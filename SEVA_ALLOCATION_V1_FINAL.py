@@ -50,13 +50,8 @@ def main(vrf_data_path, seva_data_path, linkedin_data_path, degree_to_skill_mapp
         master_sheet_df['HOBBIES_ALL'] = master_sheet_df['HOBBIES_ALL'].fillna(' ') + ' ' + master_sheet_df[hobbies_col].fillna(' ')
 
 
-    # In[156]:
-
 
     master_sheet_df['CONCERNS_ALL'] = master_sheet_df['Concerns'].fillna(' ') + ' ' + master_sheet_df['Please enter any concerns here'].fillna(' ')
-
-
-    # In[157]:
 
 
     master_sheet_df['LANGUAGES_ALL'] = np.NaN

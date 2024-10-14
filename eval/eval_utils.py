@@ -1,6 +1,7 @@
 import pandas as pd
 
 
+# ADding comments to function
 def get_dept_score_by_top_k_preds(predictions_df, assignments_df, k):
     #top_scores_idx = predictions_df.groupby(['SP_ID'])['Skill Score'].idxmax()
     #top_preds_df = predictions_df.loc[top_scores_idx]  
