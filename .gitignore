@@ -1,0 +1,9 @@
+.DS_Store
+.ipynb_checkpoints/
+__pycache__/
+SEVA_ALLOCATION_OUTPUT/*
+
+TOY_DATA/extracted_skills_data.xlsx
+TOY_DATA/predictions_data.xlsx
+TOY_DATA/predictions_data_PROCESSED.xlsx
+TOY_DATA/summary_data.xlsx

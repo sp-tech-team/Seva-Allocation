@@ -1,0 +1,3 @@
+cd C:\Users\prantika.goswami\Desktop\seva_2024\seva_code_FINAL
+python SEVA_ALLOCATION_V1_FINAL.py TOY_DATA/TOY_vrf_data2024.xlsx TOY_DATA/TOY_seva_modified2024.xlsx TOY_DATA/TOY_linkedin_data.xlsx
+python post_processing.py SEVA_ALLOCATION_OUTPUT/predictions_data.xlsx
