@@ -636,12 +636,12 @@ if __name__ == "__main__":
     parser.add_argument("vrf_data", help="Path to VRF data file (xlsx or csv)")
     parser.add_argument("seva_data", help="Path to SEVA data file (xlsx or csv)")
     parser.add_argument("linkedin_data", help="Path to LINKEDIN data file (xlsx or csv)")
-    parser.add_argument("--degree_to_skill_mapping", help="Path to DEGREE TO SKILL MAPPING file (json)", default=r'./TOY_DATA/degree_profession_mapping.json')
-    parser.add_argument("--job_clusters_latest", help="Path to JOB_CLUSTERS_LATEST file (txt)", default=r'./TOY_DATA/job_clusters_latest.txt')
+    parser.add_argument("--degree_to_skill_mapping", help="Path to DEGREE TO SKILL MAPPING file (json)", default=r'./toy_data/degree_profession_mapping.json')
+    parser.add_argument("--job_clusters_latest", help="Path to JOB_CLUSTERS_LATEST file (txt)", default=r'./toy_data/job_clusters_latest.txt')
 
-    parser.add_argument("--predictions_data", help="Path to save PREDICTIONS_DATA (xlsx)", default=r"./SEVA_ALLOCATION_OUTPUT/predictions_data.xlsx")
-    parser.add_argument("--extracted_skills_data", help="Path to save EXTRACTED_SKILLS_DATA (xlsx)", default=r"./SEVA_ALLOCATION_OUTPUT/extracted_skills_data.xlsx")
-    parser.add_argument("--summary_data", help="Path to save SUMMARY_DATA (xlsx)", default="./SEVA_ALLOCATION_OUTPUT/summary_data.xlsx")
+    parser.add_argument("--predictions_data", help="Path to save PREDICTIONS_DATA (xlsx)", default=r"./seva_allocation_output/predictions_data.xlsx")
+    parser.add_argument("--extracted_skills_data", help="Path to save EXTRACTED_SKILLS_DATA (xlsx)", default=r"./seva_allocation_output/extracted_skills_data.xlsx")
+    parser.add_argument("--summary_data", help="Path to save SUMMARY_DATA (xlsx)", default="./seva_allocation_output/summary_data.xlsx")
 
     args = parser.parse_args()
 
