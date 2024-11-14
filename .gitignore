@@ -7,3 +7,6 @@ TOY_DATA/extracted_skills_data.xlsx
 TOY_DATA/predictions_data.xlsx
 TOY_DATA/predictions_data_PROCESSED.xlsx
 TOY_DATA/summary_data.xlsx
+
+experiments/graph_rag/data/
+experiments/graph_rag/neo4j_data/
