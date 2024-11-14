@@ -3,10 +3,12 @@
 __pycache__/
 SEVA_ALLOCATION_OUTPUT/*
 
-TOY_DATA/extracted_skills_data.xlsx
-TOY_DATA/predictions_data.xlsx
-TOY_DATA/predictions_data_PROCESSED.xlsx
-TOY_DATA/summary_data.xlsx
+toy_data/extracted_skills_data.xlsx
+toy_data/predictions_data.xlsx
+toy_data/predictions_data_PROCESSED.xlsx
+toy_data/summary_data.xlsx
 
-experiments/graph_rag/data/
-experiments/graph_rag/neo4j_data/
+experiments/graph_rag/data
+experiments/graph_rag/neo4j_data
+experiments/graph_rag/neo4j
+experiments/graph_rag/.env
