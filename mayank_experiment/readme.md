@@ -12,6 +12,6 @@ Traditional retrieval-augmented generation systems often struggle with maintaini
 2. Enabling more intelligent traversal of information during the query process.
 3. Providing a visual representation of how information is connected and accessed during the answering process.
 
-I have use Llamaindex Property Graph for implementation of graph rag
+I have used Llamaindex Property Graph for implementation of graph rag
 
 https://docs.llamaindex.ai/en/stable/module_guides/indexing/lpg_index_guide/
