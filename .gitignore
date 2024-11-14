@@ -9,4 +9,5 @@ toy_data/predictions_data_PROCESSED.xlsx
 toy_data/summary_data.xlsx
 
 experiments/graph_rag/data
+experiments/graph_rag/neo4j_data
 experiments/graph_rag/neo4j
