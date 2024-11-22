@@ -1,6 +1,7 @@
 .DS_Store
 .ipynb_checkpoints/
-__pycache__/
+*/__pycache__/*
+*storage/*
 SEVA_ALLOCATION_OUTPUT/*
 
 toy_data/extracted_skills_data.xlsx
@@ -12,3 +13,12 @@ experiments/graph_rag/data
 experiments/graph_rag/neo4j_data
 experiments/graph_rag/neo4j
 experiments/graph_rag/.env
+
+mayank_experiment/.env
+mayank_experiment/input/
+
+llama_index_graph_rag/.env
+llama_index_graph_rag/input/
+llama_index_graph_rag/kg.html
+
+
