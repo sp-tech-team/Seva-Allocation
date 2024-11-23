@@ -11,18 +11,15 @@ Usage:
 
 import argparse
 import logging
-import sys
 
 from graph_rag import GraphRagRetriever
-from utils import save_to_pickle, load_from_pickle
+from utils import get_latest_index_version
 
 import nest_asyncio
 nest_asyncio.apply()
 from dotenv import load_dotenv
 # Load environment variables from a .env file
 load_dotenv()
-# from IPython.display import Markdown, display
-from pyvis.network import Network
 
 import os
 import pandas as pd
@@ -31,15 +28,11 @@ from langchain_openai import OpenAIEmbeddings
 
 from llama_index.llms.openai import OpenAI
 from llama_index.core import PropertyGraphIndex, VectorStoreIndex
-from llama_index.core import Document
-from llama_index.core.indices.property_graph import DynamicLLMPathExtractor, SchemaLLMPathExtractor
 from llama_index.core import get_response_synthesizer
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.core import Settings
-
-from typing import Literal
 
 
 def parse_args() -> argparse.Namespace:
@@ -51,23 +44,6 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Process an input file and save the results to an output file."
     )
-    parser.add_argument(
-        "--applicant_info_csv",
-        default='data/person_to_job.csv',
-        help="Path to the applicant info input file.",
-    )
-    parser.add_argument(
-        "--pg_index_pkl",
-        default='cache/pg_index.pkl',
-        help="Path to the generated Property Graph Index Pickle file.",
-    )
-
-    parser.add_argument(
-        "--use_cached_index",
-        type=bool,
-        default=False,
-        help="Use a cached index for RAG instead of creating a new one.",
-    )
 
     parser.add_argument(
         "--verbose",
@@ -77,23 +53,6 @@ def parse_args() -> argparse.Namespace:
     )
 
     return parser.parse_args()
-
-
-def create_applicant_info_corpus(applicant_info_csv: str) -> str:
-    """Create a corpus of applicant information from a CSV file.
-
-    Args:
-        applicant_info_csv: Path to the CSV file containing applicant information.
-
-    Returns:
-        A corpus of applicant information.
-    """
-    job_assigns_df = pd.read_csv(applicant_info_csv).dropna(subset=['VRF ID']).reset_index(drop=True)#.iloc[:50]
-    job_assigns_df['job'] = job_assigns_df['VRF ID'].apply(lambda x: x.split('-')[1])
-    job_assigns_df['Skillset'] = job_assigns_df['Skillset'].apply(lambda x: x.replace('\n', ' '))
-    job_assigns_df['summary'] = " Participant with skills: " + job_assigns_df['Skillset'] + " was assigned to job: " + job_assigns_df['job']
-    corpus = '.'.join(job_assigns_df['summary'])
-    return corpus
 
 def main() -> None:
     """Main entry point of the script."""
@@ -108,16 +67,21 @@ def main() -> None:
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
     embeddings = OpenAIEmbeddings()
     Settings.llm = llm
-    # Settings.embed_model = embeddings
+    Settings.embed_model = embeddings
 
     print("Loading cached Property Graph Index...")
-    pg_index = load_index_from_storage(StorageContext.from_defaults(persist_dir="./storage"))
-    pg_index.property_graph_store.save_networkx_graph(name="kg.html")
+    latest_pg_store_dir = get_latest_index_version("./pg_store_versions")
+    print("directory:", latest_pg_store_dir)
+    pg_index = load_index_from_storage(StorageContext.from_defaults(persist_dir=latest_pg_store_dir))
     pg_retriever = pg_index.as_retriever()
 
-    vector_index = VectorStoreIndex.from_documents(documents)
+    print("Loading cached Vector Index...")
+    latest_vector_store_dir = get_latest_index_version("./vector_store_versions")
+    storage_context = StorageContext.from_defaults(persist_dir=latest_vector_store_dir)
+    vector_index = load_index_from_storage(storage_context)
     vector_retriever = VectorIndexRetriever(index=vector_index)
 
+    print("Making Graph RAG retriever...")
     graph_rag_retriever = GraphRagRetriever(vector_retriever, pg_retriever)
 
     # create response synthesizer
@@ -140,7 +104,7 @@ def main() -> None:
     )
 
     for (query_engine, engine_name) in [(vector_query_engine, "vector"), (pg_keyword_query_engine, "Property Graph"), (graph_rag_query_engine, "Graph RAG")]:
-        response = query_engine.query("Give me some information on my data")
+        response = query_engine.query("Give me a candidate description from my data that is the most technical")
         print(engine_name, ": ", response)
 
     logging.info("Script finished.")

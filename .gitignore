@@ -1,7 +1,7 @@
 .DS_Store
 .ipynb_checkpoints/
 */__pycache__/*
-*storage/*
+*/storage/*
 SEVA_ALLOCATION_OUTPUT/*
 
 toy_data/extracted_skills_data.xlsx
@@ -20,5 +20,8 @@ mayank_experiment/input/
 llama_index_graph_rag/.env
 llama_index_graph_rag/input/
 llama_index_graph_rag/kg.html
+llama_index_graph_rag/lib/
+llama_index_graph_rag/pg_store_versions/
+llama_index_graph_rag/vector_store_versions/
 
 
