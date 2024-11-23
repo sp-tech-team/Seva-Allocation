@@ -1,0 +1,803 @@
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Tamil Translator .
+ Participant with skills: Medical / Medical - Others was assigned to job:  Pharmacist .
+ Participant with skills: Soft Skills / Articulate in communicationGeneral / Cook/ Chef was assigned to job:  Marathi Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: Medical / Psychologist was assigned to job:  English Teacher .
+ Participant with skills: Medical / Ayurvedic Doctor was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: General / Researcher was assigned to job:  Project Manager .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Strong Interpersonal skills (Coordinator) was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Content Writer .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Corporate / Executive - Others was assigned to job:  Video calls .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Corporate / Executive - Others was assigned to job:  Company Secretary .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  CAD Designer .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Guest Care Support .
+ Participant with skills: Construction & Fabrication / Construction - Others was assigned to job:  Akshaya Volunteers .
+ Participant with skills: IT / IT Project Manager was assigned to job:  Project Manager .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Customer Support Representatives .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Media Operations .
+ Participant with skills: Corporate / Small Business Owner (studio owners/ shop owners/ traders) was assigned to job:  Coordinating Activities .
+ Participant with skills: Arts and Crafts / Actor was assigned to job:  Front Office Activities .
+ Participant with skills: Engineering / Mechanial EngineerBasic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Safety Professionals .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Others / Cab Driver was assigned to job:  Maintenance Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Dining Support .
+ Participant with skills: General / Cook/ Chef was assigned to job:  Transcription .
+ Participant with skills: Others / Air Force was assigned to job:  Access Control .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: IT / Artificial Intelligence/ Machine Learning was assigned to job:  Infrastructure .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Construction & Fabrication / Construction - Others was assigned to job:  Ashram Support .
+ Participant with skills: Arts and Crafts / Film Director was assigned to job:  Marketing .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Illustrator .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  LSP .
+ Participant with skills: IT / Developer - front end was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Class Teacher .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Akshaya Volunteers .
+ Participant with skills: IT / Automation Test Engineer was assigned to job:  Applications .
+ Participant with skills: Engineering / Mechanial Engineer was assigned to job:  Marathi Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Content Strategist .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Researcher .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Access Control .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Farming support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Customer Support Representatives .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  English Teacher .
+ Participant with skills: Arts and Crafts / Film Cinematographer was assigned to job:  Promotions .
+ Participant with skills: General / Retail was assigned to job:  Marketing .
+ Participant with skills: Engineering / Mechanial Engineer was assigned to job:  Maintenance Support .
+ Participant with skills: Engineering / Automobile Engineer was assigned to job:  Electrical Maintenance Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Front Office Activities .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Dining Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Medical / Nurse was assigned to job:  Ashram Support .
+ Participant with skills: Engineering / Engineering - Others was assigned to job:  Ashram Support .
+ Participant with skills: IT / Developer - back end was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Ashram Support .
+ Participant with skills: Engineering / Mechanial Engineer was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Chartered Accountant .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Education / Arts and Crafts Teacher was assigned to job:  Class Teacher .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Farming support .
+ Participant with skills: Corporate / Executive - Others was assigned to job:  LSP .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: IT / Developer - back end was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Accountant .
+ Participant with skills: General / Researcher was assigned to job:  Ashram Support .
+ Participant with skills: Emedia / Digital Marketing was assigned to job:  Gujarati Translator .
+ Participant with skills: Engineering / Electrical EngineerSoft Skills / Articulate in communication was assigned to job:  Persian Translator .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Project Manager .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Guiding Visitors .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Tamil Nadu .
+ Participant with skills: General / Lawyer was assigned to job:  On ground Support .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Corporate / Consultant was assigned to job:  Agri Marketing .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) SkillsBasic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  LSP .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  On ground Support .
+ Participant with skills: Construction & Fabrication / Civil Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: IT / Automation Test Engineer was assigned to job:  Farming support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Marketing .
+ Participant with skills: Education / Mathematics Teacher was assigned to job:  Teacher .
+ Participant with skills: IT / Developer was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Akshaya Volunteers .
+ Participant with skills: IT / Automation Test Engineer was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: IT / IT - Others was assigned to job:  Video calls .
+ Participant with skills: Education / English Teacher was assigned to job:  Communication/Soft skill  Teacher .
+ Participant with skills: Others / Air Force was assigned to job:  Infrastructure .
+ Participant with skills: IT / IT - Others was assigned to job:  Nutritionist .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Ashram Support .
+ Participant with skills: Arts and Crafts / Digital Animator was assigned to job:  Media Operations .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Physiotherapist .
+ Participant with skills: Arts and Crafts / Photographer was assigned to job:  Photographer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Maintenance Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Data Analyst .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Front Office Activities .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Media Operations .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Farming support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Access Control .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / Small Business Owner was assigned to job:  Coordinating Activities .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Platform Manager .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Ashram Support .
+ Participant with skills: Construction & Fabrication / Civil Engineer was assigned to job:  LSP .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Tamil Nadu .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Linga Bhairavi .
+ Participant with skills: Construction & Fabrication / Civil Engineer was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Hindi Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Front Office Activities .
+ Participant with skills: Education / Teacher - Others was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Transcription .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Farming support .
+ Participant with skills: IT / Automation Test Engineer was assigned to job:  Marketing Manager/ Executive .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Photographer .
+ Participant with skills: IT / IT - Others was assigned to job:  Ashram Support .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Ashram Support .
+ Participant with skills: Arts and Crafts / Video Editor was assigned to job:  Dining Support .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Tamil Nadu .
+ Participant with skills: Arts and Crafts / Painter was assigned to job:  Ashram Support .
+ Participant with skills: Accounting / Chartered Accountant was assigned to job:  Accountant .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Content Manager .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Applications .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Growth Marketing Manager .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Platform Manager .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Customer Support Representatives .
+ Participant with skills: IT / Front end Web Developer was assigned to job:  Developer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  LSP .
+ Participant with skills: Education / Arts and Crafts Teacher was assigned to job:  On ground Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Guiding Visitors .
+ Participant with skills: Corporate / Small Business Owner (studio owners/ shop owners/ traders) was assigned to job:  Tamil Nadu .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Others / Army was assigned to job:  On ground Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Mandarin Chinese Translator .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Transcription .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Platform Manager .
+ Participant with skills: Corporate / Sales Executive was assigned to job:  Social media Manager .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Content Writer .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Contracts Lawyer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Project Manager .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Audio calls .
+ Participant with skills: Medical / Pharmacist was assigned to job:  Ashram Support .
+ Participant with skills: Arts and Crafts / Illustrator was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: IT / Project Manager was assigned to job:  Dining Support .
+ Participant with skills: IT / IT - Others was assigned to job:  Content Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Tamil Nadu .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Front Office Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  On ground Support .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Ashram Support .
+ Participant with skills: Others / Air Force was assigned to job:  Front Office Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Linga Bhairavi .
+ Participant with skills: Corporate / Sales Manager was assigned to job:  Front Office Activities .
+ Participant with skills: Arts and Crafts / Actor was assigned to job:  Guest Care Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Soft-spoken and cordial was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Video calls .
+ Participant with skills: IT / Developer was assigned to job:  Test Engineer .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Coordinating Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Front Office Activities .
+ Participant with skills: IT / Business Analyst was assigned to job:  Applications .
+ Participant with skills: Arts and Crafts / Actor was assigned to job:  Customer Support Representatives .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Video calls .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Corporate / Financial & Accounting Executive was assigned to job:  Account Auditor .
+ Participant with skills: IT / IT - Others was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Promotions .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Education / Teacher - Others was assigned to job:  Class Teacher .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Corporate / Small Business Owner was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Farming support .
+ Participant with skills: Engineering / Mechanial Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Nurse .
+ Participant with skills: Education / English Teacher was assigned to job:  Researcher .
+ Participant with skills: Engineering / Engineering - Others was assigned to job:  English Teacher .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Account Auditor .
+ Participant with skills: Education / Arts and Crafts Teacher was assigned to job:  Front Office Activities .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Tamil Nadu .
+ Participant with skills: Environment / Animal Husbandry was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Others / Air Force was assigned to job:  Dining Support .
+ Participant with skills: Emedia / Digital Marketing was assigned to job:  Growth Marketing Manager .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  On ground Support .
+ Participant with skills: Media and Communication / BPO Soft Skills / Enthusiastic Soft Skills / Soft-spoken and cordial was assigned to job:  Customer Support Representatives .
+ Participant with skills: General / Researcher was assigned to job:  Content Support Executive (CSE) .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Dining Support .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Customer Support Representatives .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Ashram Support .
+ Participant with skills: IT / Data Analyst was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Ashram Support .
+ Participant with skills: IT / IT - Others was assigned to job:  On ground Support .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Promotions .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Education / Mathematics Teacher was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Recruitment Officer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Video calls .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Coordinating Activities .
+ Participant with skills: Soft Skills / Soft-spoken and cordial was assigned to job:  Linga Bhairavi .
+ Participant with skills: IT / IT / Developer was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Guiding Visitors .
+ Participant with skills: IT / Developer - back end was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Dining Support .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Ashram Tour Guide .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  On ground Support .
+ Participant with skills: Medical / Medical Researchers was assigned to job:  Communication/Soft skill  Teacher .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Ashram Support .
+ Participant with skills: General / Hospitality/ Hotel Manager was assigned to job:  Class Teacher .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Stay Area Support .
+ Participant with skills: IT / Data Analyst was assigned to job:  Growth Strategist .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Dining Support .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Platform Manager .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Front Office Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Environment / Animal Husbandry was assigned to job:  Guiding Visitors .
+ Participant with skills: Corporate / Small Business Owner was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Corporate / Marketing & Branding Manager was assigned to job:  Marketing Manager/ Executive .
+ Participant with skills: Media and Communication / Content Writer was assigned to job:  Romanian Video Editor .
+ Participant with skills: Arts and Crafts / Film Producer was assigned to job:  Editors with Animation skills .
+ Participant with skills: Construction & Fabrication / Interior Design was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Agri Marketing .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Telugu Translator .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Guiding Visitors .
+ Participant with skills: Education / Science Teacher was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Maintenance Support .
+ Participant with skills: Others / Air Force was assigned to job:  Medicine Room .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  TN .
+ Participant with skills: Corporate / Financial & Accounting Executive was assigned to job:  Portuguese Translator .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Call Centre .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Front Office Activities .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Developer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Data Analyst .
+ Participant with skills: Construction & Fabrication / Interior Design was assigned to job:  LSP .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: IT / IT - Others was assigned to job:  Applications .
+ Participant with skills: Others / Air Force was assigned to job:  Maintenance Support .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  Maintenance Support .
+ Participant with skills: Construction & Fabrication / Civil Engineer was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Video calls .
+ Participant with skills: Engineering / Automobile Engineer was assigned to job:  Farming support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Dining Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Accountant .
+ Participant with skills: Education / Teacher - Others was assigned to job:  Allopathy Doctor .
+ Participant with skills: Medical / Medical - Others was assigned to job:  Ashram Support .
+ Participant with skills: Education / English Teacher was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Arts and Crafts / Digital Animator was assigned to job:  Ashram Support .
+ Participant with skills: Education / Mathematics Teacher was assigned to job:  Maths Teacher .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Infrastructure .
+ Participant with skills: Corporate / Sales Executive was assigned to job:  Promotions .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Video Editor .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Customer Support Representatives .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Linga Bhairavi .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Project Manager .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Recruitment Officer .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Editors with Animation skills .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Front Office Activities .
+ Participant with skills: IT / Automation Test Engineer was assigned to job:  Applications .
+ Participant with skills: Corporate / Small Business Owner was assigned to job:  Supervising Activities .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Marketing Manager/ Executive .
+ Participant with skills: Accounting / Auditor was assigned to job:  Accountant .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Content Writer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Content Creator .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Coordinating Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Paid Ads Expert .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Russian Video Editor .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Call Centre .
+ Participant with skills: General / Lawyer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Electrical Maintenance Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Dining Support .
+ Participant with skills: IT / IT - Others was assigned to job:  Ashram Support .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Italian Translator .
+ Participant with skills: Corporate / Financial & Accounting Manager was assigned to job:  Mandarin Chinese Translator .
+ Participant with skills: Engineering / Engineering - Others was assigned to job:  Coordinating Activities .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Promotions .
+ Participant with skills: Soft Skills / Soft-spoken and cordial was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: IT / Artificial Intelligence/ Machine Learning was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: IT / IT - Others was assigned to job:  Ashram Support .
+ Participant with skills: Engineering / Industrial Engineer was assigned to job:  Ashram Support .
+ Participant with skills: General / Lawyer was assigned to job:  Contracts Lawyer .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Education / Mathematics Teacher was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Dining Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: IT / IT - Others was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Tamil Nadu .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Teacher .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Maintenance Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Platform Manager .
+ Participant with skills: Education / Curriculum / Instruction Designer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Coordinating Activities .
+ Participant with skills: Accounting / Tally Software was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / HR Manager was assigned to job:  Recruitment Officer .
+ Participant with skills: Arts and Crafts / Dancer was assigned to job:  Spanish Translator .
+ Participant with skills: General / Lawyer was assigned to job:  Video calls .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Tamil Nadu .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Graphic Designer .
+ Participant with skills: Medical / Allopathy DoctorBasic Computer Skills / Data Entry skills was assigned to job:  Allopathy Doctor .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Platform Manager .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: IT / Developer was assigned to job:  Project Manager .
+ Participant with skills: Construction & Fabrication / Civil Engineer was assigned to job:  LSP .
+ Participant with skills: Education / Arts and Crafts Teacher was assigned to job:  Bengali Translator .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Dining Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Coordinating Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Data Analyst .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Hindi Translator .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  IHS .
+ Participant with skills: Education / Arts and Crafts Teacher was assigned to job:  Dining Support .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Dining Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Supervising Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Guiding Visitors .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Tour Guide .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Hindi Translator .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Linga Bhairavi .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Coordinating Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / Sales Executive was assigned to job:  Ashram Support .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Coordinating Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Call Centre .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Marketing .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Tamil Nadu .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  CAD Designer .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Construction & Fabrication / Drafting - AutoCad was assigned to job:  Architect .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Researcher .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  On ground Support .
+ Participant with skills: Arts and Crafts / Illustrator was assigned to job:  LSP .
+ Participant with skills: Environment / Environment Science was assigned to job:  Dining Support .
+ Participant with skills: Corporate / Small Business Owner was assigned to job:  Access Control .
+ Participant with skills: IT / Automation Test Engineer was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Medical / Pharmacist was assigned to job:  Pharmacist .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Guiding Visitors .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Accountant .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Others / Air Force was assigned to job:  Hindi Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Assamese Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Supervising Activities .
+ Participant with skills: IT / Cloud Architect was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / Marketing & Branding Manager was assigned to job:  Platform Manager .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  LSP .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Library Support .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: IT / Front end Web Developer was assigned to job:  Translators .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Farming support .
+ Participant with skills: Engineering / Automobile Engineer was assigned to job:  Guiding Visitors .
+ Participant with skills: Education / Teacher - Others was assigned to job:  Project Manager .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Project Manager .
+ Participant with skills: IT / Data Analyst was assigned to job:  Dining Support .
+ Participant with skills: Accounting / Chartered Accountant was assigned to job:  Growth Strategist .
+ Participant with skills: General / Cook/ Chef was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Kannada Translator .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Guiding Visitors .
+ Participant with skills: Corporate / Financial & Accounting Manager was assigned to job:  Session Facilitator .
+ Participant with skills: Others / Air Force was assigned to job:  IHS .
+ Participant with skills: General / Hospitality/ Hotel Manager was assigned to job:  Access Control .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Guest Care Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Marketing Manager/ Executive .
+ Participant with skills: Environment / Agriculture/ FarmerEnvironment / Agriculture/ Farmer was assigned to job:  Researcher .
+ Participant with skills: Medical / Dentist was assigned to job:  Allopathy Doctor .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Coordinating Activities .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Ashram Support .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) SkillsSoft Skills / Articulate in communication was assigned to job:  Video calls .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Translators .
+ Participant with skills: Construction & Fabrication / Civil Engineer was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Education / Teacher - Others was assigned to job:  Italian Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Farming support .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Recruitment Officer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Animal Husbandry was assigned to job:  Coordinating Activities .
+ Participant with skills: Education / Teacher - Others was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Medical / Physiotherapist was assigned to job:  Content Creator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Market Research .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  LSP .
+ Participant with skills: Emedia / Digital Marketing was assigned to job:  Social media Manager .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Front Office Activities .
+ Participant with skills: Arts and Crafts / Drummer was assigned to job:  Ashram Support .
+ Participant with skills: Arts and Crafts / Digital Animator was assigned to job:  Guest Care Support .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Ashram Support .
+ Participant with skills: Media and Communication / Technical/ Academic Writer was assigned to job:  Guiding Visitors .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Stay Area Support .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Customer Support Representatives .
+ Participant with skills: Engineering / Electrical Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / HR Executive was assigned to job:  Customer Support Representatives .
+ Participant with skills: Engineering / Electrical Engineer was assigned to job:  Electrical Engineer .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Content Writer .
+ Participant with skills: Arts and Crafts / Singer was assigned to job:  Transcription .
+ Participant with skills: Medical / Medical Researchers was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Transcription .
+ Participant with skills: Medical / Ayurvedic Doctor was assigned to job:  Coordinating Activities .
+ Participant with skills: IT / Business Analyst was assigned to job:  Kannada Translator .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Guiding Visitors .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Content Writer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Farming support .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Supervising Activities .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Environment / Animal Husbandry was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Engineering / Electrical Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  TN .
+ Participant with skills: IT / Front end Web Developer was assigned to job:  Applications .
+ Participant with skills: General / Hospitality/ Hotel Manager was assigned to job:  Video calls .
+ Participant with skills: Soft Skills / Soft-spoken and cordial was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Customer Support Representatives .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Guiding Visitors .
+ Participant with skills: IT / Front end Web Developer was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  On ground Support .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Artificial Intelligence (AI) Enthusiast .
+ Participant with skills: Education / Primary Teacher was assigned to job:  Nepali Translator .
+ Participant with skills: Corporate / Operations Manager was assigned to job:  Marketing .
+ Participant with skills: Media and Communication / Content Writer was assigned to job:  Front Office Activities .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  English Teacher .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Accountant .
+ Participant with skills: Accounting / Auditor was assigned to job:  Guiding Visitors .
+ Participant with skills: Medical / Medical - Others was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Call Centre .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  IHS .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Others / Army was assigned to job:  Access Control .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Farming support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Front Office Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Content Writer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Accountant .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: Construction & Fabrication / Civil Engineer was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Maintenance Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) SkillsBasic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Data Analyst .
+ Participant with skills: Engineering / Engineering - Others was assigned to job:  Researcher .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Coordinating Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Audio calls .
+ Participant with skills: Soft Skills / EnthusiasticBasic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Marketing .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Dining Support .
+ Participant with skills: Arts and Crafts / Photographer was assigned to job:  Photo/ Image Editing .
+ Participant with skills: Arts and Crafts / Fashion Designer was assigned to job:  Stay Area Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Guiding Visitors .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  Marathi Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Arts and Crafts / Film Director was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Content Writer .
+ Participant with skills: Others / Air Force was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Farming support .
+ Participant with skills: Medical / Ayurvedic Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Platform Manager .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Supervising Activities .
+ Participant with skills: Corporate / Consultant was assigned to job:  Vietnamese Translator .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Applications .
+ Participant with skills: General / Hospitality/ Hotel Manager was assigned to job:  Punjabi Translator .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Linga Bhairavi .
+ Participant with skills: Corporate / Small Business Owner was assigned to job:  Customer Support Representatives .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  French Translator .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Coordinating Activities .
+ Participant with skills: Media and Communication / Content Writer was assigned to job:  Applications .
+ Participant with skills: Office Assistant / Admin Assistant was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Others / Air Force was assigned to job:  Accountant .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Dining Support .
+ Participant with skills: Others / Air Force was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Stay Area Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Media Coordinator .
+ Participant with skills: Education / Chemistry Teacher was assigned to job:  IHS .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Agri Marketing .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Fine Arts Teacher .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: IT / IT - Others was assigned to job:  Ashram Support .
+ Participant with skills: Medical / Medical - Others was assigned to job:  Allopathy Doctor .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Supervising Activities .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  TN .
+ Participant with skills: Corporate / Sales Manager was assigned to job:  Linga Bhairavi .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Allopathy Doctor .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Safety Professionals .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Content Creator .
+ Participant with skills: IT / Developer was assigned to job:  Applications .
+ Participant with skills: Emedia / Digital Marketing was assigned to job:  Content Creator .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Linga Bhairavi .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Front Office Activities .
+ Participant with skills: Engineering / Electrical Engineer was assigned to job:  Electrical Engineer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ad Creative Design Expert .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Accounting / Chartered Accountant was assigned to job:  Transcription .
+ Participant with skills: IT / IT - Others was assigned to job:  Video calls .
+ Participant with skills: IT / IT - Others was assigned to job:  Market Research .
+ Participant with skills: Others / Yoga Trainer was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Linga Bhairavi .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Accounting / Chartered Accountant was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Electrical Design Engineer .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Medical / Ayurvedic Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: IT / Data Analyst was assigned to job:  Market Research .
+ Participant with skills: Construction & Fabrication / ArchitectConstruction & Fabrication / Architect was assigned to job:  LSP .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Editors with Animation skills .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  Platform Manager .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Customer Support Representatives .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  IHS .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: IT / IT - Others was assigned to job:  Ashram Support .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Accountant .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Tamil Nadu .
+ Participant with skills: Media and Communication / Content Writer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: IT / Data Analyst was assigned to job:  Guest Care Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Accountant .
+ Participant with skills: Corporate / Consultant was assigned to job:  Tamil Nadu .
+ Participant with skills: Engineering / Automobile Engineer was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Arts and Crafts / Film Director was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / Executive - Others was assigned to job:  Content Creator .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Akshaya Volunteers .
+ Participant with skills: General / Hospitality/ Hotel Manager was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Hindi Translator .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Emedia / UI Designer was assigned to job:  Content Researcher .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Farming support .
+ Participant with skills: Corporate / Executive - Others was assigned to job:  Supervising Activities .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Education / Physics Teacher was assigned to job:  Customer Support Representatives .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Engineering / Electrical Engineer was assigned to job:  Electrical Maintenance Support .
+ Participant with skills: IT / Developer - back end was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / HR Executive was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Dining Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Dining Support .
+ Participant with skills: General / Lawyer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Dining Support .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Electrical Engineer .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Transcription .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Dining Support .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Corporate / Manager - Others was assigned to job:  Social media Manager .
+ Participant with skills: Corporate / Financial & Accounting Executive was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Farming support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Supervising Activities .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Platform Manager .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Front Office Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Technical support for Audio .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Corporate / Bank Manager was assigned to job:  Video calls .
+ Participant with skills: Education / Arts and Crafts Teacher was assigned to job:  Project Manager .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: IT / Automation Test Engineer was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Promotions .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Transcription .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Dining Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Call Centre .
+ Participant with skills: IT / Artificial Intelligence/ Machine Learning was assigned to job:  Data Scientist .
+ Participant with skills: Others / Air Force was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Others / Air Force was assigned to job:  Media Coordinator .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Front Office Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  TN .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Others / Yoga Trainer was assigned to job:  Guiding Visitors .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  LSP .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Infrastructure .
+ Participant with skills: Accounting / Auditor was assigned to job:  Accountant .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Video calls .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Editors with Animation skills .
+ Participant with skills: Soft Skills / Articulate in communicationConstruction & Fabrication / Architect was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Customer Support Representatives .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Media Operations .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Call Centre .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Corporate / HR Manager was assigned to job:  Recruitment Officer .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Linga Bhairavi .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Call Centre .
+ Participant with skills: Corporate / HR Manager was assigned to job:  Russian Video Editor .
+ Participant with skills: Arts and Crafts / Film Cinematographer was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Ashram Support .
+ Participant with skills: Construction & Fabrication / Drafting - AutoCad was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Construction & Fabrication / Interior Design was assigned to job:  LSP .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Sales Manager/ Executive .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Tamil Nadu .
+ Participant with skills: General / Retail was assigned to job:  Marketing .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Farming support .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Promotions .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Video calls .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Tamil Nadu .
+ Participant with skills: Medical / Medical - Others was assigned to job:  Content Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Google Tag Manager / Google Analytics Specialist .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Linga Bhairavi .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Dining Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Customer Support Representatives .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Transcription .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Access Control .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Chartered Accountant .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Dining Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Telugu Translator .
+ Participant with skills: Accounting / Basic Accountancy was assigned to job:  Dining Support .
+ Participant with skills: Medical / Ayurvedic Doctor was assigned to job:  Video calls .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  Illustrator .
+ Participant with skills: General / Lawyer was assigned to job:  Ashram Support .
+ Participant with skills: Education / Teacher - Others was assigned to job:  Front Office Activities .
+ Participant with skills: Construction & Fabrication / Architect was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Recruitment Officer .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Market Research .
+ Participant with skills: Engineering / Plumbing EngineerSoft Skills / Articulate in communication was assigned to job:  Coordinating Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) SkillsBasic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Maintenance Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  TN .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Guiding Visitors .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Corporate / Financial & Accounting Executive was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Others / Yoga Trainer was assigned to job:  Guiding Visitors .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Linga Bhairavi .
+ Participant with skills: Emedia / Digital Marketing was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Guiding Visitors .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Researcher .
+ Participant with skills: Media and Communication / Content Writer was assigned to job:  Contracts Lawyer .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  Front Office Activities .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Dining Support .
+ Participant with skills: General / Event Manager was assigned to job:  Ashram Support .
+ Participant with skills: Others / Air Force was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Guiding Visitors .
+ Participant with skills: General / Electrician was assigned to job:  Technical support for Audio .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Coordinating Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Coordinating Activities .
+ Participant with skills: IT / Developer was assigned to job:  Front Office Activities .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Farming support .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Akshaya Volunteers .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Customer Support Representatives .
+ Participant with skills: General / Researcher was assigned to job:  Data Scientist .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Ashram Support .
+ Participant with skills: Education / Mathematics Teacher was assigned to job:  On ground Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Coordinating Activities .
+ Participant with skills: IT / IT / Developer was assigned to job:  Romanian Video Editor .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Linga Bhairavi .
+ Participant with skills: Medical / Pharmacist was assigned to job:  Ashram Support .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Maintenance Support .
+ Participant with skills: Medical / Medical - Others was assigned to job:  Tamil Nadu .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  On ground Support .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Enthusiastic was assigned to job:  Dining Support .
+ Participant with skills: Corporate / HR Manager was assigned to job:  Recruitment Officer .
+ Participant with skills: Arts and Crafts / Graphic Designer was assigned to job:  Illustrator .
+ Participant with skills: IT / Cyber Security Analyst was assigned to job:  Market Research .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Administrative Activities (Back Office) .
+ Participant with skills: Corporate / Operations Manager was assigned to job:  Video calls .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Recruitment Officer .
+ Participant with skills: Emedia / Active on Social Media was assigned to job:  On ground Support .
+ Participant with skills: Corporate / Financial & Accounting Manager was assigned to job:  Ashram Support .
+ Participant with skills: Basic Computer Skills / Data Entry skills was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Accountant .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Accountant .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Applications .
+ Participant with skills: Education / Arts and Crafts Teacher was assigned to job:  Art Teacher .
+ Participant with skills: Medical / Allopathy Doctor was assigned to job:  Allopathy Doctor .
+ Participant with skills: Corporate / Sales Manager was assigned to job:  Marketing Manager/ Executive .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Applications .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  On ground Support .
+ Participant with skills: Engineering / Electrical Engineer was assigned to job:  Content Support Executive (CSE) .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Linga Bhairavi .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Farming support .
+ Participant with skills: Engineering / Computer Science Engineer was assigned to job:  Marketing .
+ Participant with skills: Media and Communication / BPO was assigned to job:  Infrastructure .
+ Participant with skills: Environment / Agriculture/ Farmer was assigned to job:  Crop Husbandry .
+ Participant with skills: Soft Skills / Fit for Physical Seva was assigned to job:  French Translator .
+ Participant with skills: Engineering / Mechanial Engineer was assigned to job:  Farming support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Data Scientist .
+ Participant with skills: General / ResearcherEngineering / Computer Science Engineer was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Ashram Support .
+ Participant with skills: Soft Skills / Articulate in communication was assigned to job:  Front Office Activities .
+ Participant with skills: Environment / Geographic Information Systems (GIS) was assigned to job:  Researcher .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Customer Support Representatives .
+ Participant with skills: Others / Air Force was assigned to job:  Tamil Nadu .
+ Participant with skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills was assigned to job:  Malayalam Translator .

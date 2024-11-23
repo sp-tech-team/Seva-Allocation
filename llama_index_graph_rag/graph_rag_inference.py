@@ -12,7 +12,7 @@ Usage:
 import argparse
 import logging
 
-from graph_rag import GraphRagRetriever
+from graph_rag_lib import GraphRagRetriever
 from utils import get_latest_index_version
 
 import nest_asyncio
@@ -46,6 +46,12 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--eval_ids_csv",
+        default='data/eval_ids.csv',
+        help="Path to eval id's.",
+    )
+
+    parser.add_argument(
         "--verbose",
         type=bool,
         default=False,
@@ -53,6 +59,9 @@ def parse_args() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
+
+
 
 def main() -> None:
     """Main entry point of the script."""
@@ -103,9 +112,31 @@ def main() -> None:
         response_mode="tree_summarize",
     )
 
-    for (query_engine, engine_name) in [(vector_query_engine, "vector"), (pg_keyword_query_engine, "Property Graph"), (graph_rag_query_engine, "Graph RAG")]:
-        response = query_engine.query("Give me a candidate description from my data that is the most technical")
-        print(engine_name, ": ", response)
+
+    past_participant_df = pd.read_csv('data/past_participant_info.csv')
+    eval_ids_df = pd.read_csv('data/eval_ids.csv')
+    eval_df = eval_ids_df.merge(past_participant_df, on='Person Id', how='inner')
+    eval_df["eval_input"] =  " Participant " + eval_df["Person Id"].astype(str) + " has skills: " + eval_df['Skillset']
+    chunk_size = 20
+    chunks = []
+    for i in range(0, len(past_participant_df), chunk_size):
+        chunk = eval_df["eval_input"].iloc[i:i + chunk_size]
+        corpus = "\n".join(chunk.tolist())
+        chunks.append(corpus)
+    
+    for (query_engine, engine_name) in [(graph_rag_query_engine, "Graph RAG")]:#[(vector_query_engine, "vector"), (pg_keyword_query_engine, "Property Graph"), (graph_rag_query_engine, "Graph RAG")]:
+        print(engine_name, " -------- results...")
+        for i, chunk in enumerate(chunks):
+            query_combined = \
+                """
+                Could you please assign a job to each of these participants
+                using past history of jobs. Please give me the participant's number
+                followed by the job title. Here is the information about the participants: \n
+                """ \
+                    + chunk
+            response = query_engine.query(query_combined)
+            print(chunk)
+            print("response:", response)
 
     logging.info("Script finished.")
 

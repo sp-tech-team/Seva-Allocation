@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 
-from graph_rag import GraphRagRetriever
+from graph_rag_lib import GraphRagRetriever
 from utils import create_timestamped_index, create_timestamped_pg_index
 
 import nest_asyncio
@@ -54,9 +54,9 @@ def parse_args() -> argparse.Namespace:
         description="Process an input file and save the results to an output file."
     )
     parser.add_argument(
-        "--applicant_info_csv",
-        default='data/person_to_job.csv',
-        help="Path to the applicant info input file.",
+        "--train_corpus_txt",
+        default='data/train_corpus.txt',
+        help="Path to the past applicant info for indexing.",
     )
 
     parser.add_argument(
@@ -75,22 +75,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def create_applicant_info_corpus(applicant_info_csv: str) -> str:
-    """Create a corpus of applicant information from a CSV file.
-
-    Args:
-        applicant_info_csv: Path to the CSV file containing applicant information.
-
-    Returns:
-        A corpus of applicant information.
-    """
-    job_assigns_df = pd.read_csv(applicant_info_csv).dropna(subset=['VRF ID']).reset_index(drop=True).iloc[:50]
-    job_assigns_df['job'] = job_assigns_df['VRF ID'].apply(lambda x: x.split('-')[1])
-    job_assigns_df['Skillset'] = job_assigns_df['Skillset'].apply(lambda x: x.replace('\n', ' '))
-    job_assigns_df['summary'] = " Participant with skills: " + job_assigns_df['Skillset'] + " was assigned to job: " + job_assigns_df['job']
-    corpus = '.'.join(job_assigns_df['summary'])
-    return corpus
-
 def main() -> None:
     """Main entry point of the script."""
     args = parse_args()
@@ -101,7 +85,8 @@ def main() -> None:
 
     logging.info("Script started.")
     
-    applicant_info_corpus = create_applicant_info_corpus(args.applicant_info_csv)
+    with open(args.applicant_info_csv, "r") as file:
+        applicant_info_corpus = file.read()
     documents = [Document(text=applicant_info_corpus)]
 
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
