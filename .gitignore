@@ -23,5 +23,5 @@ llama_index_graph_rag/kg.html
 llama_index_graph_rag/lib/
 llama_index_graph_rag/pg_store_versions/
 llama_index_graph_rag/vector_store_versions/
-
+llama_index_graph_rag/data/eval_results.csv
 

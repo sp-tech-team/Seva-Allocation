@@ -11,6 +11,8 @@ Usage:
 
 import argparse
 import logging
+import pdb
+
 
 from graph_rag_lib import GraphRagRetriever
 from utils import get_latest_index_version
@@ -61,6 +63,32 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def run_inference(eval_data: pd.Series, query_engine) -> tuple:
+    chunk_size = 20
+    chunks = []
+    for i in range(0, len(eval_data), chunk_size):
+        chunk = eval_data.iloc[i:i + chunk_size]
+        corpus = "\n".join(chunk.tolist())
+        chunks.append(corpus)
+    
+    results = []
+    for i, chunk in enumerate(chunks):
+        query_combined = \
+            """
+            Could you please assign a job to each of these participants
+            using past history of jobs. Please give me the participant's number
+            followed by the job title in this format "{Participant_Id}-{Job_Title}\n".
+            Please do not add any other text to the response other than the id and title.
+            Here is the information about the participants: \n
+            """ \
+                + chunk
+        response = query_engine.query(query_combined)
+        lines = response.response.splitlines()
+        print(lines)
+        for line in lines:
+            data_tuple = tuple(line.split("-"))
+            results.append(data_tuple)
+    return results
 
 
 def main() -> None:
@@ -117,26 +145,14 @@ def main() -> None:
     eval_ids_df = pd.read_csv('data/eval_ids.csv')
     eval_df = eval_ids_df.merge(past_participant_df, on='Person Id', how='inner')
     eval_df["eval_input"] =  " Participant " + eval_df["Person Id"].astype(str) + " has skills: " + eval_df['Skillset']
-    chunk_size = 20
-    chunks = []
-    for i in range(0, len(past_participant_df), chunk_size):
-        chunk = eval_df["eval_input"].iloc[i:i + chunk_size]
-        corpus = "\n".join(chunk.tolist())
-        chunks.append(corpus)
     
-    for (query_engine, engine_name) in [(graph_rag_query_engine, "Graph RAG")]:#[(vector_query_engine, "vector"), (pg_keyword_query_engine, "Property Graph"), (graph_rag_query_engine, "Graph RAG")]:
-        print(engine_name, " -------- results...")
-        for i, chunk in enumerate(chunks):
-            query_combined = \
-                """
-                Could you please assign a job to each of these participants
-                using past history of jobs. Please give me the participant's number
-                followed by the job title. Here is the information about the participants: \n
-                """ \
-                    + chunk
-            response = query_engine.query(query_combined)
-            print(chunk)
-            print("response:", response)
+    results = run_inference(eval_df["eval_input"], graph_rag_query_engine)
+    results_df = pd.DataFrame(results, columns=['Person Id', 'Predicted Job Title'])
+    results_df["Person Id"] = results_df["Person Id"].astype(int)
+    results_df = eval_df[["Person Id", "Skillset","VRF ID"]].merge(results_df, on='Person Id', how='outer')
+    results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])
+    print(results_df)
+    results_df.to_csv('data/eval_results.csv', index=False)
 
     logging.info("Script finished.")
 
