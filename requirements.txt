@@ -1,0 +1,11 @@
+llama-index
+langchain
+langchain-openai
+pandas
+nest_asyncio
+pyvis
+numpy
+scipy
+scikit-learn
+python-dotenv
+llama-index-embeddings-langchain
