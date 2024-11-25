@@ -85,9 +85,9 @@ def main() -> None:
 
     logging.info("Script started.")
     
-    with open(args.applicant_info_csv, "r") as file:
-        applicant_info_corpus = file.read()
-    documents = [Document(text=applicant_info_corpus)]
+    with open(args.train_corpus_txt, "r") as file:
+        train_corpus = file.read()
+    documents = [Document(text=train_corpus)]
 
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
     embeddings = OpenAIEmbeddings()
