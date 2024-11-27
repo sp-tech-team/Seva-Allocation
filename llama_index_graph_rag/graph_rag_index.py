@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--train_corpus_txt",
-        default='data/train_corpus.txt',
+        default='data/vrf_train_corpus.txt',
         help="Path to the past applicant info for indexing.",
     )
 
