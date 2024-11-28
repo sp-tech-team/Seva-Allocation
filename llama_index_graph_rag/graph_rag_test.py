@@ -86,21 +86,22 @@ def run_inference(eval_data: pd.Series, query_engine, batch_size) -> tuple:
     for i, chunk in enumerate(chunks):
         query_combined = \
             """
-            Could you please assign a job to each of these participants
-            using the corpus of job descriptions and required skills. Please give me the participant's number
-            followed by the job title in this format "{Participant_Id}-{Job_Title}\n".
-            Please do not add any other text to the response other than the id and title.
-            Here is the information about the participants: \n
+            I want you to provide job title recommendations for a set of participants based on their skills.
+            Each participant should get 3 job recommendations ranked by relevance to their skills
+            based on the job descriptions and required skills that are available in the corpus.
+            Please also provide 3 departments that are most relevant to the participant's skills and jobs you recommened.
+            Please give me the participant's number followed by the list of recommended job titles and departments in this format
+            "{Participant Id}/-/{Job Title rank 1},{Job Title rank 2,{Job Title rank 3}/-/{Department rank 1},{Department rank 2}, {Department rank 2}\n".
+            Please do not add any other text to the response other than the id and titles.
+            Here is the information about the participants please do not skip a single of the 20 participants: \n
             """ \
                 + chunk
         response = query_engine.query(query_combined)
+        print("Model Response String: ", response)
         lines = response.response.splitlines()
-        print(lines)
         for line in lines:
-            line_parts = line.split("-")
-            if len(line_parts) > 2:
-                print("Error: ", line)
-            results.append(line_parts[:2])
+            line_parts = line.split("/-/")
+            results.append(line_parts)
     return results
 
 
@@ -154,15 +155,17 @@ def main() -> None:
     )
 
 
-    eval_df = pd.read_csv(args.past_participant_info_csv).sample(n=args.num_eval_samples)
-    eval_df = eval_df.dropna(subset=['Person Id', 'Skillset', 'VRF ID', ])
-    eval_df["eval_input"] =  " Participant " + eval_df["Person Id"].astype(str) + " has skills: " + eval_df['Skillset']
-    
+    eval_df = pd.read_csv(args.past_participant_info_csv)
+    eval_df = eval_df.dropna(subset=['Person Id', 'Skillset', 'VRF ID', ]).sample(n=args.num_eval_samples)
+    eval_df[["Computer Skills", "Work Designation", "Education", "Education Specialization"]] = eval_df[["Computer Skills", "Work Designation", "Education", "Education Specialization"]].fillna("NA")
+    eval_df["eval_input"] =  " Participant " + eval_df["Person Id"].astype(str) + " has skills: " + eval_df['Skillset'] + \
+                            "and specifically computer skills: " + eval_df["Computer Skills"] + \
+                            ". The participant worked with designation: " + eval_df["Work Designation"] + \
+                            "and has a " + eval_df["Education"] + "education specialized in " + eval_df["Education Specialization"]
     results = run_inference(eval_df["eval_input"], graph_rag_query_engine, args.inference_batch_size)
-    results_df = pd.DataFrame(results, columns=['Person Id', 'Predicted Job Title'])
+    results_df = pd.DataFrame(results, columns=['Person Id', 'Predicted Job Titles', 'Predicted Departments'])
     results_df["Person Id"] = results_df["Person Id"].astype(int)
     results_df = eval_df[["Person Id", "Skillset","VRF ID"]].merge(results_df, on='Person Id', how='outer')
-    pdb.set_trace()
     results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])
     print(results_df)
     results_df.to_csv('data/eval_results.csv', index=False)
