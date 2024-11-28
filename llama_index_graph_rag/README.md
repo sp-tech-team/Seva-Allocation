@@ -15,9 +15,14 @@
 ## Running the Pipeline
 1. Run `prep_train_test_data.ipynb`
     * This prepares the training and eval data.
-2. Run `python3 graph_rag_index.py --train_corpus_txt "data/vrf_train_corpus.txt`"
+2. Run `python3 graph_rag_index.py --vrf_jobs_train_corpus_txt "data/vrf_jobs_train_corpus.txt --vrf_depts_train_corpus_txt "data/vrf_depts_train_corpus.txt`
     * This creates the Property Graph and Vector Database/Index. This will timestamp each DB.
 3. Run `python3 graph_rag_test.py`
     * This will read the latest Graph Rag Index and evaluate the model on the generated test data.
+
+## Generated File
+* `data/eval_results.csv`
+* `data/vrf_depts_train_corpus.txt`
+* `data/vrf_jobs_train_corpus.txt`
 
 
