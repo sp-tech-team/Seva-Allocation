@@ -66,10 +66,10 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--verbose",
-        type=bool,
-        default=False,
-        help="Enable verbose logging.",
+        '--verbose',
+        action='store_true',
+        dest='verbose',  # Default False
+        help="Enable verbose logging. (default is disabled)"
     )
 
     return parser.parse_args()
@@ -110,8 +110,10 @@ def main() -> None:
     args = parse_args()
 
     # Configure logging
-    log_level = logging.DEBUG if args.verbose else logging.INFO
+    log_level = logging.INFO
     logging.basicConfig(level=log_level, format="%(asctime)s - %(levelname)s - %(message)s")
+    if not args.verbose:
+        logging.disable(logging.CRITICAL)
 
     logging.info("Script started.")
 
