@@ -1,7 +1,7 @@
 # Graph RAG with LLama Index
 
 
-## Prerequisits
+## prerequisites
 * install Python3
 * consider running: `pip3 install --upgrade pip`
 * install required pip packages (requirements file in parent directory)

@@ -91,7 +91,7 @@ def run_inference(eval_data: pd.Series, query_engine, batch_size) -> tuple:
             based on the job descriptions and required skills that are available in the corpus.
             Please also provide 3 departments that are most relevant to the participant's skills and jobs you recommened.
             Please give me the participant's number followed by the list of recommended job titles and departments in this format
-            "{Participant Id}/-/{Job Title rank 1},{Job Title rank 2,{Job Title rank 3}/-/{Department rank 1},{Department rank 2}, {Department rank 2}\n".
+            "{Participant Id}/-/{Job Title rank 1},{Job Title rank 2},{Job Title rank 3}/-/{Department rank 1},{Department rank 2}, {Department rank 2}\n".
             Please do not add any other text to the response other than the id and titles.
             Here is the information about the participants please do not skip a single of the 20 participants: \n
             """ \
