@@ -10,12 +10,13 @@ Usage:
 """
 
 import argparse
+import json
 import logging
 import pdb
 
 
 from graph_rag_lib import GraphRagRetriever
-from utils import get_latest_index_version
+from utils import create_timestamped_results, get_latest_index_version
 
 import nest_asyncio
 nest_asyncio.apply()
@@ -54,14 +55,46 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--prompt_config_json",
+        default='configs/prompt_config.json',
+        help="Path to json file of prompt query.",
+    )
+
+    parser.add_argument(
+        "--results_dir",
+        default='results/',
+        help="Path to model results dir.",
+    )
+
+    parser.add_argument(
+        "--results_info_file_name",
+        default='results_info.txt',
+        help="Results info file name.",
+    )
+
+    parser.add_argument(
+        "--pg_store_dir",
+        default='pg_store_versions/',
+        help="Path to property graph store dbs.",
+    )
+
+    parser.add_argument(
+        "--vector_store_dir",
+        default='vector_store_versions/',
+        help="Path to vector store dbs.",
+    )
+
+    parser.add_argument(
         "--num_eval_samples",
         default=20,
+        type=int,
         help="Number of past participants to sample for testing.",
     )
 
     parser.add_argument(
         "--inference_batch_size",
         default=20,
+        type=int,
         help="Number of participants to assign in one api request.",
     )
 
@@ -74,8 +107,17 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+def build_prompt(prompt_config_file):
+    with open(prompt_config_file, 'r') as f:
+        prompt_config = json.load(f)
+    prompt = ""
+    if prompt_config["prompt_mode"] == "COMPLETE":
+        prompt_complete_file = prompt_config["prompt_complete_file"]
+        with open(prompt_complete_file, 'r') as f:
+            prompt = f.read()
+    return prompt
 
-def run_inference(eval_data: pd.Series, query_engine, batch_size) -> tuple:
+def run_inference(eval_data: pd.Series, query_engine, batch_size, prompt) -> tuple:
     chunks = []
     for i in range(0, len(eval_data), batch_size):
         chunk = eval_data.iloc[i:i + batch_size]
@@ -84,18 +126,7 @@ def run_inference(eval_data: pd.Series, query_engine, batch_size) -> tuple:
     
     results = []
     for i, chunk in enumerate(chunks):
-        query_combined = \
-            """
-            I want you to provide job title recommendations for a set of participants based on their skills.
-            Each participant should get 3 job recommendations ranked by relevance to their skills
-            based on the job descriptions and required skills that are available in the corpus.
-            Please also provide 3 departments that are most relevant to the participant's skills and jobs you recommened.
-            Please give me the participant's number followed by the list of recommended job titles and departments in this format
-            "{Participant Id}/-/{Job Title rank 1},{Job Title rank 2},{Job Title rank 3}/-/{Department rank 1},{Department rank 2}, {Department rank 2}\n".
-            Please do not add any other text to the response other than the id and titles.
-            Here is the information about the participants please do not skip a single of the 20 participants: \n
-            """ \
-                + chunk
+        query_combined = prompt + chunk
         response = query_engine.query(query_combined)
         print("Model Response String: ", response)
         lines = response.response.splitlines()
@@ -123,13 +154,13 @@ def main() -> None:
     Settings.embed_model = embeddings
 
     print("Loading cached Property Graph Index...")
-    latest_pg_store_dir = get_latest_index_version("./pg_store_versions")
+    latest_pg_store_dir = get_latest_index_version(args.pg_store_dir)
     print("directory:", latest_pg_store_dir)
     pg_index = load_index_from_storage(StorageContext.from_defaults(persist_dir=latest_pg_store_dir))
     pg_retriever = pg_index.as_retriever()
 
     print("Loading cached Vector Index...")
-    latest_vector_store_dir = get_latest_index_version("./vector_store_versions")
+    latest_vector_store_dir = get_latest_index_version(args.vector_store_dir)
     storage_context = StorageContext.from_defaults(persist_dir=latest_vector_store_dir)
     vector_index = load_index_from_storage(storage_context)
     vector_retriever = VectorIndexRetriever(index=vector_index)
@@ -158,19 +189,30 @@ def main() -> None:
 
 
     eval_df = pd.read_csv(args.past_participant_info_csv)
-    eval_df = eval_df.dropna(subset=['Person Id', 'Skillset', 'VRF ID', ]).sample(n=args.num_eval_samples)
+    eval_df = eval_df[eval_df['Seva Allocation Accurate or not']==1].dropna(subset=['Person Id', 'Skillset', 'VRF ID', ]).sample(n=args.num_eval_samples)
     eval_df[["Computer Skills", "Work Designation", "Education", "Education Specialization"]] = eval_df[["Computer Skills", "Work Designation", "Education", "Education Specialization"]].fillna("NA")
     eval_df["eval_input"] =  " Participant " + eval_df["Person Id"].astype(str) + " has skills: " + eval_df['Skillset'] + \
                             "and specifically computer skills: " + eval_df["Computer Skills"] + \
                             ". The participant worked with designation: " + eval_df["Work Designation"] + \
                             "and has a " + eval_df["Education"] + "education specialized in " + eval_df["Education Specialization"]
-    results = run_inference(eval_df["eval_input"], graph_rag_query_engine, args.inference_batch_size)
+    prompt = build_prompt(args.prompt_config_json)
+    results = run_inference(eval_df["eval_input"], graph_rag_query_engine, args.inference_batch_size, prompt)
     results_df = pd.DataFrame(results, columns=['Person Id', 'Predicted Job Titles', 'Predicted Departments'])
     results_df["Person Id"] = results_df["Person Id"].astype(int)
     results_df = eval_df[["Person Id", "Skillset","VRF ID"]].merge(results_df, on='Person Id', how='outer')
     results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])
+    results_info = f"""
+    Property Graph Index Version: {latest_pg_store_dir}
+    Vector Store Index Version: {latest_vector_store_dir}
+    Model Accuracy:___
+    Model Precision:___
+    """
     print(results_df)
-    results_df.to_csv('data/eval_results.csv', index=False)
+    results_dir = create_timestamped_results(args.results_dir, results_df)
+    results_info_file = os.path.join(results_dir, args.results_info_file_name)
+    # Write the content to the file
+    with open(results_info_file, "w") as file:
+        file.write(results_info)
 
     logging.info("Script finished.")
 

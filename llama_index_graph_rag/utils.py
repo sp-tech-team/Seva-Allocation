@@ -4,6 +4,8 @@ from datetime import datetime
 from llama_index.core.indices.base import BaseIndex
 
 INDEX_DIR_PREFIX = "index-"
+RESULTS_DIR_PREFIX = "results-"
+RESULTS_FILE_NAME = "eval_results.csv"
 
 def get_latest_index_version(base_dir):
     """
@@ -88,6 +90,30 @@ def create_timestamped_pg_index(base_dir, pg_index):
     pg_index.property_graph_store.save_networkx_graph(name=os.path.join(folder_path, "kg.html"))
     return folder_path
 
+def create_timestamped_results(base_dir, results_df):
+    """
+    Creates a timestamped directory for a list of results and saves them to a pickle file.
+
+    Args:
+        base_dir (str): The base directory where timestamped directories are created.
+        results_df (pd.DataFrame): The DataFrame of results to save.
+
+    Returns:
+        str: Path to the newly created directory.
+    """
+    # Create a timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Create the directory name
+    folder_name = RESULTS_DIR_PREFIX + timestamp
+    folder_path = os.path.join(base_dir, folder_name)
+
+    # Create the directory
+    os.makedirs(folder_path, exist_ok=True)
+
+    results_df.to_csv(os.path.join(folder_path, RESULTS_FILE_NAME), index=False)
+    print(f"Results saved to: {folder_path}")
+    return folder_path
 
 def save_to_pickle(obj, file_path):
     """Saves a Python object to a pickle file.

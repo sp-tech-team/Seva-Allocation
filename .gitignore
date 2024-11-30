@@ -18,10 +18,9 @@ mayank_experiment/.env
 mayank_experiment/input/
 
 llama_index_graph_rag/.env
-llama_index_graph_rag/input/
-llama_index_graph_rag/kg.html
 llama_index_graph_rag/lib/
 llama_index_graph_rag/pg_store_versions/
 llama_index_graph_rag/vector_store_versions/
-llama_index_graph_rag/data/eval_results.csv
-
+llama_index_graph_rag/configs/
+llama_index_graph_rag/data/generated_training_data/
+llama_index_graph_rag/results/

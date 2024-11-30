@@ -58,13 +58,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--vrf_jobs_train_corpus_txt",
-        default='data/vrf_jobs_train_corpus.txt',
+        default='data/generated_training_data/vrf_jobs_train_corpus.txt',
         help="Path to the vrf jobs training corpus.",
     )
 
     parser.add_argument(
         "--vrf_depts_train_corpus_txt",
-        default='data/vrf_depts_train_corpus.txt',
+        default='data/generated_training_data/vrf_depts_train_corpus.txt',
         help="Path to the vrf dept training corpus.",
     )
 
