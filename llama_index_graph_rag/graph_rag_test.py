@@ -54,6 +54,12 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--vrf_data_csv",
+        default='data/vrf_data.csv',
+        help="Path to the vrf csv file.",
+    )
+
+    parser.add_argument(
         "--prompt_config_json",
         default='configs/prompt_config.json',
         help="Path to json file of prompt query.",
@@ -135,6 +141,25 @@ def run_inference(eval_data: pd.Series, query_engine, batch_size, prompt) -> tup
             results.append([id_and_ranks[0]] + ranked_jobs)
     return results
 
+def get_depts_from_job(job_title, vrf_df):
+    return vrf_df[vrf_df['Job Title'] == job_title]['Department'].drop_duplicates().values
+
+def get_depts_from_job_df(results_df, vrf_df):
+
+    def get_depts(row):
+        depts = ""
+        for job_title in row[3:]:
+            if pd.isna(job_title):
+                depts += ",NA, "
+            else:
+                print(job_title)
+                job_depts = get_depts_from_job(job_title, vrf_df)
+                print(job_depts)
+                depts += job_title + ": " + ", ".join(job_depts) + " "
+        return depts
+
+    depts = results_df.apply(get_depts, axis=1)
+    return depts
 
 def main() -> None:
     """Main entry point of the script."""
@@ -203,16 +228,20 @@ def main() -> None:
     results_df["Person Id"] = results_df["Person Id"].astype(int)
     results_df = eval_df[["Person Id", "Skillset","VRF ID"]].merge(results_df, on='Person Id', how='outer')
     results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])
+    results_dir = create_timestamped_results(args.results_dir, results_df)
+
+    vrf_df = pd.read_csv(args.vrf_data_csv)
+    results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df)
+    print(results_df)
+    results_dir = create_timestamped_results(args.results_dir, results_df)
+    
+    results_info_file = os.path.join(results_dir, args.results_info_file_name)
     results_info = f"""
     Property Graph Index Version: {latest_pg_store_dir}
     Vector Store Index Version: {latest_vector_store_dir}
     Model Accuracy:___
     Model Precision:___
     """
-    print(results_df)
-    results_dir = create_timestamped_results(args.results_dir, results_df)
-    results_info_file = os.path.join(results_dir, args.results_info_file_name)
-    # Write the content to the file
     with open(results_info_file, "w") as file:
         file.write(results_info)
 
