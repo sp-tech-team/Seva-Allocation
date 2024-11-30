@@ -2,31 +2,23 @@
     "property_graph_schema_extractor": {
         "entities": [
             "JOB",
-            "SKILL",
-            "DEPARTMENT"
+            "SKILL"
         ],
         "relations": [
             "WORKS_WITH",
             "RELATED_TO",
             "SIMILAR_TO",
-            "USED_BY",
-            "IS_IN",
-            "HAS"
+            "USED_BY"
         ],
         "schema": {
             "JOB": [
                 "RELATED_TO",
                 "SIMILAR_TO",
-                "WORKS_WITH",
-                "IS_IN"
+                "WORKS_WITH"
             ],
             "SKILL": [
                 "RELATED_TO",
                 "USED_BY"
-            ],
-            "DEPARTMENT": [
-                "HAS",
-                "WORKS_WITH"
             ]
         }
     }

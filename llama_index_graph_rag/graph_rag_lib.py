@@ -1,39 +1,7 @@
-
-import nest_asyncio
-nest_asyncio.apply()
-from dotenv import load_dotenv
-# Load environment variables from a .env file
-load_dotenv()
-from IPython.display import Markdown, display
-from pyvis.network import Network
-
-import os
-import pandas as pd
-
-
-
-from llama_index.core import SimpleDirectoryReader
-from llama_index.llms.openai import OpenAI
-from llama_index.core import PropertyGraphIndex, VectorStoreIndex
-from llama_index.core import Document
-from llama_index.core.indices.property_graph import DynamicLLMPathExtractor
-from llama_index.core import ServiceContext, GPTVectorStoreIndex
-from langchain.chat_models import ChatOpenAI
-from llama_index.core import get_response_synthesizer
-from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core import QueryBundle
 from llama_index.core.schema import NodeWithScore
-from llama_index.core.retrievers import (
-    BaseRetriever,
-    VectorIndexRetriever,
-)
-from llama_index.core import Settings
-
-
+from llama_index.core.retrievers import BaseRetriever
 from typing import List
-
-
-
 
 class GraphRagRetriever(BaseRetriever):
     """Custom retriever that performs both Vector search and Knowledge Graph search"""

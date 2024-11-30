@@ -63,12 +63,6 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--vrf_depts_train_corpus_txt",
-        default='data/generated_training_data/vrf_depts_train_corpus.txt',
-        help="Path to the vrf dept training corpus.",
-    )
-
-    parser.add_argument(
         "--index_config_json",
         default='configs/index_config.json',
         help="Path index generator configs.",
@@ -111,10 +105,7 @@ def main() -> None:
     
     with open(args.vrf_jobs_train_corpus_txt, "r") as file:
         jobs_train_corpus = file.read()
-    with open(args.vrf_depts_train_corpus_txt, "r") as file:
-        dept_train_corpus = file.read()
-    documents = [Document(text=jobs_train_corpus + "\n" + dept_train_corpus)]
-    # documents = [Document(text=jobs_train_corpus), Document(text=dept_train_corpus)]
+    documents = [Document(text=jobs_train_corpus)]
 
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
     embeddings = OpenAIEmbeddings()
@@ -126,13 +117,6 @@ def main() -> None:
     entities = Literal[tuple(index_config['property_graph_schema_extractor']['entities'])]
     relations = Literal[tuple(index_config['property_graph_schema_extractor']['relations'])]
     schema = index_config['property_graph_schema_extractor']['schema']
-    # entities = Literal["JOB", "SKILL"]#, "DEPARTMENT"]
-    # relations = Literal["WORKS_WITH", "RELATED_TO", "SIMILAR_TO", "USED_BY"]#, "IS_IN", "HAS"]
-    # schema = {
-    #     "JOB": ["RELATED_TO", "SIMILAR_TO", "WORKS_WITH"], #, "IS_IN"],
-    #     "SKILL": ["RELATED_TO", "USED_BY"],
-    #     #"DEPARTMENT": ["HAS", "WORKS_WITH"],
-    # }
 
     kg_extractor = SchemaLLMPathExtractor(
         llm=llm,

@@ -30,7 +30,6 @@ import pandas as pd
 from langchain_openai import OpenAIEmbeddings
 
 from llama_index.llms.openai import OpenAI
-from llama_index.core import PropertyGraphIndex, VectorStoreIndex
 from llama_index.core import get_response_synthesizer
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
@@ -131,8 +130,9 @@ def run_inference(eval_data: pd.Series, query_engine, batch_size, prompt) -> tup
         print("Model Response String: ", response)
         lines = response.response.splitlines()
         for line in lines:
-            line_parts = line.split("/-/")
-            results.append(line_parts)
+            id_and_ranks = line.split("/-/")
+            ranked_jobs = id_and_ranks[1].split(",")
+            results.append([id_and_ranks[0]] + ranked_jobs)
     return results
 
 
@@ -197,7 +197,9 @@ def main() -> None:
                             "and has a " + eval_df["Education"] + "education specialized in " + eval_df["Education Specialization"]
     prompt = build_prompt(args.prompt_config_json)
     results = run_inference(eval_df["eval_input"], graph_rag_query_engine, args.inference_batch_size, prompt)
-    results_df = pd.DataFrame(results, columns=['Person Id', 'Predicted Job Titles', 'Predicted Departments'])
+    num_ranked_jobs = len(results[0]) - 1
+    ranked_job_titles = [f"Predicted Rank {i+1} Job Title" for i in range(num_ranked_jobs)]
+    results_df = pd.DataFrame(results, columns=['Person Id'] + ranked_job_titles)
     results_df["Person Id"] = results_df["Person Id"].astype(int)
     results_df = eval_df[["Person Id", "Skillset","VRF ID"]].merge(results_df, on='Person Id', how='outer')
     results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])

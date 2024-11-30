@@ -67,12 +67,11 @@ def create_default_index_config_file():
     # Define the data to be written to the JSON file
     data = {
         "property_graph_schema_extractor": {
-            "entities": ["JOB", "SKILL", "DEPARTMENT"],
-            "relations": ["WORKS_WITH", "RELATED_TO", "SIMILAR_TO", "USED_BY", "IS_IN", "HAS"],
+            "entities": ["JOB", "SKILL"],
+            "relations": ["WORKS_WITH", "RELATED_TO", "SIMILAR_TO", "USED_BY"],
             "schema": {
-                "JOB": ["RELATED_TO", "SIMILAR_TO", "WORKS_WITH", "IS_IN"],
+                "JOB": ["RELATED_TO", "SIMILAR_TO", "WORKS_WITH"],
                 "SKILL": ["RELATED_TO", "USED_BY"],
-                "DEPARTMENT": ["HAS", "WORKS_WITH"]
             }
         }
     }
@@ -126,7 +125,7 @@ Here is the information about the participants please do not skip a single of th
 
     with open(prompt_config["prompt_complete_file"], "w") as file:
         file.write(prompt_complete)
-    print("Prompt configuration and sample have been written to the file")
+    print("Prompt configuration and sample have been written")
 
 def main():
     args = parse_args()
