@@ -137,6 +137,9 @@ def run_inference(eval_data: pd.Series, query_engine, batch_size, prompt) -> tup
         lines = response.response.splitlines()
         for line in lines:
             id_and_ranks = line.split("/-/")
+            if len(id_and_ranks) > 5:
+                print("over 5 predictions")
+                pdb.set_trace()
             ranked_jobs = id_and_ranks[1].split(",")
             results.append([id_and_ranks[0]] + ranked_jobs)
     return results
@@ -232,7 +235,6 @@ def main() -> None:
 
     vrf_df = pd.read_csv(args.vrf_data_csv)
     results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df)
-    print(results_df)
     results_dir = create_timestamped_results(args.results_dir, results_df)
     
     results_info_file = os.path.join(results_dir, args.results_info_file_name)
