@@ -148,19 +148,17 @@ def get_depts_from_job(job_title, vrf_df):
     return vrf_df[vrf_df['Job Title'] == job_title]['Department'].drop_duplicates().values
 
 def get_depts_from_job_df(results_df, vrf_df):
-
+    predicted_columns = [col for col in results_df.columns if col.startswith("Predicted Rank")]
     def get_depts(row):
         depts = ""
-        for job_title in row[3:]:
+        for job_title in row[predicted_columns]:
             if pd.isna(job_title):
                 depts += ",NA, "
             else:
-                print(job_title)
                 job_depts = get_depts_from_job(job_title, vrf_df)
-                print(job_depts)
+                print(f"Job Title: {job_title} Depts: {job_depts}")
                 depts += job_title + ": " + ", ".join(job_depts) + " "
         return depts
-
     depts = results_df.apply(get_depts, axis=1)
     return depts
 
@@ -229,9 +227,15 @@ def main() -> None:
     ranked_job_titles = [f"Predicted Rank {i+1} Job Title" for i in range(num_ranked_jobs)]
     results_df = pd.DataFrame(results, columns=['Person Id'] + ranked_job_titles)
     results_df["Person Id"] = results_df["Person Id"].astype(int)
-    results_df = eval_df[["Person Id", "Skillset","VRF ID"]].merge(results_df, on='Person Id', how='outer')
+    input_columns = ["Person Id", "Skillset","Computer Skills", "Work Designation", "Education", "Education Specialization", "VRF ID"]
+    results_df = eval_df[input_columns].merge(results_df, on='Person Id', how='outer')
     results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])
-    results_dir = create_timestamped_results(args.results_dir, results_df)
+    
+    predicted_columns = [col for col in results_df.columns if col.startswith("Predicted Rank")]
+    results_df["is_in_predictions"] = results_df.apply(lambda row: row["VRF ID"] in row[predicted_columns].values, axis=1)
+
+    accuracy = results_df["is_in_predictions"].mean()
+
 
     vrf_df = pd.read_csv(args.vrf_data_csv)
     results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df)
@@ -241,7 +245,7 @@ def main() -> None:
     results_info = f"""
     Property Graph Index Version: {latest_pg_store_dir}
     Vector Store Index Version: {latest_vector_store_dir}
-    Model Accuracy:___
+    Model Accuracy: {accuracy}
     Model Precision:___
     """
     with open(results_info_file, "w") as file:
