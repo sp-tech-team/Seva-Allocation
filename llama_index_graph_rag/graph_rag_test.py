@@ -97,10 +97,24 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        '--random_sample',
+        action='store_true',
+        dest='random_sample',  # Default False
+        help="Enable verbose logging. (default is disabled)"
+    )
+
+    parser.add_argument(
         "--inference_batch_size",
         default=20,
         type=int,
         help="Number of participants to assign in one api request.",
+    )
+
+    parser.add_argument(
+        "--num_job_predictions",
+        default=2,
+        type=int,
+        help="Number of jobs to predict for each participant. Note this needs to match the prompt.",
     )
 
     parser.add_argument(
@@ -112,6 +126,23 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+def make_eval_input_df(past_participant_info_csv, num_eval_samples, random_sample):
+    eval_input_df = pd.read_csv(past_participant_info_csv)
+    eval_input_df = eval_input_df.map(lambda x: x.replace("\n", " ") if isinstance(x, str) else x)
+    eval_input_df = eval_input_df[eval_input_df['Seva Allocation Accurate or not']==1]
+    eval_input_df= eval_input_df.dropna(subset=['Person Id', 'Skillset', 'VRF ID'])
+    if random_sample:
+        eval_input_df = eval_input_df.sample(n=num_eval_samples)
+    else:
+        eval_input_df = eval_input_df.head(num_eval_samples)
+    optional_columns = ["Computer Skills", "Work Designation", "Education", "Education Specialization"]
+    eval_input_df[optional_columns] = eval_input_df[optional_columns].fillna("NA")
+    eval_input_df["eval_input"] =  " Participant " + eval_input_df["Person Id"].astype(str) + " has skills: " + eval_input_df['Skillset'] + \
+                            "and specifically computer skills: " + eval_input_df["Computer Skills"] + \
+                            ". The participant worked with designation: " + eval_input_df["Work Designation"] + \
+                            "and has a " + eval_input_df["Education"] + " education specialized in " + eval_input_df["Education Specialization"]
+    return eval_input_df
+
 def build_prompt(prompt_config_file):
     with open(prompt_config_file, 'r') as f:
         prompt_config = json.load(f)
@@ -122,7 +153,11 @@ def build_prompt(prompt_config_file):
             prompt = f.read()
     return prompt
 
-def run_inference(eval_data: pd.Series, query_engine, batch_size, prompt) -> tuple:
+def fill_jagged_responses(jagad_responses, num_job_predictions):
+    return
+
+def run_inference(eval_data, prompt, query_engine, batch_size, num_job_predictions) -> tuple:
+    # Group the eval inputs into chunks of batch_size
     chunks = []
     for i in range(0, len(eval_data), batch_size):
         chunk = eval_data.iloc[i:i + batch_size]
@@ -136,13 +171,25 @@ def run_inference(eval_data: pd.Series, query_engine, batch_size, prompt) -> tup
         print("Model Response String: ", response)
         lines = response.response.splitlines()
         for line in lines:
-            id_and_ranks = line.split("/-/")
-            if len(id_and_ranks) > 5:
-                print("over 5 predictions")
-                pdb.set_trace()
-            ranked_jobs = id_and_ranks[1].split(",")
-            results.append([id_and_ranks[0]] + ranked_jobs)
-    return results
+            id_and_preds = line.split("/-/")
+            if len(id_and_preds) != 2:
+                raise ValueError("Bad LLM response format: more than one /-/")
+            id = id_and_preds[0]
+            predictions = id_and_preds[1].split(",")
+            results.append([id] + predictions)
+    # for i, row in enumerate(results):
+    #     if len(row) < num_job_predictions + 1:
+    #         pdb.set_trace()
+    #         raise ValueError(f"Row {i}: {row} does not have enough columns. Expected at least {num_job_predictions + 1}, got {len(row)}")
+    
+    max_length = max(len(row) for row in results)
+    results = [row + ["NA"] * (max_length - len(row)) for row in results]
+    column_names = ["Person Id"] + [f"Predicted Rank {i} Job Title" for i in range(1, num_job_predictions + 1)]
+    extra_columns = [f"extra_{i}" for i in range(1, max_length - num_job_predictions)]
+    column_names += extra_columns
+    results_df = pd.DataFrame(results, columns=column_names)
+    results_df["Person Id"] = results_df["Person Id"].astype(int)
+    return results_df
 
 def get_depts_from_job(job_title, vrf_df):
     return vrf_df[vrf_df['Job Title'] == job_title]['Department'].drop_duplicates().values
@@ -156,7 +203,7 @@ def get_depts_from_job_df(results_df, vrf_df):
                 depts += ",NA, "
             else:
                 job_depts = get_depts_from_job(job_title, vrf_df)
-                print(f"Job Title: {job_title} Depts: {job_depts}")
+                #print(f"Job Title: {job_title} Depts: {job_depts}")
                 depts += job_title + ": " + ", ".join(job_depts) + " "
         return depts
     depts = results_df.apply(get_depts, axis=1)
@@ -198,59 +245,46 @@ def main() -> None:
     response_synthesizer = get_response_synthesizer(
         response_mode="tree_summarize",
     )
-
+    print("Creating query engines...")
     graph_rag_query_engine = RetrieverQueryEngine(
         retriever=graph_rag_retriever,
         response_synthesizer=response_synthesizer,
     )
-
     vector_query_engine = vector_index.as_query_engine()
-
     pg_keyword_query_engine = pg_index.as_query_engine(
         # setting to false uses the raw triplets instead of adding the text from the corresponding nodes
         include_text=False,
         retriever_mode="keyword",
         response_mode="tree_summarize",
     )
-
-
-    eval_df = pd.read_csv(args.past_participant_info_csv)
-    eval_df = eval_df[eval_df['Seva Allocation Accurate or not']==1].dropna(subset=['Person Id', 'Skillset', 'VRF ID', ]).sample(n=args.num_eval_samples)
-    eval_df[["Computer Skills", "Work Designation", "Education", "Education Specialization"]] = eval_df[["Computer Skills", "Work Designation", "Education", "Education Specialization"]].fillna("NA")
-    eval_df["eval_input"] =  " Participant " + eval_df["Person Id"].astype(str) + " has skills: " + eval_df['Skillset'] + \
-                            "and specifically computer skills: " + eval_df["Computer Skills"] + \
-                            ". The participant worked with designation: " + eval_df["Work Designation"] + \
-                            "and has a " + eval_df["Education"] + "education specialized in " + eval_df["Education Specialization"]
+    print("Peparing data for inference / evaluation...")
+    eval_input_df = make_eval_input_df(args.past_participant_info_csv, args.num_eval_samples, args.random_sample)
+    print("\n".join(eval_input_df["eval_input"]))
+    print("Preparing prompt...")
     prompt = build_prompt(args.prompt_config_json)
-    results = run_inference(eval_df["eval_input"], graph_rag_query_engine, args.inference_batch_size, prompt)
-    num_ranked_jobs = len(results[0]) - 1
-    ranked_job_titles = [f"Predicted Rank {i+1} Job Title" for i in range(num_ranked_jobs)]
-    results_df = pd.DataFrame(results, columns=['Person Id'] + ranked_job_titles)
-    results_df["Person Id"] = results_df["Person Id"].astype(int)
+    print("Running inference on evaluation data...")
+    results_df = run_inference(eval_input_df["eval_input"], prompt, graph_rag_query_engine, args.inference_batch_size, args.num_job_predictions)
+    print("Evaluating the results...")
     input_columns = ["Person Id", "Skillset","Computer Skills", "Work Designation", "Education", "Education Specialization", "VRF ID"]
-    results_df = eval_df[input_columns].merge(results_df, on='Person Id', how='outer')
+    results_df = eval_input_df[input_columns].merge(results_df, on='Person Id', how='outer')
     results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])
-    
     predicted_columns = [col for col in results_df.columns if col.startswith("Predicted Rank")]
     results_df["is_in_predictions"] = results_df.apply(lambda row: row["VRF ID"] in row[predicted_columns].values, axis=1)
-
     accuracy = results_df["is_in_predictions"].mean()
-
-
     vrf_df = pd.read_csv(args.vrf_data_csv)
     results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df)
+    print("Saving evaluation results...")
     results_dir = create_timestamped_results(args.results_dir, results_df)
-    
     results_info_file = os.path.join(results_dir, args.results_info_file_name)
     results_info = f"""
-    Property Graph Index Version: {latest_pg_store_dir}
-    Vector Store Index Version: {latest_vector_store_dir}
-    Model Accuracy: {accuracy}
-    Model Precision:___
+Property Graph Index Version: {latest_pg_store_dir}
+Vector Store Index Version: {latest_vector_store_dir}
+Model Accuracy: {accuracy}
+Model Precision:___
+Prompt Used: \n{prompt}
     """
     with open(results_info_file, "w") as file:
         file.write(results_info)
-
     logging.info("Script finished.")
 
 
