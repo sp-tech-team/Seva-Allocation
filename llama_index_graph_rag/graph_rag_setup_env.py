@@ -114,14 +114,38 @@ def create_prompt_config(prompt_config_file):
         json.dump(prompt_config, file, indent=4)
     
     prompt_complete = \
-"""I want you to provide job title recommendations for a set of participants based on their skills.
-Each participant should get 3 job recommendations ranked by relevance to their skills
-based on the job descriptions and required skills that are available in the corpus.
-Please also provide 3 departments that are most relevant to the participant's skills and jobs you recommened.
-Please give me the participant's number followed by the list of recommended job titles and departments in this format
-"{Participant Id}/-/{Job Title rank 1},{Job Title rank 2},{Job Title rank 3}/-/{Department rank 1},{Department rank 2}, {Department rank 2}\\n".
-Please do not add any other text to the response other than the id and titles.
-Here is the information about the participants please do not skip a single of the 20 participants:\n"""
+"""
+For a list of participants assign each participant a list of relevant jobs
+from the provided list of jobs in the provided context only,
+the list must be ranked by the strength of relevance to their skills and experience.
+This assignment labeling task is called "Job Title Rank i"
+
+Each participant should also get a label indicating their work skill level called "Skill Label".
+Please assign the labels from this list[SKILLED-TECHNICAL, SKILLED-NON-TECHNICAL, NON-SKILLED]
+
+The response must be formatted exactly as follows
+"{Participant Id}/-/{Job Title Rank 1},{Job Title Rank 2},{Skill Label}"
+
+Here is a list of rules to follow when generating the formatted response.
+- Do not repeat job recommendations for the same person.
+- Only assign jobs from the provided context.
+- Do not add any other text to the response other than what's exactly described in the format string.
+- Do not skip any of the response labels for a single participant.
+- Do not put "Skill Label" labels one of the "Job Title" slots.
+- The response for each participant must be on a new line.
+
+Here is an example list of participants and the information we would have on each of them…
+Participant 908902 has skills: IT / IT - Others. Python, C++, Machine Learning. specifically computer skills: data science, machine learning, python. The participant worked with designation: Software Engineer - Data and has a Bachelor of Science (B.Sc) education specialized in Computer Science
+ Participant 909755 has skills: Soft Skills / General / Lawyer and specifically computer skills: Basic knowledge of M.S. Word, M.S. Excel, M.S. Powerpoint, Evernote, Adobe Photoshop, operating and navigating Manupatra.com (legal research platform). The participant worked with designation: Senior advocate and has a Bachelor of Law (B.L. / LLB) education specialized in Constitution of India
+ Participant 972477 has skills: Basic Computer Skills / Basic Computer (MS Office and Email) Skills, Worked as Social Media Marketing Manager handling SG social media pages - YT, Twitter, Instagram and Facebook and specifically computer skills: Basic computer skills. The participant worked with designation: Social Media Marketing Manager and has a Master of Business Administration (M.B.A.) education specialized in Commerce
+
+Here is an example of what your response would look like for these participants
+908902/-/Data Scientist,Developer,SKILLED-TECHNICAL
+909755/-/Lawyer,Administrative Activities (Back Office),SKILLED-NON-TECHNICAL
+972477/-/Social media Manager,Content Strategist,NON-SKILLED
+
+Here are the listed participants with their relevant metadata:\n
+"""
 
     with open(prompt_config["prompt_complete_file"], "w") as file:
         file.write(prompt_complete)

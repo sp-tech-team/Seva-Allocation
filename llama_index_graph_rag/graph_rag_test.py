@@ -135,12 +135,12 @@ def make_eval_input_df(past_participant_info_csv, num_eval_samples, random_sampl
         eval_input_df = eval_input_df.sample(n=num_eval_samples)
     else:
         eval_input_df = eval_input_df.head(num_eval_samples)
-    optional_columns = ["Computer Skills", "Work Designation", "Education", "Education Specialization"]
+    optional_columns = ["Computer Skills", "Additional Skills", "Work Designation", "Education", "Education Specialization"]
     eval_input_df[optional_columns] = eval_input_df[optional_columns].fillna("NA")
     eval_input_df["eval_input"] =  " Participant " + eval_input_df["Person Id"].astype(str) + " has skills: " + eval_input_df['Skillset'] + \
-                            "and specifically computer skills: " + eval_input_df["Computer Skills"] + \
+                            ". " + eval_input_df["Additional Skills"] + " and specifically computer skills: " + eval_input_df["Computer Skills"] + \
                             ". The participant worked with designation: " + eval_input_df["Work Designation"] + \
-                            "and has a " + eval_input_df["Education"] + " education specialized in " + eval_input_df["Education Specialization"]
+                            " and has a " + eval_input_df["Education"] + " education specialized in " + eval_input_df["Education Specialization"]
     return eval_input_df
 
 def build_prompt(prompt_config_file):
