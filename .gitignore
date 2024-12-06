@@ -24,3 +24,5 @@ llama_index_graph_rag/vector_store_versions/
 llama_index_graph_rag/configs/
 llama_index_graph_rag/data/generated_training_data/
 llama_index_graph_rag/results/
+llama_index_graph_rag/test_junk/
+llama_index_graph_rag/local_experiments.ipynb

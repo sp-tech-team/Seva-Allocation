@@ -203,7 +203,6 @@ def get_depts_from_job_df(results_df, vrf_df):
                 depts += ",NA, "
             else:
                 job_depts = get_depts_from_job(job_title, vrf_df)
-                #print(f"Job Title: {job_title} Depts: {job_depts}")
                 depts += job_title + ": " + ", ".join(job_depts) + " "
         return depts
     depts = results_df.apply(get_depts, axis=1)

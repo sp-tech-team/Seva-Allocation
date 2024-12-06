@@ -40,6 +40,7 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.core import Settings
+from llama_index.core.schema import TextNode
 
 # Use typing_extention for forward compatibility with dynamic TypeAlias/ Literal
 #from typing import Literal # Python 3.11 and up
@@ -102,10 +103,6 @@ def main() -> None:
         logging.disable(logging.CRITICAL)
 
     logging.info("Script started.")
-    
-    with open(args.vrf_jobs_train_corpus_txt, "r") as file:
-        jobs_train_corpus = file.read()
-    documents = [Document(text=jobs_train_corpus)]
 
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
     embeddings = OpenAIEmbeddings()
@@ -128,6 +125,9 @@ def main() -> None:
         max_triplets_per_chunk=10,
     )
     print("Creating Property Graph Index...")
+    with open(args.vrf_jobs_train_corpus_txt, "r") as file:
+        jobs_train_corpus = file.read()
+    documents = [Document(text=jobs_train_corpus)]
     try:
         pg_index = PropertyGraphIndex.from_documents(
             documents,
@@ -149,7 +149,11 @@ def main() -> None:
 
     if args.update_vector_db:
         print("Creating Vector Store Index...")
-        vector_index = VectorStoreIndex.from_documents(documents)
+        nodes = []
+        for i, sentence in enumerate(jobs_train_corpus.split("\n")):
+            node = TextNode(text=sentence, id_=str(i))
+            nodes.append(node)
+        vector_index = VectorStoreIndex(nodes)
         create_timestamped_index("./vector_store_versions", vector_index)
     logging.info("Script finished.")
 
