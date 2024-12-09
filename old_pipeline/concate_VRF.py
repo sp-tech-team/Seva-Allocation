@@ -7,7 +7,7 @@ def front_fill_columns(df, columns):
             df[column] = df[column].ffill()
     return df
 
-def concatenate_columns(df, group_column, columns_to_concatenate, separator=' '):
+def concatenate_columns(df, group_column, columns_to_concatenate, separator=','):
     """Concatenates specified columns within a DataFrame, grouped by another column."""
     for column in columns_to_concatenate:
         if column in df.columns:
@@ -64,7 +64,7 @@ df_joined = df_main.merge(df_exported_filtered, on='Request Name', how='left')
 # Write the output to a new Excel file with multiple tabs
 output_file = 'D:/Seva-Allocation/old_pipeline/content/output_transformed.xlsx'
 with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
-    df_with_concatenate.to_excel(writer, sheet_name='Exported Data', index=False)  # Write df_with_concatenate to one tab
+    df_with_concatenate.to_excel(writer, sheet_name='Concatenated Export Data', index=False)  # Write df_with_concatenate to one tab
     df_joined.to_excel(writer, sheet_name='Joined Data', index=False)  # Write the joined data to another tab
 
 print(f"Transformation complete. Output written to {output_file}")
