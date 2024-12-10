@@ -7,12 +7,14 @@ INDEX_DIR_PREFIX = "index-"
 RESULTS_DIR_PREFIX = "results-"
 RESULTS_FILE_NAME = "eval_results.csv"
 
-def get_latest_index_version(base_dir):
+def get_index_version(base_dir, version='latest'):
     """
-    Finds the latest version of timestamped Index directories.
+    Finds the requested version of timestamped Index directories, pass 'latest' for getting the
+    most recent index.
 
     Args:
         base_dir (str): Path to the base directory containing timestamped directories.
+        version (str): The version of the index to retrieve. Default is 'latest'. Format is 'YYYYMMDD_HHMMSS'.
 
     Returns:
         str: The path to the latest version directory or None if no directories are found.
@@ -42,10 +44,17 @@ def get_latest_index_version(base_dir):
         print("No valid timestamped directories found.")
         return None
 
+    target_dir = ""
     # Find the directory with the latest timestamp
-    latest_timestamp, latest_dir = max(timestamped_dirs, key=lambda x: x[0])
-
-    return os.path.join(base_dir, latest_dir)
+    if version == 'latest':
+        timestamp, target_dir = max(timestamped_dirs, key=lambda x: x[0])
+    else:
+        matched_dirs = [dir for dir in timestamped_dirs if dir[0].strftime("%Y%m%d_%H%M%S") == version]
+        if matched_dirs:
+            timestamp, target_dir = matched_dirs[0]
+        else:
+            raise ValueError(f"No directory found for version: {version}")
+    return os.path.join(base_dir, target_dir)
 
 
 def create_timestamped_index(base_dir, index):

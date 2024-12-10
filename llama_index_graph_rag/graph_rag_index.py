@@ -17,6 +17,7 @@ import json
 
 from graph_rag_lib import GraphRagRetriever
 from utils import create_timestamped_index, create_timestamped_pg_index
+from training_data import create_vrf_single_df, create_vrf_single_txt_corpus
 
 import nest_asyncio
 nest_asyncio.apply()
@@ -48,7 +49,7 @@ from typing_extensions import Literal # Python 3.10 and below
 
 
 
-def parse_args() -> argparse.Namespace:
+def index_parse_args() -> argparse.Namespace:
     """Parses command-line arguments.
 
     Returns:
@@ -58,9 +59,15 @@ def parse_args() -> argparse.Namespace:
         description="Process an input file and save the results to an output file."
     )
     parser.add_argument(
-        "--vrf_jobs_train_corpus_txt",
-        default='data/generated_training_data/vrf_jobs_train_corpus.txt',
-        help="Path to the vrf jobs training corpus.",
+        "--vrf_generic_train_data_csv",
+        default='data/generated_training_data/vrf_generic_train_data.csv',
+        help="Path to the vrf jobs generic training data.",
+    )
+
+    parser.add_argument(
+        "--vrf_specific_train_data_csv",
+        default='data/generated_training_data/vrf_specific_train_data.csv',
+        help="Path to the vrf jobs specific training data.",
     )
 
     parser.add_argument(
@@ -91,30 +98,12 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-
-def main() -> None:
-    """Main entry point of the script."""
-    args = parse_args()
-
-    # Configure logging
-    log_level = logging.INFO
-    logging.basicConfig(level=log_level, format="%(asctime)s - %(levelname)s - %(message)s")
-    if not args.verbose:
-        logging.disable(logging.CRITICAL)
-
-    logging.info("Script started.")
-
-    llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
-    embeddings = OpenAIEmbeddings()
-    Settings.llm = llm
-    # Settings.embed_model = embeddings
-
-    with open(args.index_config_json, "r") as file:
+def get_pg_extractor(index_config_json, llm):
+    with open(index_config_json, "r") as file:
         index_config = json.load(file)
     entities = Literal[tuple(index_config['property_graph_schema_extractor']['entities'])]
     relations = Literal[tuple(index_config['property_graph_schema_extractor']['relations'])]
     schema = index_config['property_graph_schema_extractor']['schema']
-
     kg_extractor = SchemaLLMPathExtractor(
         llm=llm,
         possible_entities=entities,
@@ -124,10 +113,9 @@ def main() -> None:
         num_workers=4,
         max_triplets_per_chunk=10,
     )
-    print("Creating Property Graph Index...")
-    with open(args.vrf_jobs_train_corpus_txt, "r") as file:
-        jobs_train_corpus = file.read()
-    documents = [Document(text=jobs_train_corpus)]
+    return kg_extractor
+
+def create_pg_index(documents, kg_extractor, llm, embeddings):
     try:
         pg_index = PropertyGraphIndex.from_documents(
             documents,
@@ -145,14 +133,44 @@ def main() -> None:
             embed_model = embeddings,
             show_progress=True,
         )
+    return pg_index
+
+def create_index_nodes(vrf_specific_train_data_csv, vrf_generic_train_data_csv):
+    vrf_single_df = create_vrf_single_df(vrf_specific_train_data_csv, vrf_generic_train_data_csv)
+    nodes = []
+    for i, sentence in enumerate(vrf_single_df['summary']):
+        node = TextNode(text=sentence, id_=str(i))
+        nodes.append(node)
+    return nodes
+
+def main() -> None:
+    """Main entry point of the script."""
+    args = index_parse_args()
+
+    # Configure logging
+    log_level = logging.INFO
+    logging.basicConfig(level=log_level, format="%(asctime)s - %(levelname)s - %(message)s")
+    if not args.verbose:
+        logging.disable(logging.CRITICAL)
+
+    logging.info("Script started.")
+
+    llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
+    embeddings = OpenAIEmbeddings()
+    Settings.llm = llm
+    Settings.embed_model = embeddings
+
+    print("Creating Property Graph Index...")
+    kg_extractor = get_pg_extractor(args.index_config_json, llm)
+    jobs_train_corpus = create_vrf_single_txt_corpus(specific_train_data_file = "",
+                                                     generic_train_data_file = args.vrf_generic_train_data_csv)
+    documents = [Document(text=jobs_train_corpus)]
+    pg_index = create_pg_index(documents, kg_extractor, llm, embeddings)
     create_timestamped_pg_index("./pg_store_versions", pg_index)
 
     if args.update_vector_db:
         print("Creating Vector Store Index...")
-        nodes = []
-        for i, sentence in enumerate(jobs_train_corpus.split("\n")):
-            node = TextNode(text=sentence, id_=str(i))
-            nodes.append(node)
+        nodes = create_index_nodes(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
         vector_index = VectorStoreIndex(nodes)
         create_timestamped_index("./vector_store_versions", vector_index)
     logging.info("Script finished.")
