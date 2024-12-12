@@ -1,7 +1,15 @@
 import pandas as pd
 import os
 
-def create_vrf_training_data(vrf_df, output_dir):
+def create_vrf_training_data(vrf_df,
+                             output_dir):
+    """
+    Create training data for VRF model.
+
+    Args:
+        vrf_df (pd.DataFrame): DataFrame containing VRF data.
+        output_dir (str): Output directory to save training data.
+    """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     required_columns = ['Job Title', 'Job Title Generic Description', 'Request Name', 'Request Name Description', 'Skills/Keywords']
@@ -22,7 +30,15 @@ def create_vrf_training_data(vrf_df, output_dir):
         " and know the languages: " + vrf_df["Languages"] + "."
     vrf_specific_df.to_csv(os.path.join(output_dir, "vrf_specific_train_data.csv"), index=False)
 
-def create_vrf_single_txt_corpus(specific_train_data_file = "", generic_train_data_file = ""):
+def create_vrf_single_txt_corpus(specific_train_data_file = "",
+                                 generic_train_data_file = ""):
+    """
+    Create a single text corpus from the VRF training data.
+    
+    Args:
+        specific_train_data_file (str): Path to the specific training data file.
+        generic_train_data_file (str): Path to the generic training data file.
+    """
     summaries = [""]
     if specific_train_data_file != "":
         specific_df = pd.read_csv(specific_train_data_file, header=0)
@@ -32,7 +48,15 @@ def create_vrf_single_txt_corpus(specific_train_data_file = "", generic_train_da
         summaries += generic_df["summary"].tolist()
     return "\n".join(summaries)
 
-def create_vrf_single_df(specific_train_data_file = "", generic_train_data_file = ""):
+def create_vrf_single_df(specific_train_data_file = "",
+                         generic_train_data_file = ""):
+    """
+    Create a single DataFrame from the VRF training data.
+    
+    Args:
+        specific_train_data_file (str): Path to the specific training data file.
+        generic_train_data_file (str): Path to the generic training data file.
+    """
     dfs = []
     target_columns = ['Job Title', 'summary']
     if specific_train_data_file != "":
@@ -45,8 +69,9 @@ def create_vrf_single_df(specific_train_data_file = "", generic_train_data_file 
     
     return pd.concat(dfs).reset_index(drop=True)
 
+
 def main():
-    vrf_df = pd.read_csv('data/vrf_data_new.csv')
+    vrf_df = pd.read_csv('data/vrf_data.csv')
     create_vrf_training_data(vrf_df, 'data/generated_training_data/')
     corpus = create_vrf_single_txt_corpus('data/generated_training_data/vrf_specific_train_data.csv', 'data/generated_training_data/vrf_generic_train_data.csv')
     print("Training Data Successfully created.")

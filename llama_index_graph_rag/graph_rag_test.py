@@ -158,6 +158,17 @@ def test_parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 def make_eval_input_df(past_participant_info_csv, num_samples, random_sample):
+    """
+    Create a dataframe of past participants to evaluate the model on.
+    
+    Args:
+        past_participant_info_csv: str, path to the past participants csv file.
+        num_samples: int, number of samples to take from the past participants.
+        random_sample: bool, whether to take a random sample or the first n samples.
+    
+    Returns:
+        eval_input_df, a dataframe of past participants to evaluate the model on.        
+    """
     eval_input_df = pd.read_csv(past_participant_info_csv)
     eval_input_df = eval_input_df.map(lambda x: x.replace("\n", " ") if isinstance(x, str) else x)
     eval_input_df = eval_input_df[eval_input_df['Seva Allocation Accurate or not']==1]
@@ -175,6 +186,14 @@ def make_eval_input_df(past_participant_info_csv, num_samples, random_sample):
     return eval_input_df
 
 def eval_results(results_df, eval_input_df, vrf_df):
+    """
+    Evaluate the results of the model on the evaluation data.
+    
+    Args:
+        results_df: pd.DataFrame, the results of the model on the evaluation data.
+        eval_input_df: pd.DataFrame, the evaluation data.
+        vrf_df: pd.DataFrame, the vrf data.
+    """
     input_columns = ["Person Id", "Skillset","Computer Skills", "Work Designation", "Education", "Education Specialization", "VRF ID"]
     results_df = eval_input_df[input_columns].merge(results_df, on='Person Id', how='outer')
     results_df['VRF ID'] = results_df['VRF ID'].apply(lambda x: x.split('-')[1])

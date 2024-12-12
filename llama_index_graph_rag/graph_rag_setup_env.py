@@ -49,6 +49,15 @@ def parse_args() -> argparse.Namespace:
 
 
 def create_env_file(openai_key, neo4j_uri, neo4j_user, neo4j_password):
+    """
+    Create a .env file with the OpenAI and Neo4j credentials.
+    
+    Args:
+    openai_key (str): The OpenAI API key.
+    neo4j_uri (str): The Neo4j URI.
+    neo4j_user (str): The Neo4j username.
+    neo4j_password (str): The Neo4j password.
+    """
     # Define the content of the .env file
     env_content = \
         f"""# Environment variables
@@ -64,6 +73,9 @@ def create_env_file(openai_key, neo4j_uri, neo4j_user, neo4j_password):
     print(".env file created successfully!")
 
 def create_default_index_config_file():
+    """
+    Create a default index configuration file in JSON format.
+    """
     # Define the data to be written to the JSON file
     data = {
         "property_graph_schema_extractor": {
@@ -86,26 +98,13 @@ def create_default_index_config_file():
 
     print(f"JSON configuration has been written to {file_path}")
 
-def create_training_corpus(vrf_jobs_train_corpus_file, vrf_depts_train_corpus_file, vrf_data_file):
-    vrf_df = pd.read_csv(vrf_data_file)
-    vrf_df = vrf_df.dropna(subset=['Job Title', 'Job Description', 'Skills/Keywords'])
-    vrf_df["Job Description"] = vrf_df["Job Description"].apply(lambda x: x.replace("\n", " "))
-    os.makedirs(os.path.dirname(vrf_jobs_train_corpus_file), exist_ok=True)
-    os.makedirs(os.path.dirname(vrf_depts_train_corpus_file), exist_ok=True)
-
-    vrf_df["summary"] = "The job titled: \"" + vrf_df["Job Title"] + "\" has a description: " + vrf_df["Job Description"] + ", and requires the following skills: " + vrf_df["Skills/Keywords"] + ".\n"
-    vrf_corpus = "".join(vrf_df["summary"])
-    with open(vrf_jobs_train_corpus_file, "w") as file:
-        file.write(vrf_corpus)
-
-    depts_df = vrf_df.groupby("Department")["Job Title"].apply(lambda x: ", ".join(x)).reset_index()
-    depts_df["summary"] = "The department: \"" + depts_df["Department"] + "\" will consider the following job titles: " + depts_df["Job Title"] + ".\n"
-    depts_corpus = "".join(depts_df["summary"])
-    with open(vrf_depts_train_corpus_file, "w") as file:
-        file.write(depts_corpus)
-    print(f"Training corpus data has been written to {vrf_depts_train_corpus_file}, {vrf_jobs_train_corpus_file}")
-
 def create_prompt_config(prompt_config_file):
+    """
+    Create a prompt configuration file in JSON format.
+    
+    Args:
+        prompt_config_file (str): The path to the prompt configuration file.
+    """
     prompt_config = {
         "prompt_mode": "COMPLETE",
         "prompt_complete_file":  "configs/prompt_complete.txt"
@@ -155,7 +154,6 @@ def main():
     args = parse_args()
     create_env_file(args.openai_key, args.neo4j_uri, args.neo4j_user, args.neo4j_password)
     create_default_index_config_file()
-    create_training_corpus(args.vrf_jobs_train_corpus_txt, args.vrf_depts_train_corpus_txt, args.vrf_data_csv)
     create_prompt_config(args.prompt_config_json)
 
 if __name__ == "__main__":

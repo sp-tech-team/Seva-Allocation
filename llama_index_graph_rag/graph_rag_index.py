@@ -17,7 +17,7 @@ import json
 
 from graph_rag_lib import GraphRagRetriever
 from utils import create_timestamped_index, create_timestamped_pg_index
-from training_data import create_vrf_single_df, create_vrf_single_txt_corpus
+from training_data import create_vrf_single_df, create_vrf_single_txt_corpus, create_vrf_training_data
 
 import nest_asyncio
 nest_asyncio.apply()
@@ -58,6 +58,26 @@ def index_parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Process an input file and save the results to an output file."
     )
+
+    parser.add_argument(
+        "--vrf_data_csv",
+        default='data/vrf_data.csv',
+        help="Path to the vrf csv file.",
+    )
+
+    parser.add_argument(
+        "--training_data_dir",
+        default='data/generated_training_data/',
+        help="Path to the training data directory.",
+    )
+
+    parser.add_argument(
+        '--setup_training_data',
+        action='store_true',
+        dest='setup_training_data',  # Default False
+        help="Enable setup of training data. (default is disabled)"
+    )
+    
     parser.add_argument(
         "--vrf_generic_train_data_csv",
         default='data/generated_training_data/vrf_generic_train_data.csv',
@@ -99,6 +119,13 @@ def index_parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 def get_pg_extractor(index_config_json, llm):
+    """
+    Get the Property Graph Schema Extractor from the index config json file.
+    
+    Args:
+        index_config_json: Path to the index config json file.
+        llm: The Language Model to use for the extractor.
+    """
     with open(index_config_json, "r") as file:
         index_config = json.load(file)
     entities = Literal[tuple(index_config['property_graph_schema_extractor']['entities'])]
@@ -116,6 +143,15 @@ def get_pg_extractor(index_config_json, llm):
     return kg_extractor
 
 def create_pg_index(documents, kg_extractor, llm, embeddings):
+    """
+    Create a Property Graph Index from the documents.
+    
+    Args:
+        documents: List of documents to create the index from.
+        kg_extractor: The Knowledge Graph Extractor to use.
+        llm: The Language Model to use for the index.
+        embeddings: The Embeddings to use for the index.
+    """
     try:
         pg_index = PropertyGraphIndex.from_documents(
             documents,
@@ -136,6 +172,13 @@ def create_pg_index(documents, kg_extractor, llm, embeddings):
     return pg_index
 
 def create_index_nodes(vrf_specific_train_data_csv, vrf_generic_train_data_csv):
+    """
+    Create the index nodes from the training data.
+    
+    Args:
+        vrf_specific_train_data_csv: Path to the specific training data csv file.
+        vrf_generic_train_data_csv: Path to the generic training data csv file.
+    """
     vrf_single_df = create_vrf_single_df(vrf_specific_train_data_csv, vrf_generic_train_data_csv)
     nodes = []
     for i, sentence in enumerate(vrf_single_df['summary']):
@@ -155,6 +198,12 @@ def main() -> None:
 
     logging.info("Script started.")
 
+    # Setup training data
+    if args.setup_training_data:
+        vrf_df = pd.read_csv(args.vrf_data_csv)
+        create_vrf_training_data(vrf_df, 'data/generated_training_data/')
+
+    # Setup LLM and Embeddings
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
     embeddings = OpenAIEmbeddings()
     Settings.llm = llm
@@ -162,14 +211,14 @@ def main() -> None:
 
     print("Creating Property Graph Index...")
     kg_extractor = get_pg_extractor(args.index_config_json, llm)
-    jobs_train_corpus = create_vrf_single_txt_corpus(specific_train_data_file = "",
+    vrf_generic_train_corpus = create_vrf_single_txt_corpus(specific_train_data_file = "",
                                                      generic_train_data_file = args.vrf_generic_train_data_csv)
-    documents = [Document(text=jobs_train_corpus)]
+    documents = [Document(text=vrf_generic_train_corpus)]
     pg_index = create_pg_index(documents, kg_extractor, llm, embeddings)
     create_timestamped_pg_index("./pg_store_versions", pg_index)
 
+    print("Creating Vector Store Index...")
     if args.update_vector_db:
-        print("Creating Vector Store Index...")
         nodes = create_index_nodes(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
         vector_index = VectorStoreIndex(nodes)
         create_timestamped_index("./vector_store_versions", vector_index)

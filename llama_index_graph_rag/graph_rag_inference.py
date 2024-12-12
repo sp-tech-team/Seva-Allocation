@@ -151,6 +151,17 @@ def inference_parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 def make_input_df(input_participant_info_csv, num_samples, random_sample):
+    """
+    Read the input participant info csv and create a dataframe with the required columns.
+    
+    Args:
+        input_participant_info_csv (str): Path to the input participant info csv file.
+        num_samples (int): Number of samples to take from the input csv.
+        random_sample (bool): Whether to take a random sample or the first n samples.
+    
+    Returns:
+        input_df (pd.DataFrame): A dataframe with the required columns
+    """
     input_df = pd.read_csv(input_participant_info_csv)
     input_df = input_df.map(lambda x: x.replace("\n", " ") if isinstance(x, str) else x)
     input_df = input_df.dropna(subset=['Person Id', 'Skillset'])
@@ -167,6 +178,15 @@ def make_input_df(input_participant_info_csv, num_samples, random_sample):
     return input_df
 
 def build_prompt(prompt_config_file):
+    """
+    Read the prompt config file and build the prompt string.
+    
+    Args:
+        prompt_config_file (str): Path to the prompt config file.
+    
+    Returns:
+        prompt (str): The prompt string.
+    """
     with open(prompt_config_file, 'r') as f:
         prompt_config = json.load(f)
     prompt = ""
@@ -177,6 +197,15 @@ def build_prompt(prompt_config_file):
     return prompt
 
 def create_specific_queries(input_df):
+    """
+    Create specific queries for the input dataframe.
+    
+    Args:
+        input_df (pd.DataFrame): A dataframe with the required columns.
+    
+    Returns:
+        specific_queries (list): A list of specific queries.
+    """
     skills_query = input_df['Skillset'] + ". " + \
                    input_df["Additional Skills"] + \
                    " and specifically computer skills: " + input_df["Computer Skills"]
@@ -184,7 +213,20 @@ def create_specific_queries(input_df):
     education_query = "The participant has a " + input_df["Education"] + " education specialized in " + input_df["Education Specialization"]
     return ["\n".join(skills_query), "\n".join(experience_query), "\n".join(education_query)]
 
-def run_inference(input_df, prompt, query_engine, batch_size, num_job_predictions) -> tuple:
+def run_inference(input_df, prompt, query_engine, batch_size, num_job_predictions):
+    """
+    Run inference on the input dataframe.
+    
+    Args:
+        input_df (pd.DataFrame): A dataframe with the required columns.
+        prompt (str): The prompt string.
+        query_engine (CustomQueryEngine): The query engine to use for inference.
+        batch_size (int): The batch size for inference.
+        num_job_predictions (int): The number of job predictions to make for each participant.
+        
+    Returns:
+        results_df (pd.DataFrame): A dataframe with the inference results.
+    """
     # Group the eval inputs into chunks of batch_size
     results = []
     for i in range(0, len(input_df), batch_size):
@@ -216,6 +258,16 @@ def get_depts_from_job(job_title, vrf_df):
     return vrf_df[vrf_df['Job Title'] == job_title]['Department'].drop_duplicates().values
 
 def get_depts_from_job_df(results_df, vrf_df):
+    """
+    Get the departments for the predicted jobs in the results dataframe.
+    
+    Args:
+        results_df (pd.DataFrame): The results dataframe.
+        vrf_df (pd.DataFrame): The vrf dataframe.
+    
+    Returns:
+        depts (pd.Series): A series with the departments for the predicted jobs.
+    """
     predicted_columns = [col for col in results_df.columns if col.startswith("Predicted Rank")]
     def get_depts(row):
         depts = ""

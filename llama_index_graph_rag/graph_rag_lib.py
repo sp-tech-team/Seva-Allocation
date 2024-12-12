@@ -25,7 +25,16 @@ class GraphRagRetriever(BaseRetriever):
         super().__init__()
 
     def _retrieve(self, query_bundle: QueryBundle, db_mode: str = "OR") -> List[NodeWithScore]:
-        """Retrieve nodes given query."""
+        """
+        Retrieve nodes from both Vector and Property Graph retrievers.
+        
+        Args:
+            query_bundle (QueryBundle): The query bundle to retrieve nodes.
+            db_mode (str): The mode to retrieve nodes. Options are 'AND', 'OR', 'VECTOR_ONLY', and 'PG_ONLY'.
+        
+        Returns:
+            List[NodeWithScore]: The list of nodes with scores.
+        """
 
         if db_mode not in ("AND", "OR", "VECTOR_ONLY", "PG_ONLY"):
             raise ValueError(f"Invalid db mode: {db_mode}.")
@@ -93,6 +102,7 @@ class CustomQueryEngine(RetrieverQueryEngine):
         matched_jobs = set()
 
         # Check for jobs in each node
+        # TODO(adrianmarkelov): for job search don't search the Graph Nodes!!!!!!!!!!!!!!!!!
         for job in self.job_list:
             for node in nodes:
                 if job in node.get_content():
@@ -111,6 +121,16 @@ class CustomQueryEngine(RetrieverQueryEngine):
         return super().query(full_query_context)
     
     def _postprocess_retrieved_nodes(self, nodes, query_bundle):
+        """
+        Post-process the retrieved nodes.
+        
+        Args:
+            nodes (List[NodeWithScore]): The retrieved nodes.
+            query_bundle (QueryBundle): The query bundle used for retrieval.
+        
+        Returns:
+            List[NodeWithScore]: The post-processed nodes.
+        """
         # Considering using this as a place for node manipulation as well.
         for node in nodes:
             # Can do something here to manipulate the nodes
@@ -121,7 +141,6 @@ class CustomQueryEngine(RetrieverQueryEngine):
 """
 Consider also doing a lot of the work in the response synthesizer
 """
-
 class JobMatchingResponseSynthesizer(BaseSynthesizer):
     def synthesize(self, query_bundle, nodes, additional_context=None):
         """
@@ -162,6 +181,18 @@ class JobMatchingResponseSynthesizer(BaseSynthesizer):
         )
 
 def load_cached_indexes(pg_store_dir, vector_store_dir, pg_version="latest", vector_version="latest"):
+    """
+    Load the cached Property Graph and Vector indexes.
+    
+    Args:
+        pg_store_dir (str): The directory path to the Property Graph index.
+        vector_store_dir (str): The directory path to the Vector index.
+        pg_version (str): The version of the Property Graph index to load.
+        vector_version (str): The version of the Vector index to load.
+    
+    Returns:
+        Tuple: The loaded Property Graph index, Vector index, Property Graph store directory, and Vector store directory.
+    """
     print("Loading cached Property Graph Index...")
     pg_store_dir = get_index_version(pg_store_dir, version=pg_version)
     pg_index = load_index_from_storage(StorageContext.from_defaults(persist_dir=pg_store_dir))
