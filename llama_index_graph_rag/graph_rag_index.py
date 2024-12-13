@@ -91,6 +91,59 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+def create_vrf_single_txt_corpus(specific_train_data_file = "",
+                                 generic_train_data_file = ""):
+    """
+    Create a single text corpus from the VRF training data.
+    
+    Args:
+        specific_train_data_file (str): Path to the specific training data file.
+        generic_train_data_file (str): Path to the generic training data file.
+    """
+    summaries = [""]
+    if specific_train_data_file != "":
+        specific_df = pd.read_csv(specific_train_data_file, header=0)
+        summaries += specific_df["summary"].tolist()
+    if generic_train_data_file != "":
+        generic_df = pd.read_csv(generic_train_data_file, header=0)
+        summaries += generic_df["summary"].tolist()
+    return "\n".join(summaries)
+
+def create_vrf_single_df(specific_train_data_file = "",
+                         generic_train_data_file = ""):
+    """
+    Create a single DataFrame from the VRF training data.
+    
+    Args:
+        specific_train_data_file (str): Path to the specific training data file.
+        generic_train_data_file (str): Path to the generic training data file.
+    """
+    dfs = []
+    target_columns = ['Job Title', 'summary']
+    if specific_train_data_file != "":
+        specific_df = pd.read_csv(specific_train_data_file, header=0)
+        specific_df = specific_df.rename(columns={'Request Id': 'Job Title'})
+        dfs.append(specific_df[target_columns])
+    if generic_train_data_file != "":
+        generic_df = pd.read_csv(generic_train_data_file, header=0)
+        dfs.append(generic_df[target_columns])
+    
+    return pd.concat(dfs).reset_index(drop=True)
+
+def create_index_nodes(vrf_specific_train_data_csv, vrf_generic_train_data_csv):
+    """
+    Create the index nodes from the training data.
+    
+    Args:
+        vrf_specific_train_data_csv: Path to the specific training data csv file.
+        vrf_generic_train_data_csv: Path to the generic training data csv file.
+    """
+    vrf_single_df = create_vrf_single_df(vrf_specific_train_data_csv, vrf_generic_train_data_csv)
+    nodes = []
+    for i, sentence in enumerate(vrf_single_df['summary']):
+        node = TextNode(text=sentence, id_=str(i))
+        nodes.append(node)
+    return nodes
 
 def main() -> None:
     """Main entry point of the script."""
@@ -125,9 +178,12 @@ def main() -> None:
         max_triplets_per_chunk=10,
     )
     print("Creating Property Graph Index...")
-    with open(args.vrf_jobs_train_corpus_txt, "r") as file:
-        jobs_train_corpus = file.read()
-    documents = [Document(text=jobs_train_corpus)]
+    # with open(args.vrf_jobs_train_corpus_txt, "r") as file:
+    #     jobs_train_corpus = file.read()
+    vrf_generic_train_corpus = create_vrf_single_txt_corpus(
+        specific_train_data_file = "",
+        generic_train_data_file = "data/generated_training_data/vrf_generic_train_data.csv")
+    documents = [Document(text=vrf_generic_train_corpus)]
     try:
         pg_index = PropertyGraphIndex.from_documents(
             documents,
@@ -149,10 +205,13 @@ def main() -> None:
 
     if args.update_vector_db:
         print("Creating Vector Store Index...")
-        nodes = []
-        for i, sentence in enumerate(jobs_train_corpus.split("\n")):
-            node = TextNode(text=sentence, id_=str(i))
-            nodes.append(node)
+        # nodes = []
+        # for i, sentence in enumerate(jobs_train_corpus.split("\n")):
+        #     node = TextNode(text=sentence, id_=str(i))
+        #     nodes.append(node)
+        nodes = create_index_nodes(
+            "data/generated_training_data/vrf_specific_train_data.csv",
+            "data/generated_training_data/vrf_generic_train_data.csv")
         vector_index = VectorStoreIndex(nodes)
         create_timestamped_index("./vector_store_versions", vector_index)
     logging.info("Script finished.")
