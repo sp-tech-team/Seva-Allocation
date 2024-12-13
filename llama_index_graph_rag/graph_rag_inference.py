@@ -132,7 +132,7 @@ def inference_parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--query_mode",
-        default='ALL',
+        default='PROMPT_ONLY',
         help="The mode to choose query input for the retriever. Options are 'ALL', 'PROMPT_ONLY', and 'SPECIFIC_ONLY'.",
     )
 
@@ -164,17 +164,20 @@ def make_input_df(input_participant_info_csv, num_samples, random_sample):
     """
     input_df = pd.read_csv(input_participant_info_csv)
     input_df = input_df.map(lambda x: x.replace("\n", " ") if isinstance(x, str) else x)
-    input_df = input_df.dropna(subset=['Person Id', 'Skillset'])
+    input_df = input_df.dropna(subset=['SP ID', 'Skills'])
     if random_sample:
         input_df = input_df.sample(n=num_samples)
     else:
         input_df = input_df.head(num_samples)
-    optional_columns = ["Computer Skills", "Additional Skills", "Work Designation", "Education", "Education Specialization"]
+    optional_columns = ["Computer Skills", "Any Additional Skills",
+                        "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
     input_df[optional_columns] = input_df[optional_columns].fillna("NA")
-    input_df["input"] =  " Participant " + input_df["Person Id"].astype(str) + " has skills: " + input_df['Skillset'] + \
-                            ". " + input_df["Additional Skills"] + " and specifically computer skills: " + input_df["Computer Skills"] + \
-                            ". The participant worked with designation: " + input_df["Work Designation"] + \
-                            " and has a " + input_df["Education"] + " education specialized in " + input_df["Education Specialization"]
+    input_df["input"] =  " Participant " + input_df["SP ID"].astype(str) + " has skills: " + input_df['Skills'] + \
+                            ". " + input_df["Any Additional Skills"] + \
+                            " and specifically computer skills: " + input_df["Computer Skills"] + \
+                            ". The participant worked with designation: " + input_df["Work Experience/Designation"] + \
+                            " and has a " + input_df["Education/Qualifications"] + " education specialized in " + \
+                            input_df["Education/Specialization"]
     return input_df
 
 def build_prompt(prompt_config_file):
@@ -206,11 +209,11 @@ def create_specific_queries(input_df):
     Returns:
         specific_queries (list): A list of specific queries.
     """
-    skills_query = input_df['Skillset'] + ". " + \
-                   input_df["Additional Skills"] + \
+    skills_query = input_df['Skills'] + ". " + \
+                   input_df["Any Additional Skills"] + \
                    " and specifically computer skills: " + input_df["Computer Skills"]
-    experience_query = "The participant worked with designation: " + input_df["Work Designation"]
-    education_query = "The participant has a " + input_df["Education"] + " education specialized in " + input_df["Education Specialization"]
+    experience_query = "The participant worked with designation: " + input_df["Work Experience/Designation"]
+    education_query = "The participant has a " + input_df["Education/Qualifications"] + " education specialized in " + input_df["Education/Specialization"]
     return ["\n".join(skills_query), "\n".join(experience_query), "\n".join(education_query)]
 
 def run_inference(input_df, prompt, query_engine, batch_size, num_job_predictions):
@@ -232,9 +235,10 @@ def run_inference(input_df, prompt, query_engine, batch_size, num_job_prediction
     for i in range(0, len(input_df), batch_size):
         chunk_df = input_df.iloc[i:i + batch_size]
         particpant_summaries = "\n".join(chunk_df["input"].tolist())
-        specific_queries = create_specific_queries(chunk_df)
-        prompt += particpant_summaries
-        response = query_engine.query(prompt, specific_queries)
+        # specific_queries = []
+        # specific_queries = create_specific_queries(chunk_df)
+        prompt_with_summaries = prompt + particpant_summaries
+        response = query_engine.query(prompt_with_summaries)
         print("Model Response String: ", response)
         lines = response.response.splitlines()
         for line in lines:
@@ -247,11 +251,11 @@ def run_inference(input_df, prompt, query_engine, batch_size, num_job_prediction
     
     max_length = max(len(row) for row in results)
     results = [row + ["NA"] * (max_length - len(row)) for row in results]
-    column_names = ["Person Id"] + [f"Predicted Rank {i} Job Title" for i in range(1, num_job_predictions + 1)]
+    column_names = ["SP ID"] + [f"Predicted Rank {i} Job Title" for i in range(1, num_job_predictions + 1)]
     extra_columns = [f"extra_{i}" for i in range(1, max_length - num_job_predictions)]
     column_names += extra_columns
     results_df = pd.DataFrame(results, columns=column_names)
-    results_df["Person Id"] = results_df["Person Id"].astype(int)
+    results_df["SP ID"] = results_df["SP ID"].astype(int)
     return results_df
 
 def get_depts_from_job(job_title, vrf_df):
@@ -314,14 +318,24 @@ def main() -> None:
         response_mode="tree_summarize",
     )
     print("Creating query engines...")
-    vrf_single_df = create_vrf_single_df(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
-    jobs_list = vrf_single_df["Job Title"].tolist()
-    graph_rag_query_engine = CustomQueryEngine(
+    # vrf_single_df = create_vrf_single_df(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
+    # jobs_list = vrf_single_df["Job Title"].tolist()
+    # graph_rag_query_engine = CustomQueryEngine(
+    #     retriever=graph_rag_retriever,
+    #     response_synthesizer=response_synthesizer,
+    #     query_mode=args.query_mode,
+    #     job_list=jobs_list,
+    # )
+    response_synthesizer = get_response_synthesizer(
+        response_mode="tree_summarize",
+    )
+    print("Creating query engines...")
+    graph_rag_query_engine = RetrieverQueryEngine(
         retriever=graph_rag_retriever,
         response_synthesizer=response_synthesizer,
-        query_mode=args.query_mode,
-        job_list=jobs_list,
     )
+
+
     vector_query_engine = vector_index.as_query_engine()
     pg_keyword_query_engine = pg_index.as_query_engine(
         # setting to false uses the raw triplets instead of adding the text from the corresponding nodes
@@ -334,7 +348,12 @@ def main() -> None:
     print("Preparing prompt...")
     prompt = build_prompt(args.prompt_config_json)
     print("Running inference on input data...")
-    results_df = run_inference(input_df, prompt, graph_rag_query_engine, args.inference_batch_size, args.num_job_predictions)
+    results_df = run_inference(input_df, prompt,
+                               graph_rag_query_engine,
+                               args.inference_batch_size,
+                               args.num_job_predictions)
+    input_columns = ["SP ID", "Skills", "Any Additional Skills", "Computer Skills", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
+    results_df = results_df.merge(input_df[input_columns], on='SP ID', how='outer')
     vrf_df = pd.read_csv(args.vrf_data_csv)
     results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df)
     results_dir = create_timestamped_results(args.results_dir, results_df)

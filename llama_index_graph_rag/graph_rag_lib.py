@@ -98,7 +98,7 @@ class CustomQueryEngine(RetrieverQueryEngine):
         if self.query_mode == 'ALL' or self.query_mode == 'SPECIFIC_ONLY':
             for specific_query in specific_queries:
                 nodes += self._retriever.retrieve(specific_query)
-        
+        # TODO(adrianmarkelov): Re sort nodes so that vector and pg nodes are separated
         matched_jobs = set()
 
         # Check for jobs in each node
@@ -112,7 +112,7 @@ class CustomQueryEngine(RetrieverQueryEngine):
         # Add matched jobs to the query context
         job_context = f"Jobs allowed for assignment: {', '.join(matched_jobs)}\n\n"
         node_context = "\n".join(node.get_content() for node in nodes)
-        full_query_context = prompt + "\n" + job_context + "\n" + node_context
+        full_query_context = prompt + "\n\n" + job_context + "\n" + node_context + "\n\n"
         print("Full Query Context:")
         print(full_query_context)
         # how llamaindex would normally do it
