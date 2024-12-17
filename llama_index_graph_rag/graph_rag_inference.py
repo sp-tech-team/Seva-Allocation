@@ -14,8 +14,8 @@ import json
 import logging
 
 
-from graph_rag_lib import GraphRagRetriever, CustomQueryEngine, load_cached_indexes
-from utils import create_timestamped_results
+from graph_rag_lib import GraphRagRetriever, PlainQueryEngine
+from utils import create_timestamped_results, extract_jobs_from_nodes, load_cached_indexes
 from training_data import create_vrf_single_df
 
 import nest_asyncio
@@ -164,7 +164,7 @@ def make_input_df(input_participant_info_csv, num_samples, random_sample):
     """
     input_df = pd.read_csv(input_participant_info_csv)
     input_df = input_df.map(lambda x: x.replace("\n", " ") if isinstance(x, str) else x)
-    input_df = input_df.dropna(subset=['SP ID', 'Skills'])
+    input_df = input_df.dropna(subset=['SP ID'])
     if random_sample:
         input_df = input_df.sample(n=num_samples)
     else:
@@ -172,9 +172,7 @@ def make_input_df(input_participant_info_csv, num_samples, random_sample):
     optional_columns = ["Computer Skills", "Any Additional Skills",
                         "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
     input_df[optional_columns] = input_df[optional_columns].fillna("NA")
-    input_df["input"] =  " Participant " + input_df["SP ID"].astype(str) + " has skills: " + input_df['Skills'] + \
-                            ". " + input_df["Any Additional Skills"] + \
-                            " and specifically computer skills: " + input_df["Computer Skills"] + \
+    input_df["input"] =  " Participant " + input_df["SP ID"].astype(str) + \
                             ". The participant worked with designation: " + input_df["Work Experience/Designation"] + \
                             " and has a " + input_df["Education/Qualifications"] + " education specialized in " + \
                             input_df["Education/Specialization"]
@@ -216,44 +214,82 @@ def create_specific_queries(input_df):
     education_query = "The participant has a " + input_df["Education/Qualifications"] + " education specialized in " + input_df["Education/Specialization"]
     return ["\n".join(skills_query), "\n".join(experience_query), "\n".join(education_query)]
 
-def run_inference(input_df, prompt, query_engine, batch_size, num_job_predictions):
+def run_embedding_inference(input_df, vector_retriever, job_list):
+    participants_nodes = dict()
+    for _, row in input_df.iterrows():
+        summary = row["input"]
+        sp_id = row["SP ID"]
+        participant_nodes = vector_retriever.retrieve(summary)
+        participants_nodes[sp_id] = participant_nodes
+    participant_jobs_vec_db = dict()
+    for sp_id, nodes in participants_nodes.items():
+        jobs = extract_jobs_from_nodes(nodes, job_list)
+        participant_jobs_vec_db[sp_id] = jobs
+    return participants_nodes, participant_jobs_vec_db
+
+def jobs_dict_to_df(jobs_dict):
+    """
+    Convert the jobs dictionary to a dataframe.
+    
+    Args:
+        jobs_dict (dict): A dictionary with the jobs.
+    
+    Returns:
+        jobs_df (pd.DataFrame): A dataframe with the jobs.
+    """
+    rows = []
+    for sp_id, jobs in jobs_dict.items():
+        rows.append([sp_id] + jobs)
+    max_jobs = max(len(row) for row in rows)
+    rows = [row + ["NA"] * (max_jobs - len(row)) for row in rows]
+    headers = ["SP ID"] + [f"Vec Pred Job_{i}" for i in range(1, max_jobs)]
+    jobs_df = pd.DataFrame(rows, columns=headers)
+    return jobs_df
+
+
+def run_inference(input_df, prompt, llm, participants_nodes, participant_jobs_vec_db, batch_size, num_job_predictions):
     """
     Run inference on the input dataframe.
     
     Args:
         input_df (pd.DataFrame): A dataframe with the required columns.
         prompt (str): The prompt string.
-        query_engine (CustomQueryEngine): The query engine to use for inference.
+        query_engine (PlainQueryEngine): The query engine to use for inference.
         batch_size (int): The batch size for inference.
         num_job_predictions (int): The number of job predictions to make for each participant.
         
     Returns:
         results_df (pd.DataFrame): A dataframe with the inference results.
     """
+
     # Group the eval inputs into chunks of batch_size
     results = []
     for i in range(0, len(input_df), batch_size):
         chunk_df = input_df.iloc[i:i + batch_size]
-        particpant_summaries = "\n".join(chunk_df["input"].tolist())
-        # specific_queries = []
-        # specific_queries = create_specific_queries(chunk_df)
+        particpant_summaries = ""
+        for _, row in chunk_df.iterrows():
+            sp_id = row["SP ID"]
+            nodes = participants_nodes[sp_id]
+            jobs = participant_jobs_vec_db[sp_id]
+            particpant_summaries += row["input"] + "\n"
+            particpant_summaries += f"The following jobs have been assigned to participant {sp_id}: {', '.join(jobs)}\n"
+            particpant_summaries += f"Here are the descriptions of the jobs above assigned to participant {sp_id}:\n" + \
+                "\n".join(node.get_content() for node in nodes) + "\n\n"
+            
         prompt_with_summaries = prompt + particpant_summaries
-        response = query_engine.query(prompt_with_summaries)
-        print("Model Response String: ", response)
-        lines = response.response.splitlines()
+        response = llm.complete(prompt_with_summaries)
+        print("Model Response String: \n", response)
+        lines = response.text.splitlines()
         for line in lines:
-            id_and_preds = line.split("/-/")
-            if len(id_and_preds) != 2:
-                raise ValueError("Bad LLM response format: more than one /-/")
-            id = id_and_preds[0]
-            predictions = id_and_preds[1].split(",")
-            results.append([id] + predictions)
+            predictions = line.split(",")
+            results.append(predictions[:5])
     
     max_length = max(len(row) for row in results)
     results = [row + ["NA"] * (max_length - len(row)) for row in results]
-    column_names = ["SP ID"] + [f"Predicted Rank {i} Job Title" for i in range(1, num_job_predictions + 1)]
-    extra_columns = [f"extra_{i}" for i in range(1, max_length - num_job_predictions)]
-    column_names += extra_columns
+    column_names = ["SP ID", "Rating"] + [f"Predicted Rank {i} Job Title" for i in range(1, num_job_predictions + 1)]
+    column_names.append("Clusters")
+    #extra_columns = [f"extra_{i}" for i in range(1, max_length - num_job_predictions)]
+    #column_names += extra_columns
     results_df = pd.DataFrame(results, columns=column_names)
     results_df["SP ID"] = results_df["SP ID"].astype(int)
     return results_df
@@ -303,59 +339,54 @@ def main() -> None:
     Settings.embed_model = embeddings
 
     pg_index, vector_index, _, _ = load_cached_indexes(
-        pg_store_dir=args.pg_store_dir,
-        vector_store_dir=args.vector_store_dir,
+        pg_store_base_dir=args.pg_store_dir,
+        vector_store_base_dir=args.vector_store_dir,
         pg_version=args.pg_version,
         vector_version=args.vector_version)
     pg_retriever = pg_index.as_retriever(include_text=False)
-    vector_retriever = VectorIndexRetriever(index=vector_index)
+    vector_retriever = VectorIndexRetriever(
+                        index=vector_index,
+                        similarity_top_k=3)
 
     print("Making Graph RAG retriever...")
-    graph_rag_retriever = GraphRagRetriever(vector_retriever, pg_retriever)
+    graph_rag_retriever = GraphRagRetriever(vector_retriever, pg_retriever, db_mode="VECTOR_ONLY")
 
     # create response synthesizer
     response_synthesizer = get_response_synthesizer(
         response_mode="tree_summarize",
     )
     print("Creating query engines...")
-    # vrf_single_df = create_vrf_single_df(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
-    # jobs_list = vrf_single_df["Job Title"].tolist()
-    # graph_rag_query_engine = CustomQueryEngine(
+    vrf_single_df = create_vrf_single_df(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
+    job_list = vrf_single_df["Job Title"].tolist()
+    # graph_rag_query_engine = RetrieverQueryEngine(
     #     retriever=graph_rag_retriever,
     #     response_synthesizer=response_synthesizer,
-    #     query_mode=args.query_mode,
-    #     job_list=jobs_list,
     # )
-    response_synthesizer = get_response_synthesizer(
-        response_mode="tree_summarize",
-    )
-    print("Creating query engines...")
-    graph_rag_query_engine = RetrieverQueryEngine(
-        retriever=graph_rag_retriever,
-        response_synthesizer=response_synthesizer,
-    )
-
-
-    vector_query_engine = vector_index.as_query_engine()
-    pg_keyword_query_engine = pg_index.as_query_engine(
-        # setting to false uses the raw triplets instead of adding the text from the corresponding nodes
-        include_text=False,
-        retriever_mode="keyword",
-        response_mode="tree_summarize",
-    )
+    # vector_query_engine = vector_index.as_query_engine()
+    # pg_keyword_query_engine = pg_index.as_query_engine(
+    #     include_text=False,
+    #     retriever_mode="keyword",
+    #     response_mode="tree_summarize",
+    # )
     print("Peparing data for inference...")
     input_df = make_input_df(args.input_participant_info_csv, args.num_samples, args.random_sample)
     print("Preparing prompt...")
     prompt = build_prompt(args.prompt_config_json)
     print("Running inference on input data...")
-    results_df = run_inference(input_df, prompt,
-                               graph_rag_query_engine,
-                               args.inference_batch_size,
-                               args.num_job_predictions)
-    input_columns = ["SP ID", "Skills", "Any Additional Skills", "Computer Skills", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
-    results_df = results_df.merge(input_df[input_columns], on='SP ID', how='outer')
-    vrf_df = pd.read_csv(args.vrf_data_csv)
-    results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df)
+    participants_nodes, participant_jobs_vec_db = run_embedding_inference(input_df, graph_rag_retriever, job_list)
+    # results_df = run_inference(input_df, prompt,
+    #                            llm,
+    #                            participants_nodes,
+    #                            participant_jobs_vec_db,
+    #                            args.inference_batch_size,
+    #                            args.num_job_predictions)
+    vec_preds_df = jobs_dict_to_df(participant_jobs_vec_db)
+    #results_df = vec_preds_df.merge(results_df, on='SP ID', how='outer')
+    # input_columns = ["SP ID", "Skills", "Any Additional Skills", "Computer Skills", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
+    input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
+    results_df = vec_preds_df.merge(input_df[input_columns], on='SP ID', how='outer')
+    # vrf_df = pd.read_csv(args.vrf_data_csv)
+    #results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df)
     results_dir = create_timestamped_results(args.results_dir, results_df)
     print(f"Inference results saved to {results_dir}")
     logging.info("Script finished.")

@@ -14,8 +14,8 @@ import json
 import logging
 
 
-from graph_rag_lib import GraphRagRetriever, CustomQueryEngine, load_cached_indexes
-from utils import create_timestamped_results
+from graph_rag_lib import GraphRagRetriever, CustomQueryEngine
+from utils import create_timestamped_results, load_cached_indexes
 from training_data import create_vrf_single_df
 from graph_rag_inference import run_inference, build_prompt, get_depts_from_job_df
 
@@ -222,8 +222,8 @@ def main() -> None:
     Settings.embed_model = embeddings
 
     pg_index, vector_index, pg_store_dir, vector_store_dir = load_cached_indexes(
-        pg_store_dir=args.pg_store_dir,
-        vector_store_dir=args.vector_store_dir,
+        pg_store_base_dir=args.pg_store_dir,
+        vector_store_base_dir=args.vector_store_dir,
         pg_version=args.pg_version,
         vector_version=args.vector_version)
     pg_retriever = pg_index.as_retriever(include_text=False)

@@ -27,3 +27,9 @@ llama_index_graph_rag/results/
 llama_index_graph_rag/eval_results/
 llama_index_graph_rag/test_junk/
 llama_index_graph_rag/local_experiments.ipynb
+seva_allocator/.env
+seva_allocator/data/generated_training_data/
+seva_allocator/lib/
+seva_allocator/vector_store_versions/
+seva_allocator/configs/
+seva_allocator/results/

@@ -15,28 +15,7 @@ def parse_args() -> argparse.Namespace:
 
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Create a .env file with OpenAI and Neo4j credentials.")
-
     parser.add_argument("--openai-key",required=True, help="OpenAI API Key")
-    parser.add_argument("--neo4j-uri", default="bolt://localhost:7687", help="Neo4j URI (e.g., bolt://localhost:7687)")
-    parser.add_argument("--neo4j-user", default="neo4j", help="Neo4j Username")
-    parser.add_argument("--neo4j-password", default="your-password", help="Neo4j Password")
-    parser.add_argument(
-        "--vrf_data_csv",
-        default='data/vrf_data.csv',
-        help="Path to the vrf csv file.",
-    )
-    
-    parser.add_argument(
-        "--vrf_jobs_train_corpus_txt",
-        default='data/generated_training_data/vrf_jobs_train_corpus.txt',
-        help="Path to the vrf jobs training corpus.",
-    )
-
-    parser.add_argument(
-        "--vrf_depts_train_corpus_txt",
-        default='data/generated_training_data/vrf_depts_train_corpus.txt',
-        help="Path to the vrf dept training corpus.",
-    )
 
     parser.add_argument(
         "--prompt_config_json",
@@ -48,23 +27,17 @@ def parse_args() -> argparse.Namespace:
 
 
 
-def create_env_file(openai_key, neo4j_uri, neo4j_user, neo4j_password):
+def create_env_file(openai_key):
     """
     Create a .env file with the OpenAI and Neo4j credentials.
     
     Args:
     openai_key (str): The OpenAI API key.
-    neo4j_uri (str): The Neo4j URI.
-    neo4j_user (str): The Neo4j username.
-    neo4j_password (str): The Neo4j password.
     """
     # Define the content of the .env file
     env_content = \
         f"""# Environment variables
             OPENAI_API_KEY={openai_key}
-            NEO4J_URI={neo4j_uri}
-            NEO4J_USER={neo4j_user}
-            NEO4J_PASSWORD={neo4j_password}
         """
 
     # Write the content to a .env file
@@ -152,7 +125,7 @@ Here are the listed participants with their relevant metadata:\n
 
 def main():
     args = parse_args()
-    create_env_file(args.openai_key, args.neo4j_uri, args.neo4j_user, args.neo4j_password)
+    create_env_file(args.openai_key)
     create_default_index_config_file()
     create_prompt_config(args.prompt_config_json)
 

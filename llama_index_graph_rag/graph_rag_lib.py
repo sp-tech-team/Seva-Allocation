@@ -1,13 +1,15 @@
 from llama_index.core import QueryBundle
 from llama_index.core.schema import NodeWithScore
 from llama_index.core.retrievers import BaseRetriever
-from llama_index.core.query_engine import RetrieverQueryEngine
+from llama_index.core.query_engine import CustomQueryEngine
+
+
 from llama_index.core.response_synthesizers import BaseSynthesizer
 from llama_index.core.base.response.schema import Response
-from llama_index.core import StorageContext, load_index_from_storage
-from utils import get_index_version
 
 from typing import List
+
+
 
 
 class GraphRagRetriever(BaseRetriever):
@@ -17,14 +19,18 @@ class GraphRagRetriever(BaseRetriever):
         self,
         vector_retriever,
         pg_retriever,
+        db_mode="OR",
     ) -> None:
         """Init params."""
 
         self._vector_retriever = vector_retriever
         self._pg_retriever = pg_retriever
+        self._db_mode = db_mode
+        if self._db_mode not in ("AND", "OR", "VECTOR_ONLY", "PG_ONLY"):
+            raise ValueError(f"Invalid db mode: {self._db_mode}.")
         super().__init__()
 
-    def _retrieve(self, query_bundle: QueryBundle, db_mode: str = "OR") -> List[NodeWithScore]:
+    def _retrieve(self, query_bundle: QueryBundle) -> List[NodeWithScore]:
         """
         Retrieve nodes from both Vector and Property Graph retrievers.
         
@@ -36,8 +42,7 @@ class GraphRagRetriever(BaseRetriever):
             List[NodeWithScore]: The list of nodes with scores.
         """
 
-        if db_mode not in ("AND", "OR", "VECTOR_ONLY", "PG_ONLY"):
-            raise ValueError(f"Invalid db mode: {db_mode}.")
+        
 
         vector_nodes = self._vector_retriever.retrieve(query_bundle)
         pg_nodes = self._pg_retriever.retrieve(query_bundle)
@@ -48,94 +53,38 @@ class GraphRagRetriever(BaseRetriever):
         combined_dict = {n.node.node_id: n for n in vector_nodes}
         combined_dict.update({n.node.node_id: n for n in pg_nodes})
 
-        if db_mode == "AND":
+        if self._db_mode == "AND":
             retrieve_ids = vector_ids.intersection(pg_ids)
-        elif db_mode == "OR":
+        elif self._db_mode == "OR":
             retrieve_ids = vector_ids.union(pg_ids)
-        elif db_mode == "VECTOR_ONLY":
+        elif self._db_mode == "VECTOR_ONLY":
             retrieve_ids = vector_ids
-        elif db_mode == "PG_ONLY":
+        elif self._db_mode == "PG_ONLY":
             retrieve_ids = pg_ids
         else:
             retrieve_ids = vector_ids.union(pg_ids)
         retrieve_nodes = [combined_dict[rid] for rid in retrieve_ids]
         return retrieve_nodes
 
-class CustomQueryEngine(RetrieverQueryEngine):
-
-    def __init__(self,
-                 retriever,
-                 response_synthesizer,
-                 query_mode = 'ALL',
-                 job_list = ["Engineer", "Analyst", "Manager"]):
-        """
-        Constructor to initialize the retriever and the job list.
-
-        Args:
-            retriever: The retriever instance to use.
-            response_synthesizer: The response synthesizer instance to use.
-            query_mode (str): The mode to choose query input for the retriever. Options are 'ALL', 'PROMPT_ONLY', and 'SPECIFIC_ONLY'.
-            job_list (list of str): A list of job titles to search for in the nodes.
-        """
-        super().__init__(retriever=retriever, response_synthesizer=response_synthesizer)  # Initialize the parent class
-        self.query_mode = query_mode
-        self.job_list = job_list
+class PlainQueryEngine(CustomQueryEngine):
     
-    def query(self,
-              prompt,
-              specific_queries=[]):
+    def custom_query(self, query):
         """
         Query the retriever with the prompt and specific queries.
 
         Args:
-            prompt (str): The prompt to query the retriever.
-            specific_queries (list of str): A list of specific queries to query the retriever.
+            query (str): The prompt to query the llm.
         """
-        # Retrieve nodes based on the query mode
-        nodes = []        
-        if self.query_mode == 'ALL' or self.query_mode == 'PROMPT_ONLY':
-            nodes = self._retriever.retrieve(prompt)
-        if self.query_mode == 'ALL' or self.query_mode == 'SPECIFIC_ONLY':
-            for specific_query in specific_queries:
-                nodes += self._retriever.retrieve(specific_query)
         # TODO(adrianmarkelov): Re sort nodes so that vector and pg nodes are separated
-        matched_jobs = set()
-
-        # Check for jobs in each node
         # TODO(adrianmarkelov): for job search don't search the Graph Nodes!!!!!!!!!!!!!!!!!
-        for job in self.job_list:
-            for node in nodes:
-                if job in node.get_content():
-                    matched_jobs.add(job)
-                    break  # Avoid duplicate checks for the same node
 
         # Add matched jobs to the query context
-        job_context = f"Jobs allowed for assignment: {', '.join(matched_jobs)}\n\n"
-        node_context = "\n".join(node.get_content() for node in nodes)
-        full_query_context = prompt + "\n\n" + job_context + "\n" + node_context + "\n\n"
         print("Full Query Context:")
-        print(full_query_context)
+        print(query)
         # how llamaindex would normally do it
         # https://github.com/run-llama/llama_index/blob/3c5ec51ddc0bdec0e3a39c27a52cfdb451d1eadd/llama-index-core/llama_index/core/query_engine/retriever_query_engine.py#L173
         # Pass the modified query to the LLM
-        return super().query(full_query_context)
-    
-    def _postprocess_retrieved_nodes(self, nodes, query_bundle):
-        """
-        Post-process the retrieved nodes.
-        
-        Args:
-            nodes (List[NodeWithScore]): The retrieved nodes.
-            query_bundle (QueryBundle): The query bundle used for retrieval.
-        
-        Returns:
-            List[NodeWithScore]: The post-processed nodes.
-        """
-        # Considering using this as a place for node manipulation as well.
-        for node in nodes:
-            # Can do something here to manipulate the nodes
-            node.text = node.get_content()
-        return nodes
+        return self.llm.complete(query)
 
 
 """
@@ -179,26 +128,3 @@ class JobMatchingResponseSynthesizer(BaseSynthesizer):
             context=synthesized_content,
             nodes=nodes
         )
-
-def load_cached_indexes(pg_store_dir, vector_store_dir, pg_version="latest", vector_version="latest"):
-    """
-    Load the cached Property Graph and Vector indexes.
-    
-    Args:
-        pg_store_dir (str): The directory path to the Property Graph index.
-        vector_store_dir (str): The directory path to the Vector index.
-        pg_version (str): The version of the Property Graph index to load.
-        vector_version (str): The version of the Vector index to load.
-    
-    Returns:
-        Tuple: The loaded Property Graph index, Vector index, Property Graph store directory, and Vector store directory.
-    """
-    print("Loading cached Property Graph Index...")
-    pg_store_dir = get_index_version(pg_store_dir, version=pg_version)
-    pg_index = load_index_from_storage(StorageContext.from_defaults(persist_dir=pg_store_dir))
-
-    print("Loading cached Vector Index...")
-    vector_store_dir = get_index_version(vector_store_dir, version=vector_version)
-    storage_context = StorageContext.from_defaults(persist_dir=vector_store_dir)
-    vector_index = load_index_from_storage(storage_context)
-    return pg_index, vector_index, pg_store_dir, vector_store_dir

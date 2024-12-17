@@ -9,43 +9,30 @@ Usage:
     python main.py --input_file=input.txt --output_file=output.txt --verbose
 """
 
-import argparse
-import logging
-import sys
-from pathlib import Path
-import json
-
-from graph_rag_lib import GraphRagRetriever
-from utils import create_timestamped_index, create_timestamped_pg_index
-from training_data import create_vrf_single_df, create_vrf_single_txt_corpus, create_vrf_training_data
-
-import nest_asyncio
-nest_asyncio.apply()
-from dotenv import load_dotenv
-# Load environment variables from a .env file
-load_dotenv()
-# from IPython.display import Markdown, display
-from pyvis.network import Network
-
-import os
-import pandas as pd
-
-from langchain_openai import OpenAIEmbeddings
-
-from llama_index.llms.openai import OpenAI
-from llama_index.core import PropertyGraphIndex, VectorStoreIndex
-from llama_index.core import Document
-from llama_index.core.indices.property_graph import DynamicLLMPathExtractor, SchemaLLMPathExtractor
-from llama_index.core import get_response_synthesizer
-from llama_index.core.query_engine import RetrieverQueryEngine
-from llama_index.core.retrievers import VectorIndexRetriever
-from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.core import Settings
-from llama_index.core.schema import TextNode
-
 # Use typing_extention for forward compatibility with dynamic TypeAlias/ Literal
 #from typing import Literal # Python 3.11 and up
 from typing_extensions import Literal # Python 3.10 and below
+import argparse
+import logging
+import json
+import pandas as pd
+
+from utils import create_timestamped_index, create_timestamped_pg_index
+from training_data import create_vrf_single_df, create_vrf_single_txt_corpus, create_vrf_training_data
+
+from langchain_openai import OpenAIEmbeddings
+from llama_index.llms.openai import OpenAI
+from llama_index.core import PropertyGraphIndex, VectorStoreIndex
+from llama_index.core import Document
+from llama_index.core.indices.property_graph import SchemaLLMPathExtractor
+from llama_index.core import Settings
+from llama_index.core.schema import TextNode
+import nest_asyncio
+nest_asyncio.apply()
+from dotenv import load_dotenv
+load_dotenv()
+
+
 
 
 
@@ -107,6 +94,13 @@ def index_parse_args() -> argparse.Namespace:
         action='store_false',
         dest='update_vector_db',  # Default True
         help="Disable updating vector db (default is enabled)"
+    )
+
+    parser.add_argument(
+        '--no-pg_db',
+        action='store_false',
+        dest='update_pg_db',  # Default True
+        help="Disable updating Property Graph db (default is enabled)"
     )
 
     parser.add_argument(
@@ -209,16 +203,17 @@ def main() -> None:
     Settings.llm = llm
     Settings.embed_model = embeddings
 
-    print("Creating Property Graph Index...")
-    kg_extractor = get_pg_extractor(args.index_config_json, llm)
-    vrf_generic_train_corpus = create_vrf_single_txt_corpus(specific_train_data_file = "",
-                                                     generic_train_data_file = args.vrf_generic_train_data_csv)
-    documents = [Document(text=vrf_generic_train_corpus)]
-    pg_index = create_pg_index(documents, kg_extractor, llm, embeddings)
-    create_timestamped_pg_index("./pg_store_versions", pg_index)
+    if args.update_pg_db:
+        print("Creating Property Graph Index...")
+        kg_extractor = get_pg_extractor(args.index_config_json, llm)
+        vrf_generic_train_corpus = create_vrf_single_txt_corpus(specific_train_data_file = "",
+                                                        generic_train_data_file = args.vrf_generic_train_data_csv)
+        documents = [Document(text=vrf_generic_train_corpus)]
+        pg_index = create_pg_index(documents, kg_extractor, llm, embeddings)
+        create_timestamped_pg_index("./pg_store_versions", pg_index)
 
-    print("Creating Vector Store Index...")
     if args.update_vector_db:
+        print("Creating Vector Store Index...")
         nodes = create_index_nodes(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
         vector_index = VectorStoreIndex(nodes)
         create_timestamped_index("./vector_store_versions", vector_index)

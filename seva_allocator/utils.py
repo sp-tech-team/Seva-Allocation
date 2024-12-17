@@ -6,7 +6,7 @@ import pandas as pd
 
 INDEX_DIR_PREFIX = "index-"
 RESULTS_DIR_PREFIX = "results-"
-RESULTS_FILE_NAME = "eval_results.csv"
+RESULTS_FILE_NAME = "results.csv"
 
 def get_index_version(base_dir, version='latest'):
     """
@@ -81,22 +81,6 @@ def create_timestamped_index(base_dir, index):
     # Save the graph to the directory
     index.storage_context.persist(persist_dir=folder_path)
     print(f"Index saved to: {folder_path}")
-    return folder_path
-
-def create_timestamped_pg_index(base_dir, pg_index):
-    """
-    Creates a timestamped directory for a Property Graph Index and saves the graph.
-
-    Args:
-        base_dir (str): The base directory where timestamped directories are created.
-        pg_index (PropertyGraphIndex): The Property Graph Index to save.
-
-    Returns:
-        str: Path to the newly created directory.
-    """
-
-    folder_path = create_timestamped_index(base_dir, pg_index)
-    pg_index.property_graph_store.save_networkx_graph(name=os.path.join(folder_path, "kg.html"))
     return folder_path
 
 def create_timestamped_results(base_dir, results_df):
