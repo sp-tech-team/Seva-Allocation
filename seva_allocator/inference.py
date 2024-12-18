@@ -149,12 +149,14 @@ def run_embedding_inference(input_df, vector_retriever, job_list, input_columns)
         if nodes:
             job_titles = []
             request_names = []
+            scores = []
             for node in nodes:
                 job_titles.append(node.metadata["Job Title"])
                 request_names.append(node.metadata["Request Name"])
-            participant_jobs_vec_db[sp_id] = (job_titles, request_names)
+                scores.append(node.score)
+            participant_jobs_vec_db[sp_id] = (job_titles, request_names, scores)
         else:
-            participant_jobs_vec_db[sp_id] = (["Ashram Support"] * 3, [""] * 3)
+            participant_jobs_vec_db[sp_id] = (["Ashram Support"] * 3, [""] * 3, [0] * 3)
     return participants_nodes, participant_jobs_vec_db
 
 def jobs_dict_to_df(jobs_dict, max_jobs=3):
@@ -169,12 +171,13 @@ def jobs_dict_to_df(jobs_dict, max_jobs=3):
     """
     rows = []
     for sp_id, jobs_tuple in jobs_dict.items():
-        rows.append([sp_id] + jobs_tuple[0] + jobs_tuple[1])
+        rows.append([sp_id] + jobs_tuple[0] + jobs_tuple[1] + jobs_tuple[2])
     
     max_columns = max(len(row) for row in rows)
     rows = [row + ["NA"] * (max_columns - len(row)) for row in rows]
     headers = ["SP ID"] + [f"Vec Pred Job Title: {i}" for i in range(1, max_jobs + 1)]
     headers += [f"Vec Pred Request Name: {i}" for i in range(1, max_jobs + 1)]
+    headers += [f"Vec Pred Score: {i}" for i in range(1, max_jobs + 1)]
     jobs_df = pd.DataFrame(rows, columns=headers)
     return jobs_df
 
