@@ -108,7 +108,7 @@ def inference_parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-def make_input_df(input_participant_info_csv, num_samples, random_sample):
+def make_input_df(input_participant_info_csv, num_samples, random_sample, input_columns):
     """
     Read the input participant info csv and create a dataframe with the required columns.
     
@@ -127,29 +127,37 @@ def make_input_df(input_participant_info_csv, num_samples, random_sample):
         input_df = input_df.sample(n=num_samples)
     else:
         input_df = input_df.head(num_samples)
-    optional_columns = ["Computer Skills", "Any Additional Skills",
-                        "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
-    input_df[optional_columns] = input_df[optional_columns].fillna("NA")
+    input_df[input_columns] = input_df[input_columns].fillna("NA")
     input_df["input"] =  " Participant " + input_df["SP ID"].astype(str) + \
                             ". The participant worked with designation: " + input_df["Work Experience/Designation"] + \
                             " and has a " + input_df["Education/Qualifications"] + " education specialized in " + \
-                            input_df["Education/Specialization"]
+                            input_df["Education/Specialization"] + " and speaks these languages: " + input_df["Languages"]
     return input_df
 
-def run_embedding_inference(input_df, vector_retriever, job_list):
+def run_embedding_inference(input_df, vector_retriever, job_list, input_columns):
     participants_nodes = dict()
     for _, row in input_df.iterrows():
-        summary = row["input"]
         sp_id = row["SP ID"]
-        participant_nodes = vector_retriever.retrieve(summary)
-        participants_nodes[sp_id] = participant_nodes
+        if all(row[col] == 'NA' for col in input_columns):
+            participants_nodes[sp_id] = []
+        else:
+            summary = row["input"]
+            participant_nodes = vector_retriever.retrieve(summary)
+            participants_nodes[sp_id] = participant_nodes
     participant_jobs_vec_db = dict()
     for sp_id, nodes in participants_nodes.items():
-        jobs = extract_jobs_from_nodes(nodes, job_list)
-        participant_jobs_vec_db[sp_id] = jobs
+        if nodes:
+            job_titles = []
+            request_names = []
+            for node in nodes:
+                job_titles.append(node.metadata["Job Title"])
+                request_names.append(node.metadata["Request Name"])
+            participant_jobs_vec_db[sp_id] = (job_titles, request_names)
+        else:
+            participant_jobs_vec_db[sp_id] = (["Ashram Support"] * 3, [""] * 3)
     return participants_nodes, participant_jobs_vec_db
 
-def jobs_dict_to_df(jobs_dict):
+def jobs_dict_to_df(jobs_dict, max_jobs=3):
     """
     Convert the jobs dictionary to a dataframe.
     
@@ -160,11 +168,13 @@ def jobs_dict_to_df(jobs_dict):
         jobs_df (pd.DataFrame): A dataframe with the jobs.
     """
     rows = []
-    for sp_id, jobs in jobs_dict.items():
-        rows.append([sp_id] + jobs)
-    max_jobs = max(len(row) for row in rows)
-    rows = [row + ["NA"] * (max_jobs - len(row)) for row in rows]
-    headers = ["SP ID"] + [f"Vec Pred Job_{i}" for i in range(1, max_jobs)]
+    for sp_id, jobs_tuple in jobs_dict.items():
+        rows.append([sp_id] + jobs_tuple[0] + jobs_tuple[1])
+    
+    max_columns = max(len(row) for row in rows)
+    rows = [row + ["NA"] * (max_columns - len(row)) for row in rows]
+    headers = ["SP ID"] + [f"Vec Pred Job Title: {i}" for i in range(1, max_jobs + 1)]
+    headers += [f"Vec Pred Request Name: {i}" for i in range(1, max_jobs + 1)]
     jobs_df = pd.DataFrame(rows, columns=headers)
     return jobs_df
 
@@ -198,15 +208,15 @@ def main() -> None:
     vrf_single_df = create_vrf_single_df(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
     job_list = vrf_single_df["Job Title"].tolist()
     print("Peparing data for inference...")
-    input_df = make_input_df(args.input_participant_info_csv, args.num_samples, args.random_sample)
+    input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization", "Languages"]
+    input_df = make_input_df(args.input_participant_info_csv, args.num_samples, args.random_sample, input_columns)
     print("Running inference on input data...")
-    _, participant_jobs_vec_db = run_embedding_inference(input_df, vector_retriever, job_list)
+    _, participant_jobs_vec_db = run_embedding_inference(input_df, vector_retriever, job_list, input_columns)
     vec_preds_df = jobs_dict_to_df(participant_jobs_vec_db)
-    # input_columns = ["SP ID", "Skills", "Any Additional Skills", "Computer Skills", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
-    input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
     results_df = vec_preds_df.merge(input_df[input_columns], on='SP ID', how='outer')
     vrf_df = pd.read_csv(args.vrf_data_csv)
-    results_df["predicted_depts"] = get_depts_from_job_df(results_df, vrf_df, pred_column_prefix="Vec Pred Job")
+    dept_columns = [f"Department {i}" for i in range(1, args.num_job_predictions + 1)]
+    results_df[dept_columns] = get_depts_from_job_df(results_df, vrf_df, pred_column_prefix="Vec Pred Job Title", dept_columns=dept_columns)
     results_dir = create_timestamped_results(args.results_dir, results_df)
     print(f"Inference results saved to {results_dir}")
     logging.info("Script finished.")

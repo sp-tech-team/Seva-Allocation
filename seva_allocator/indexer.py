@@ -87,8 +87,15 @@ def create_index_nodes(vrf_specific_train_data_csv, vrf_generic_train_data_csv):
     """
     vrf_single_df = create_vrf_single_df(vrf_specific_train_data_csv, vrf_generic_train_data_csv)
     nodes = []
-    for i, sentence in enumerate(vrf_single_df['summary']):
-        node = TextNode(text=sentence, id_=str(i))
+    for i, (_, row) in enumerate(vrf_single_df.iterrows()):
+        node = TextNode(
+            text=row["summary"],
+            id_=str(i),
+            metadata = {
+                "Job Title": row["Job Title"],
+                "Request Name": row["Request Name"],
+                "Department": row["Department"]
+            })
         nodes.append(node)
     return nodes
 

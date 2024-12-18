@@ -160,9 +160,13 @@ def load_cached_indexes(pg_store_base_dir = "", vector_store_base_dir = "", pg_v
     return pg_index, vector_index, pg_store_dir, vector_store_dir
 
 def get_depts_from_job(job_title, vrf_df):
-    return vrf_df[vrf_df['Job Title'] == job_title]['Department'].drop_duplicates().values
+    return vrf_df[vrf_df['Job Title'] ==job_title]['Department'].drop_duplicates().values
+    # return vrf_df[vrf_df['Request Name'].str.contains(job_title, na=False)]['Department'].drop_duplicates().values
+    # if generic job title give all departments...
+    # write code for this here!!!!!
+    # TODO(adrianmarkelov): Implement this
 
-def get_depts_from_job_df(results_df, vrf_df, pred_column_prefix="Predicted Rank"):
+def get_depts_from_job_df(results_df, vrf_df, pred_column_prefix="Predicted Rank", dept_columns=None):
     """
     Get the departments for the predicted jobs in the results dataframe.
     
@@ -171,17 +175,18 @@ def get_depts_from_job_df(results_df, vrf_df, pred_column_prefix="Predicted Rank
         vrf_df (pd.DataFrame): The vrf dataframe.
     
     Returns:
-        depts (pd.Series): A series with the departments for the predicted jobs.
+        depts_df (pd.DataFrame): A series with the departments for the predicted jobs.
     """
     predicted_columns = [col for col in results_df.columns if col.startswith(pred_column_prefix)]
     def get_depts(row):
-        depts = ""
+        depts = []
         for job_title in row[predicted_columns]:
             if pd.isna(job_title):
-                depts += ",NA, "
+                depts.append("NA")
             else:
                 job_depts = get_depts_from_job(job_title, vrf_df)
-                depts += job_title + ": " + ", ".join(job_depts) + " "
+                depts.append(job_title + ": " + ", ".join(job_depts) + " ")
         return depts
     depts = results_df.apply(get_depts, axis=1)
-    return depts
+    depts_df = pd.DataFrame(depts.tolist(), columns=dept_columns)
+    return depts_df

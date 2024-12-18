@@ -19,7 +19,7 @@
 
 2. Train the model / build the database by running...
 ```
-python3 indexer.py
+python3 indexer.py --setup_training_data
 ```
 This creates the Vector Database/Index. This will timestamp each DB for each run.
 
