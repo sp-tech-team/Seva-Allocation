@@ -1,6 +1,20 @@
 import pandas as pd
 import os
 
+def create_participant_db_df(participant_info_csv):
+    """
+    Create a DataFrame from the participant info csv.
+
+    Args:
+        participant_info_csv (str): Path to the participant info csv.
+
+    Returns:
+        pd.DataFrame: DataFrame containing participant info.
+    """
+    participant_info = pd.read_csv(participant_info_csv)
+    
+    return 
+
 def create_vrf_training_data(vrf_df,
                              output_dir):
     """

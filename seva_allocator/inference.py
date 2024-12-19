@@ -131,7 +131,7 @@ def make_input_df(input_participant_info_csv, num_samples, random_sample, input_
     input_df["input"] =  " Participant " + input_df["SP ID"].astype(str) + \
                             ". The participant worked with designation: " + input_df["Work Experience/Designation"] + \
                             " and has a " + input_df["Education/Qualifications"] + " education specialized in " + \
-                            input_df["Education/Specialization"] + " and speaks these languages: " + input_df["Languages"]
+                            input_df["Education/Specialization"]
     return input_df
 
 def run_embedding_inference(input_df, vector_retriever, job_list, input_columns):
