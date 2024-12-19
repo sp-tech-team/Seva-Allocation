@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from Gspread_Library import GoogleSheetHandler
+from Concatenation_Library import Concatenation_Handler
 
 def front_fill_columns(df, columns):
     """Front fills specified columns in the given DataFrame."""
