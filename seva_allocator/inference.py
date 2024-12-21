@@ -13,7 +13,7 @@ import argparse
 import logging
 
 from utils import create_timestamped_results, extract_jobs_from_nodes, load_cached_indexes, get_depts_from_job_df
-from training_data import create_vrf_single_df
+from training_data import clean_participant_data
 
 import pandas as pd
 from langchain_openai import OpenAIEmbeddings
@@ -38,13 +38,19 @@ def inference_parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--input_participant_info_csv",
-        default='data/input_participant_info.csv',
+        default='data/input_participant_info_raw.csv',
         help="Path to input participants information.",
     )
 
     parser.add_argument(
-        "--vrf_data_csv",
-        default='data/vrf_data.csv',
+        "--input_participant_info_cleaned_csv",
+        default='data/input_participant_info_cleaned.csv',
+        help="Path to write cleaned participants information.",
+    )
+
+    parser.add_argument(
+        "--vrf_data_cleaned_csv",
+        default='data/vrf_data_cleaned.csv',
         help="Path to the vrf csv file.",
     )
 
@@ -88,18 +94,6 @@ def inference_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--vrf_generic_train_data_csv",
-        default='data/generated_training_data/vrf_generic_train_data.csv',
-        help="Path to the vrf jobs generic training data.",
-    )
-
-    parser.add_argument(
-        "--vrf_specific_train_data_csv",
-        default='data/generated_training_data/vrf_specific_train_data.csv',
-        help="Path to the vrf jobs specific training data.",
-    )
-
-    parser.add_argument(
         '--verbose',
         action='store_true',
         dest='verbose',  # Default False
@@ -108,19 +102,19 @@ def inference_parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-def make_input_df(input_participant_info_csv, num_samples, random_sample, input_columns):
+def make_input_df(participant_info_df, num_samples, random_sample, input_columns):
     """
     Read the input participant info csv and create a dataframe with the required columns.
     
     Args:
-        input_participant_info_csv (str): Path to the input participant info csv file.
+        participant_info_df (pd.DataFrame): Path to the input participant info csv file.
         num_samples (int): Number of samples to take from the input csv.
         random_sample (bool): Whether to take a random sample or the first n samples.
     
     Returns:
         input_df (pd.DataFrame): A dataframe with the required columns
     """
-    input_df = pd.read_csv(input_participant_info_csv)
+    input_df = participant_info_df
     input_df = input_df.map(lambda x: x.replace("\n", " ") if isinstance(x, str) else x)
     input_df = input_df.dropna(subset=['SP ID'])
     if random_sample:
@@ -134,7 +128,7 @@ def make_input_df(input_participant_info_csv, num_samples, random_sample, input_
                             input_df["Education/Specialization"]
     return input_df
 
-def run_embedding_inference(input_df, vector_retriever, job_list, input_columns):
+def run_embedding_inference(input_df, vector_retriever, input_columns):
     participants_nodes = dict()
     for _, row in input_df.iterrows():
         sp_id = row["SP ID"]
@@ -208,16 +202,17 @@ def main() -> None:
     vector_retriever = VectorIndexRetriever(
                         index=vector_index,
                         similarity_top_k=args.num_job_predictions)
-    vrf_single_df = create_vrf_single_df(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
-    job_list = vrf_single_df["Job Title"].tolist()
     print("Peparing data for inference...")
+    participant_info_df = pd.read_csv(args.input_participant_info_csv)
+    participant_info_df = clean_participant_data(participant_info_df)
+    participant_info_df.to_csv(args.input_participant_info_cleaned_csv, index=False)
     input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization", "Languages"]
-    input_df = make_input_df(args.input_participant_info_csv, args.num_samples, args.random_sample, input_columns)
+    input_df = make_input_df(participant_info_df, args.num_samples, args.random_sample, input_columns)
     print("Running inference on input data...")
-    _, participant_jobs_vec_db = run_embedding_inference(input_df, vector_retriever, job_list, input_columns)
+    _, participant_jobs_vec_db = run_embedding_inference(input_df, vector_retriever, input_columns)
     vec_preds_df = jobs_dict_to_df(participant_jobs_vec_db)
     results_df = vec_preds_df.merge(input_df[input_columns], on='SP ID', how='outer')
-    vrf_df = pd.read_csv(args.vrf_data_csv)
+    vrf_df = pd.read_csv(args.vrf_data_cleaned_csv)
     dept_columns = [f"Department {i}" for i in range(1, args.num_job_predictions + 1)]
     results_df[dept_columns] = get_depts_from_job_df(results_df, vrf_df, pred_column_prefix="Vec Pred Job Title", dept_columns=dept_columns)
     results_dir = create_timestamped_results(args.results_dir, results_df)
