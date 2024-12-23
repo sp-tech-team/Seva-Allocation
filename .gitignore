@@ -31,5 +31,8 @@ seva_allocator/.env
 seva_allocator/data/generated_training_data/
 seva_allocator/lib/
 seva_allocator/vector_store_versions/
+seva_allocator/vrf_vector_store_versions/
+seva_allocator/participant_vector_store_versions/
 seva_allocator/configs/
 seva_allocator/results/
+seva_allocator/test.ipynb

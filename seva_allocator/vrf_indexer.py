@@ -82,6 +82,12 @@ def index_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--vector_store_base_dir",
+        default='vrf_vector_store_versions/',
+        help="Path to vector store dbs.",
+    )
+
+    parser.add_argument(
         '--verbose',
         action='store_true',
         dest='verbose',  # Default False
@@ -141,7 +147,7 @@ def main() -> None:
     print("Creating Vector Store Index...")
     nodes = create_index_nodes(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
     vector_index = VectorStoreIndex(nodes)
-    create_timestamped_index("./vector_store_versions", vector_index)
+    create_timestamped_index(args.vector_store_base_dir, vector_index)
     logging.info("Script finished.")
 
 

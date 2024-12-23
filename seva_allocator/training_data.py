@@ -54,19 +54,32 @@ def clean_participant_data(participant_info_df):
     participant_cleaned_df = Concatenation_Handler.Concatenation_Main_Using_Local_Downloaded_File(participant_info_df, columns_to_fill, columns_to_concatenate, "SP ID")
     return participant_cleaned_df
 
-def create_participant_db_df(participant_info_csv):
+def create_participant_db_df(participant_info_df):
     """
     Create a DataFrame from the participant info csv.
 
     Args:
-        participant_info_csv (str): Path to the participant info csv.
+        participant_info_df (pd.DataFrame): DataFrame containing participant info.
 
     Returns:
         pd.DataFrame: DataFrame containing participant info.
     """
-    participant_info = pd.read_csv(participant_info_csv)
-    
-    return 
+    participant_info_df = clean_participant_data(participant_info_df)
+    target_columns = ['SP ID', 'Work Experience/Company', 'Work Experience/Designation',
+       'Work Experience/Tasks', 'Work Experience/Industry',
+       'Education/Qualifications', 'Education/Specialization',
+       'Any Additional Skills', 'Computer Skills', 'Skills', 'Languages']
+    participant_info_df = participant_info_df[target_columns]
+    participant_info_df['SP ID'] = participant_info_df['SP ID'].astype(int)
+    participant_info_df["summary"] = \
+        "Participant " + participant_info_df['SP ID'].astype(str) + " has the following work experience: A " + participant_info_df['Work Experience/Designation'] + \
+        " in the" + participant_info_df['Work Experience/Industry'] + "industry doing " + participant_info_df["Work Experience/Tasks"] + \
+        " tasks. They have the following qualifications: " + participant_info_df['Education/Qualifications'] + \
+        " in " + participant_info_df['Education/Specialization'] + ". They have the following skills: " + participant_info_df['Skills'] + \
+        " and " + participant_info_df['Any Additional Skills'] + " and computer skill " + participant_info_df['Computer Skills'] + \
+        " and know the following languages: " + participant_info_df['Languages'] + "."
+
+    return participant_info_df
 
 def create_vrf_training_data(vrf_df,
                              generic_jobs_df,

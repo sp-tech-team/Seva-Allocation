@@ -15,8 +15,7 @@ import json
 import pandas as pd
 
 from utils import create_timestamped_index
-from training_data import create_vrf_single_df, create_vrf_training_data
-
+from training_data import create_vrf_single_df, create_participant_db_df, clean_participant_data
 from langchain_openai import OpenAIEmbeddings
 from llama_index.llms.openai import OpenAI
 from llama_index.core import VectorStoreIndex
@@ -38,40 +37,21 @@ def index_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--vrf_data_csv",
-        default='data/vrf_data.csv',
-        help="Path to the vrf csv file.",
+        "--input_participant_info_csv",
+        default='data/input_participant_info_raw.csv',
+        help="Path to input participants information.",
     )
 
     parser.add_argument(
-        "--generic_jobs_csv",
-        default='data/generic_jobs.csv',
-        help="Path to the generic_jobs csv file.",
+        "--input_participant_info_cleaned_csv",
+        default='data/input_participant_info_cleaned.csv',
+        help="Path to write cleaned participants information.",
     )
 
     parser.add_argument(
-        "--training_data_dir",
-        default='data/generated_training_data/',
-        help="Path to the training data directory.",
-    )
-
-    parser.add_argument(
-        '--setup_training_data',
-        action='store_true',
-        dest='setup_training_data',  # Default False
-        help="Enable setup of training data. (default is disabled)"
-    )
-    
-    parser.add_argument(
-        "--vrf_generic_train_data_csv",
-        default='data/generated_training_data/vrf_generic_train_data.csv',
-        help="Path to the vrf jobs generic training data.",
-    )
-
-    parser.add_argument(
-        "--vrf_specific_train_data_csv",
-        default='data/generated_training_data/vrf_specific_train_data.csv',
-        help="Path to the vrf jobs specific training data.",
+        "--vector_store_base_dir",
+        default='participant_vector_store_versions/',
+        help="Path to vector store dbs.",
     )
 
     parser.add_argument(
@@ -83,24 +63,29 @@ def index_parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-def create_index_nodes(vrf_specific_train_data_csv, vrf_generic_train_data_csv):
+def create_index_nodes(participant_info_df):
     """
     Create the index nodes from the training data.
     
     Args:
-        vrf_specific_train_data_csv: Path to the specific training data csv file.
-        vrf_generic_train_data_csv: Path to the generic training data csv file.
+        participant_info_df (pd.DataFrame): DataFrame containing participant information.
     """
-    vrf_single_df = create_vrf_single_df(vrf_specific_train_data_csv, vrf_generic_train_data_csv)
     nodes = []
-    for i, (_, row) in enumerate(vrf_single_df.iterrows()):
+    for i, (_, row) in enumerate(participant_info_df.iterrows()):
         node = TextNode(
             text=row["summary"],
             id_=str(i),
             metadata = {
-                "Job Title": row["Job Title"],
-                "Request Name": row["Request Name"],
-                "Department": row["Department"]
+                "SP ID": row["SP ID"],
+                "Work Experience/Designation": row["Work Experience/Designation"],
+                "Work Experience/Industry": row["Work Experience/Industry"],
+                "Work Experience/Tasks": row["Work Experience/Tasks"],
+                "Education/Specialization": row["Education/Specialization"],
+                "Education/Qualifications": row["Education/Qualifications"],
+                "Any Additional Skills": row["Any Additional Skills"],
+                "Computer Skills": row["Computer Skills"],
+                "Skills": row["Skills"],
+                "Languages": row["Languages"],
             })
         nodes.append(node)
     return nodes
@@ -117,22 +102,22 @@ def main() -> None:
 
     logging.info("Script started.")
 
-    # Setup training data
-    if args.setup_training_data:
-        vrf_df = pd.read_csv(args.vrf_data_csv)
-        generic_jobs_df = pd.read_csv(args.generic_jobs_csv)
-        create_vrf_training_data(vrf_df, generic_jobs_df, 'data/generated_training_data/')
-
     # Setup LLM and Embeddings
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
     embeddings = OpenAIEmbeddings()
     Settings.llm = llm
     Settings.embed_model = embeddings
 
+    # Setup training data
+    participant_info_df = pd.read_csv(args.input_participant_info_csv)
+    participant_info_df = clean_participant_data(participant_info_df)
+    participant_info_df.to_csv(args.input_participant_info_cleaned_csv, index=False)
+    participant_info_df = create_participant_db_df(participant_info_df)
+
     print("Creating Vector Store Index...")
-    nodes = create_index_nodes(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
+    nodes = create_index_nodes(participant_info_df)
     vector_index = VectorStoreIndex(nodes)
-    create_timestamped_index("./vector_store_versions", vector_index)
+    create_timestamped_index(args.vector_store_base_dir, vector_index)
     logging.info("Script finished.")
 
 

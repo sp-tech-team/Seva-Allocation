@@ -62,7 +62,7 @@ def inference_parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--vector_store_base_dir",
-        default='vector_store_versions/',
+        default='vrf_vector_store_versions/',
         help="Path to vector store dbs.",
     )
 
