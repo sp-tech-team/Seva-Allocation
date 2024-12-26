@@ -11,17 +11,23 @@ Usage:
 
 import argparse
 import logging
-
-from utils import create_timestamped_results, extract_jobs_from_nodes, load_cached_indexes, get_depts_from_job_df
-from training_data import clean_participant_data
-
 import pandas as pd
-from langchain_openai import OpenAIEmbeddings
+import os
+
+from utils import create_timestamped_results, load_cached_indexes, get_depts_from_job_df
+from training_data import clean_participant_data
+from pinecone_utils import get_pinecone_index
+
+
+from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.core.retrievers import VectorIndexRetriever
+from llama_index.core import VectorStoreIndex
+from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import Settings
-import nest_asyncio
-nest_asyncio.apply()
+
+from pinecone import Pinecone
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -91,6 +97,12 @@ def inference_parse_args() -> argparse.Namespace:
         default=3,
         type=int,
         help="Number of jobs to predict for each participant.",
+    )
+
+    parser.add_argument(
+        "--pinecone_index_name",
+        default='vrf-test',
+        help="Path to vector store dbs.",
     )
 
     parser.add_argument(
@@ -190,18 +202,19 @@ def main() -> None:
     logging.info("Script started.")
 
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbedding()
     Settings.llm = llm
     Settings.embed_model = embeddings
+    
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 
-    _, vector_index, _, _ = load_cached_indexes(
-        pg_store_base_dir="",
-        vector_store_base_dir=args.vector_store_base_dir,
-        pg_version="",
-        vector_version=args.vector_version)
+    pinecone_vector_index = get_pinecone_index(args.pinecone_index_name, pc, create_if_not_exists=False)
+    pinecone_vector_store = PineconeVectorStore(pinecone_index=pinecone_vector_index)
+    vector_index = VectorStoreIndex.from_vector_store(vector_store=pinecone_vector_store)
     vector_retriever = VectorIndexRetriever(
-                        index=vector_index,
-                        similarity_top_k=args.num_job_predictions)
+        index=vector_index,
+        similarity_top_k=args.num_job_predictions)
+
     print("Peparing data for inference...")
     participant_info_df = pd.read_csv(args.input_participant_info_csv)
     participant_info_df = clean_participant_data(participant_info_df)

@@ -11,18 +11,18 @@ Usage:
 
 import argparse
 import logging
-import json
+import os
 import pandas as pd
 
-from utils import create_timestamped_index
-from training_data import create_vrf_single_df, create_participant_db_df, clean_participant_data
-from langchain_openai import OpenAIEmbeddings
+from training_data import  create_participant_db_df, clean_participant_data
+from pinecone_utils import get_pinecone_index
+
+from pinecone import Pinecone
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
-from llama_index.core import VectorStoreIndex
 from llama_index.core import Settings
 from llama_index.core.schema import TextNode
-import nest_asyncio
-nest_asyncio.apply()
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -55,6 +55,12 @@ def index_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--pinecone_index_name",
+        default='participant-test',
+        help="Path to vector store dbs.",
+    )
+
+    parser.add_argument(
         '--verbose',
         action='store_true',
         dest='verbose',  # Default False
@@ -74,7 +80,7 @@ def create_index_nodes(participant_info_df):
     for i, (_, row) in enumerate(participant_info_df.iterrows()):
         node = TextNode(
             text=row["summary"],
-            id_=str(i),
+            _id=str(i),
             metadata = {
                 "SP ID": row["SP ID"],
                 "Work Experience/Designation": row["Work Experience/Designation"],
@@ -104,20 +110,25 @@ def main() -> None:
 
     # Setup LLM and Embeddings
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
-    embeddings = OpenAIEmbeddings()
+    embedding_model = OpenAIEmbedding()
     Settings.llm = llm
-    Settings.embed_model = embeddings
+    Settings.embed_model = embedding_model
+
+    # Setup Pinecone
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    index = get_pinecone_index(args.pinecone_index_name, pc, create_if_not_exists=True)
 
     # Setup training data
     participant_info_df = pd.read_csv(args.input_participant_info_csv)
     participant_info_df = clean_participant_data(participant_info_df)
     participant_info_df.to_csv(args.input_participant_info_cleaned_csv, index=False)
     participant_info_df = create_participant_db_df(participant_info_df)
-
-    print("Creating Vector Store Index...")
     nodes = create_index_nodes(participant_info_df)
-    vector_index = VectorStoreIndex(nodes)
-    create_timestamped_index(args.vector_store_base_dir, vector_index)
+    for node in nodes:
+        node.embedding = embedding_model.get_text_embedding(node.get_text())
+    vector_store = PineconeVectorStore(index)
+    vector_store.add(nodes)
+
     logging.info("Script finished.")
 
 

@@ -11,17 +11,18 @@ Usage:
 
 import argparse
 import logging
+import os
 
-from utils import load_cached_indexes
+from pinecone_utils import get_pinecone_index
 
-import pandas as pd
-from langchain_openai import OpenAIEmbeddings
+from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.core.retrievers import VectorIndexRetriever
-from llama_index.core.query_engine import RetrieverQueryEngine
+from llama_index.core import VectorStoreIndex
+from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import Settings
-import nest_asyncio
-nest_asyncio.apply()
+from pinecone import Pinecone
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -37,34 +38,22 @@ def inference_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--participant_vector_store_base_dir",
-        default='participant_vector_store_versions/',
-        help="Path to participant vector store dbs.",
-    )
-
-    parser.add_argument(
-        "--participant_vector_version",
-        default='latest',
-        help="The version of the index to retrieve. Default is 'latest'. Format is 'YYYYMMDD_HHMMSS'",
-    )
-
-    parser.add_argument(
-        "--vrf_vector_store_base_dir",
-        default='vrf_vector_store_versions/',
-        help="Path to vrf vector store dbs.",
-    )
-
-    parser.add_argument(
-        "--vrf_vector_version",
-        default='latest',
-        help="The version of the index to retrieve. Default is 'latest'. Format is 'YYYYMMDD_HHMMSS'",
-    )
-
-    parser.add_argument(
         "--num_retrievals",
         default=10,
         type=int,
         help="Number of retrievals from db.",
+    )
+
+    parser.add_argument(
+        "-participant_pinecone_index_name",
+        default='participant-test',
+        help="Path to vector store dbs.",
+    )
+
+    parser.add_argument(
+        "-vrf_pinecone_index_name",
+        default='vrf-test',
+        help="Path to vector store dbs.",
     )
 
     parser.add_argument(
@@ -125,6 +114,39 @@ Query: {query_str}\n
 Answer: 
 """
 
+def initialize_pipeline(participant_pinecone_index_name, vrf_pinecone_index_name, num_retrievals):
+    llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
+    embeddings = OpenAIEmbedding()
+    Settings.llm = llm
+    Settings.embed_model = embeddings
+
+    # Setup Pinecone
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    
+    participant_pinecone_vector_index = get_pinecone_index(participant_pinecone_index_name, pc, create_if_not_exists=False)
+    participant_pinecone_vector_store = PineconeVectorStore(pinecone_index=participant_pinecone_vector_index)
+    participant_vector_index = VectorStoreIndex.from_vector_store(vector_store=participant_pinecone_vector_store)
+    participant_vector_retriever = VectorIndexRetriever(
+        index=participant_vector_index,
+        similarity_top_k=num_retrievals)
+    
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+
+    vrf_pinecone_vector_index = get_pinecone_index(vrf_pinecone_index_name, pc, create_if_not_exists=False)
+    vrf_pinecone_vector_store = PineconeVectorStore(pinecone_index=vrf_pinecone_vector_index)
+    vrf_vector_index = VectorStoreIndex.from_vector_store(vector_store=vrf_pinecone_vector_store)
+    vrf_vector_retriever = VectorIndexRetriever(
+        index=vrf_vector_index,
+        similarity_top_k=num_retrievals)
+
+    both_vector_retriever = CombinedRetriever([participant_vector_retriever, vrf_vector_retriever])
+    retrievers = {
+        "PARTICIPANT_DB": participant_vector_retriever,
+        "JOB_DB": vrf_vector_retriever,
+        "BOTH": both_vector_retriever
+    }
+    return retrievers, llm
+
 def process_input(user_input, retrievers, llm):
     relevance_extracted_response = llm.complete(relevance_extractor_query + user_input)
     extracted_user_input = relevance_extracted_response.text
@@ -151,35 +173,7 @@ def main() -> None:
 
     logging.info("Script started.")
 
-    llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
-    embeddings = OpenAIEmbeddings()
-    Settings.llm = llm
-    Settings.embed_model = embeddings
-
-    _, participant_vector_index, _, _ = load_cached_indexes(
-        pg_store_base_dir="",
-        vector_store_base_dir=args.participant_vector_store_base_dir,
-        pg_version="",
-        vector_version=args.participant_vector_version)
-    participant_vector_retriever = VectorIndexRetriever(
-                        index=participant_vector_index,
-                        similarity_top_k=args.num_retrievals)
-
-    _, vrf_vector_index, _, _ = load_cached_indexes(
-        pg_store_base_dir="",
-        vector_store_base_dir=args.vrf_vector_store_base_dir,
-        pg_version="",
-        vector_version=args.vrf_vector_version)
-    vrf_vector_retriever = VectorIndexRetriever(
-                        index=vrf_vector_index,
-                        similarity_top_k=args.num_retrievals)
-
-    both_vector_retriever = CombinedRetriever([participant_vector_retriever, vrf_vector_retriever])
-    retrievers = {
-        "PARTICIPANT_DB": participant_vector_retriever,
-        "JOB_DB": vrf_vector_retriever,
-        "BOTH": both_vector_retriever
-    }
+    retrievers, llm = initialize_pipeline(args.participant_pinecone_index_name, args.vrf_pinecone_index_name, args.num_retrievals)
     while True:
         user_input = input("\nYou: ")
         if user_input.lower() == "exit":
