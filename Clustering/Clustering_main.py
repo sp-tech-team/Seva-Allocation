@@ -307,7 +307,7 @@ if __name__ == "__main__":
     entities_output_file = 'D:/Seva-Allocation/Clustering/data/Entities.csv'
     nodes_output_file = 'D:/Seva-Allocation/Clustering/data/Embedded_Nodes.csv'
     clusters_output_file = 'D:/Seva-Allocation/Clustering/data/Clusters.csv'
-    dendrogram_output_file = 'D:/Seva-Allocation/Clustering/Work-Experience-Tasks-dendrogram.png'
+    dendrogram_output_file = 'D:/Seva-Allocation/Clustering/data/Work-Experience-Tasks-dendrogram.png'
     cluster_names_file = 'D:/Seva-Allocation/Clustering/data/Cluster_Names.csv'
     updated_tasks_file = 'D:/Seva-Allocation/Clustering/data/Updated_Task_Responses.csv'
 
