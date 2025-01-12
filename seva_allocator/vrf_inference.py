@@ -67,18 +67,6 @@ def inference_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--vector_store_base_dir",
-        default='vrf_vector_store_versions/',
-        help="Path to vector store dbs.",
-    )
-
-    parser.add_argument(
-        "--vector_version",
-        default='latest',
-        help="The version of the index to retrieve. Default is 'latest'. Format is 'YYYYMMDD_HHMMSS'",
-    )
-
-    parser.add_argument(
         "--num_samples",
         default=20,
         type=int,
@@ -101,7 +89,7 @@ def inference_parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--pinecone_index_name",
-        default='vrf-test',
+        default='vrf-test-local',
         help="Path to vector store dbs.",
     )
 
@@ -217,9 +205,9 @@ def main() -> None:
 
     print("Peparing data for inference...")
     participant_info_df = pd.read_csv(args.input_participant_info_csv)
-    participant_info_df = clean_participant_data(participant_info_df)
-    participant_info_df.to_csv(args.input_participant_info_cleaned_csv, index=False)
     input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization", "Languages"]
+    participant_info_df = clean_participant_data(participant_info_df, target_columns=input_columns, columns_to_concatenate=["Languages"])
+    participant_info_df.to_csv(args.input_participant_info_cleaned_csv, index=False)
     input_df = make_input_df(participant_info_df, args.num_samples, args.random_sample, input_columns)
     print("Running inference on input data...")
     _, participant_jobs_vec_db = run_embedding_inference(input_df, vector_retriever, input_columns)

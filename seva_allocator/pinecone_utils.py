@@ -3,6 +3,19 @@ import pinecone
 from pinecone import Pinecone
 from pinecone import ServerlessSpec
 
+def clear_index(index: pinecone.Index):
+    """
+    Clear all vectors from a Pinecone index.
+    
+    Args:
+        index (pinecone.Index): The Pinecone index.
+    """
+    stats = index.describe_index_stats()
+    # Only attempt deletion if vectors exist
+    if stats["total_vector_count"] > 0:
+        index.delete(delete_all=True)
+        print("Deleted all vectors.")
+
 
 def index_name_exists(pinecone_index_name: str, pc: Pinecone) -> bool:
     """

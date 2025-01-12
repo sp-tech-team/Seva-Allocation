@@ -46,13 +46,13 @@ def inference_parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "-participant_pinecone_index_name",
-        default='participant-test',
+        default='participant-test-local',
         help="Path to vector store dbs.",
     )
 
     parser.add_argument(
         "-vrf_pinecone_index_name",
-        default='vrf-test',
+        default='vrf-test-local',
         help="Path to vector store dbs.",
     )
 
@@ -88,19 +88,6 @@ participant private data for the RAG application. On the other hand, if the quer
 looking for jobs with a description of a participant, it should only use the job private db.
 Please create a resoponse that only says: PARTICIPANT_DB, JOB_DB, or BOTH. The response
 you make should have nothing other than the word PARTICIPANT_DB, JOB_DB, or BOTH.  \n
-"""
-
-relevance_extractor_query = """
-The query below is going to be used to ask a question about a private database.
-We have two private databases and a RAG model for each of them. Please extract
-sentences from the query are relevant only to the databases. The first database
-contains a list of applicants and their qualifications. The second database contains
-a list of job postings and their requirements. As an example, there may be sentences
-that are relevant to the the llm being queried but would only confuse the database
-vector search. For example descriptions of how to formate the output have nothing to
-do with participants or jobs in the database. So please extract the sentences that
-are relevant to the databases only and only return the extraction text and nothing else.
-Here is the query to analyze...
 """
 
 prompt_tmpl = \
@@ -148,17 +135,14 @@ def initialize_pipeline(participant_pinecone_index_name, vrf_pinecone_index_name
     return retrievers, llm
 
 def process_input(user_input, retrievers, llm):
-    relevance_extracted_response = llm.complete(relevance_extractor_query + user_input)
-    extracted_user_input = relevance_extracted_response.text
-    db_selector_response = llm.complete(db_selector_query + extracted_user_input)
+    db_selector_response = llm.complete(db_selector_query + user_input)
     if db_selector_response.text not in retrievers:
         raise ValueError(f"Invalid database selector response: {db_selector_response.text}")
-    nodes = retrievers[db_selector_response.text].retrieve(extracted_user_input)
+    nodes = retrievers[db_selector_response.text].retrieve(user_input)
     context_str = "\n".join(node.get_content() for node in nodes)
     query = prompt_tmpl.format(context_str=context_str, query_str=user_input)
     response = llm.complete(query)
     print(f"LlamaIndex: \n{response}")
-    print(f"Relevance Extractor: \n{extracted_user_input}")
     print(f"DB Selector: \n{db_selector_response}")
 
 def main() -> None:

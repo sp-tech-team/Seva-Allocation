@@ -14,8 +14,8 @@ import logging
 import os
 import pandas as pd
 
-from training_data import create_vrf_single_df, create_vrf_training_data, clean_vrf_data
-from pinecone_utils import get_pinecone_index
+from training_data import create_vrf_db_df
+from pinecone_utils import get_pinecone_index, clear_index
 
 
 from pinecone import Pinecone
@@ -38,7 +38,7 @@ def index_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--vrf_data_csv",
+        "--vrf_data_raw_csv",
         default='data/vrf_data_raw.csv',
         help="Path to the vrf csv file.",
     )
@@ -56,39 +56,8 @@ def index_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--training_data_dir",
-        default='data/generated_training_data/',
-        help="Path to the training data directory.",
-    )
-
-    parser.add_argument(
-        '--setup_training_data',
-        action='store_true',
-        dest='setup_training_data',  # Default False
-        help="Enable setup of training data. (default is disabled)"
-    )
-    
-    parser.add_argument(
-        "--vrf_generic_train_data_csv",
-        default='data/generated_training_data/vrf_generic_train_data.csv',
-        help="Path to the vrf jobs generic training data.",
-    )
-
-    parser.add_argument(
-        "--vrf_specific_train_data_csv",
-        default='data/generated_training_data/vrf_specific_train_data.csv',
-        help="Path to the vrf jobs specific training data.",
-    )
-
-    parser.add_argument(
-        "--vector_store_base_dir",
-        default='vrf_vector_store_versions/',
-        help="Path to vector store dbs.",
-    )
-
-    parser.add_argument(
         "--pinecone_index_name",
-        default='vrf-test',
+        default='vrf-test-local',
         help="Path to vector store dbs.",
     )
 
@@ -101,7 +70,7 @@ def index_parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-def create_index_nodes(vrf_specific_train_data_csv, vrf_generic_train_data_csv):
+def create_index_nodes(vrf_db_df: pd.DataFrame) -> list[TextNode]:
     """
     Create the index nodes from the training data.
     
@@ -109,9 +78,8 @@ def create_index_nodes(vrf_specific_train_data_csv, vrf_generic_train_data_csv):
         vrf_specific_train_data_csv: Path to the specific training data csv file.
         vrf_generic_train_data_csv: Path to the generic training data csv file.
     """
-    vrf_single_df = create_vrf_single_df(vrf_specific_train_data_csv, vrf_generic_train_data_csv)
     nodes = []
-    for i, (_, row) in enumerate(vrf_single_df.iterrows()):
+    for i, (_, row) in enumerate(vrf_db_df.iterrows()):
         if not row["summary"]:
             continue
         node = TextNode(
@@ -137,28 +105,22 @@ def main() -> None:
 
     logging.info("Script started.")
 
-    # Setup training data
-    if args.setup_training_data:
-        vrf_df = pd.read_csv(args.vrf_data_csv)
-        vrf_cleaned_df = clean_vrf_data(vrf_df)
-        vrf_cleaned_df.to_csv(args.vrf_data_cleaned_out_csv, index=False)
-        generic_jobs_df = pd.read_csv(args.generic_jobs_csv)
-        create_vrf_training_data(vrf_cleaned_df, generic_jobs_df, 'data/generated_training_data/')
-
     # Setup LLM and Embeddings
     llm = OpenAI(temperature=0, model_name="gpt-4o", max_tokens=4000)
     embedding_model = OpenAIEmbedding()
     Settings.llm = llm
     Settings.embed_model = embedding_model
 
-    # Setup Pinecone
-    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-    index = get_pinecone_index(args.pinecone_index_name, pc, create_if_not_exists=True)
-
     print("Creating Vector Store Index...")
-    nodes = create_index_nodes(args.vrf_specific_train_data_csv, args.vrf_generic_train_data_csv)
+    vrf_raw_df = pd.read_csv(args.vrf_data_raw_csv)
+    generic_jobs_df = pd.read_csv(args.generic_jobs_csv)
+    vrf_db_df = create_vrf_db_df(vrf_raw_df, generic_jobs_df)
+    nodes = create_index_nodes(vrf_db_df)
     for node in nodes:
         node.embedding = embedding_model.get_text_embedding(node.get_text())
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    index = get_pinecone_index(args.pinecone_index_name, pc, create_if_not_exists=True)
+    clear_index(index)
     vector_store = PineconeVectorStore(index)
     vector_store.add(nodes)
 

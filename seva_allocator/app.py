@@ -1,6 +1,7 @@
 import gradio as gr
-from chatbot import initialize_pipeline
+from chatbot import initialize_pipeline, db_selector_query, prompt_tmpl
 import argparse
+import os
 
 
 def inference_parse_args() -> argparse.Namespace:
@@ -22,13 +23,13 @@ def inference_parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "-participant_pinecone_index_name",
-        default='participant-test',
+        default='participant-test-local',
         help="Path to vector store dbs.",
     )
 
     parser.add_argument(
         "-vrf_pinecone_index_name",
-        default='vrf-test',
+        default='vrf-test-local',
         help="Path to vector store dbs.",
     )
 
@@ -51,17 +52,13 @@ def chat_with_bot(user_input, chat_history):
     and generating a response using the LLM.
     """
     try:
-        # Retrieve relevant nodes
-        retrieved_nodes = retrievers["PARTICIPANT_DB"].retrieve(user_input)
-
-        # Concatenate the node content to form the context
-        context = "\n\n".join(node.get_text() for node in retrieved_nodes)
-
-        # Prepare the prompt for the LLM
-        prompt = f"Context:\n{context}\n\nQuestion: {user_input}\n\nAnswer:"
-
-        # Generate a response using the LLM
-        response = llm.complete(prompt)
+        db_selector_response = llm.complete(db_selector_query + user_input)
+        if db_selector_response.text not in retrievers:
+            raise ValueError(f"Invalid database selector response: {db_selector_response.text}")
+        nodes = retrievers[db_selector_response.text].retrieve(user_input)
+        context_str = "\n".join(node.get_content() for node in nodes)
+        query = prompt_tmpl.format(context_str=context_str, query_str=user_input)
+        response = llm.complete(query)
 
         # Update chat history
         bot_response = response.text
@@ -78,19 +75,39 @@ def create_interface():
         with gr.Row():
             gr.Markdown("# Chatbot with LlamaIndex RAG Pipeline (Optimized)")
 
-        # Chatbot UI Components
+        # Login UI Components
         with gr.Row():
+            password_input = gr.Textbox(placeholder="Enter password...", type="password", label="Password")
+            login_btn = gr.Button("Login")
+
+        # Chatbot UI Components
+        with gr.Row(visible=False) as chat_row:
             chatbot = gr.Chatbot()
         
-        with gr.Row():
+        with gr.Row(visible=False) as input_row:
             user_input = gr.Textbox(placeholder="Ask me anything...", label="Your Query")
             submit_btn = gr.Button("Send")
 
         # Clear chat button
-        with gr.Row():
+        with gr.Row(visible=False) as clear_row:
             clear_btn = gr.Button("Clear Chat")
 
         # Define callbacks
+        def login(password):
+            if password == os.getenv("GRADIO_APP_PASSWORD"):
+                chat_row.visible = True
+                input_row.visible = True
+                clear_row.visible = True
+                return gr.update(visible=False), gr.update(visible=True), gr.update(visible=True), gr.update(visible=True)
+            else:
+                return gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
+
+        login_btn.click(
+            login, 
+            inputs=[password_input], 
+            outputs=[password_input, chat_row, input_row, clear_row]
+        )
+
         submit_btn.click(
             chat_with_bot, 
             inputs=[user_input, chatbot], 
