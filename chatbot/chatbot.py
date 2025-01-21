@@ -13,8 +13,9 @@ import argparse
 import logging
 import os
 import pandas as pd
+from io import StringIO
 
-from training_data import  create_participant_db_df
+# from preprocessing.participant_data import  create_participant_db_df
 
 from openai import OpenAI
 
@@ -72,32 +73,32 @@ class CombinedRetriever:
         return results
 
 prompt_tmpl = \
-"""Context information is below.\n
----------------------\n
-{context_str}\n
----------------------\n
-Given the context information and not prior knowledge, 
-answer the query.\n
-Query: {query_str}\n
-Answer: 
+"""
+{query_str}\n
+Here is the context... \n
+{context_str}
 """
 
 def initialize_pipeline(input_participant_info_csv):
     client = OpenAI()
-    target_columns = ['SP ID', 'Work Experience/Company', 'Work Experience/Designation',
-       'Work Experience/Tasks', 'Work Experience/Industry',
-       'Education/Qualifications', 'Education/Specialization',
-       'Any Additional Skills', 'Computer Skills', 'Skills',
-       'Languages', 'Gender', 'Age', 'Work Experience/From Date', 'Work Experience/To Date']
-    participant_info_raw_df = pd.read_csv(input_participant_info_csv)
-    participant_db_df = create_participant_db_df(participant_info_raw_df, target_columns)
-    context = " ".join(participant_db_df["summary"])
+    # Load data
+    # target_columns = ['SP ID', 'Work Experience/Company', 'Work Experience/Designation',
+    #    'Work Experience/Tasks', 'Work Experience/Industry',
+    #    'Education/Qualifications', 'Education/Specialization',
+    #    'Any Additional Skills', 'Computer Skills', 'Skills',
+    #    'Languages', 'Gender', 'Age', 'Work Experience/From Date', 'Work Experience/To Date']
+    # participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
+    # participant_db_df = create_participant_db_df(participant_info_raw_df, target_columns)
+    participant_db_df = pd.read_csv("participant_test.csv")
+    csv_buffer = StringIO()
+    participant_db_df.to_csv(csv_buffer, index=False)
+    context = csv_buffer.getvalue()
     return context, client
 
 def process_input(user_input, context, client):
     query = prompt_tmpl.format(context_str=context, query_str=user_input)
     completion = client.chat.completions.create(
-        model="o1-preview", #"o1-mini",
+        model="gpt-4o", #"o1-mini",
         messages=[
             #{"role": "system", "content": "You are a helpful assistant."},
             {

@@ -102,6 +102,16 @@ def inference_parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+def create_input_str(row):
+    sentences = " Participant " + str(int(row["SP ID"])) + " worked with designations: "
+    for des in row["Work Experience/Designation"]:
+        sentences += des + ", "
+    sentences += sentences[:-2] + ". " # remove last comma
+    zip_cols = [row["Education/Qualifications"], row["Education/Specialization"]]
+    for qual, spec in zip(*zip_cols):
+        sentences += " The participant has a " + qual + " education specialized in " + spec + ". "
+    return sentences
+
 def make_input_df(participant_info_df, num_samples, random_sample, input_columns):
     """
     Read the input participant info csv and create a dataframe with the required columns.
@@ -122,10 +132,7 @@ def make_input_df(participant_info_df, num_samples, random_sample, input_columns
     else:
         input_df = input_df.head(num_samples)
     input_df[input_columns] = input_df[input_columns].fillna("NA")
-    input_df["input"] =  " Participant " + input_df["SP ID"].astype(str) + \
-                            ". The participant worked with designation: " + input_df["Work Experience/Designation"] + \
-                            " and has a " + input_df["Education/Qualifications"] + " education specialized in " + \
-                            input_df["Education/Specialization"]
+    input_df["input"] = input_df.apply(create_input_str, axis = 1)
     return input_df
 
 def run_embedding_inference(input_df, vector_retriever, input_columns):
@@ -205,8 +212,8 @@ def main() -> None:
 
     print("Peparing data for inference...")
     participant_info_df = pd.read_csv(args.input_participant_info_csv)
-    input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization", "Languages"]
-    participant_info_df = clean_participant_data(participant_info_df, target_columns=input_columns, columns_to_concatenate=["Languages"])
+    input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
+    participant_info_df = clean_participant_data(participant_info_df, target_columns=input_columns, columns_to_concatenate=["Work Experience/Designation", "Education/Qualifications", "Education/Specialization"])
     participant_info_df.to_csv(args.input_participant_info_cleaned_csv, index=False)
     input_df = make_input_df(participant_info_df, args.num_samples, args.random_sample, input_columns)
     print("Running inference on input data...")

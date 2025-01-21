@@ -3,6 +3,7 @@
 */__pycache__/*
 */storage/*
 SEVA_ALLOCATION_OUTPUT/*
+venv/
 
 toy_data/extracted_skills_data.xlsx
 toy_data/predictions_data.xlsx
@@ -37,3 +38,10 @@ seva_allocator/configs/
 seva_allocator/results/
 seva_allocator/test.ipynb
 seva_allocator/venv/
+seva_allocator/concatenation/__pycache__/
+
+chatbot/.env
+chatbot/participant_test.csv
+chatbot/participant_test.txt
+chatbot/preprocessing/__pycache__/
+chatbot/preprocessing/.env
