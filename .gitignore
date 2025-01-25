@@ -40,8 +40,11 @@ seva_allocator/test.ipynb
 seva_allocator/venv/
 seva_allocator/concatenation/__pycache__/
 
+chatbot/participants.db
 chatbot/.env
 chatbot/participant_test.csv
 chatbot/participant_test.txt
 chatbot/preprocessing/__pycache__/
 chatbot/preprocessing/.env
+
+seva_allocator/data/input_participant_info_raw-test.csv

@@ -1,0 +1,7 @@
+langchain
+langchain-experimental
+langchain-community
+langchain-openai
+
+faiss-cpu
+pydantic==2.9.2
