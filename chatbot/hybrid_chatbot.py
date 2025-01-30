@@ -324,7 +324,7 @@ class ChatbotPipeline:
             semantic_entities_dict = self.create_semantic_entities(query, unstructured_cols)
             semantic_results = self.execute_semantic_queries(semantic_entities_dict)
         
-        final_response = self.process_results_with_llm(sql_query, sql_response, semantic_results, identified_cols, query)
+        final_response = self.process_results_with_llm(sql_query, sql_response , semantic_results, identified_cols, query)
         return final_response
 
 

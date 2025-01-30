@@ -62,3 +62,15 @@ def create_participant_db_df(participant_info_raw_df, target_columns):
     participant_info_df = participant_info_df[target_columns]
     participant_info_df["summary"] = participant_info_df.apply(create_participant_summary, axis=1)
     return participant_info_df
+
+
+if __name__ == "__main__":
+    target_columns = ['SP ID', 'Work Experience/Company', 'Work Experience/Designation',
+    'Work Experience/Tasks', 'Work Experience/Industry',
+    'Education/Qualifications', 'Education/Specialization',
+    'Any Additional Skills', 'Computer Skills', 'Skills',
+    'Languages', 'Gender', 'Age', 'Work Experience/From Date', 'Work Experience/To Date']
+    participant_info_raw_df = pd.read_csv('../../data/input_participant_info_raw.csv')
+    participant_db_df = create_participant_db_df(participant_info_raw_df, target_columns)
+    print(participant_db_df)
+    participant_db_df.to_csv("../../data/input_participant_info_cleaned.csv")
