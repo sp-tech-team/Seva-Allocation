@@ -4,6 +4,8 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 from typing_extensions import TypedDict
+from prettytable import PrettyTable
+import ast
 import pdb
 
 from langchain import hub
@@ -40,6 +42,24 @@ if args.config:
         CONFIG = json.load(config_file)
 else:
     CONFIG = DEFAULT_CONFIG
+
+
+def format_query_result(result, headers=None):
+    table = PrettyTable()
+    if headers:
+        table.field_names = headers  # Set column headers
+    for row in result:
+        table.add_row(row)  # Add each row of data
+    return table.get_string()
+
+def extract_selected_columns(query: str):
+    lower_query = query.lower()
+    if "select *" in lower_query:
+        return []
+    start_idx = lower_query.index("select") + len("select")
+    end_idx = lower_query.index("from")
+    columns_part = query[start_idx:end_idx].strip()
+    return [col.strip() for col in columns_part.split(",")]
 
 class UnstructuredCategories(BaseModel):
     """
@@ -132,8 +152,11 @@ class ChatbotPipeline:
             conn.execute(self.participants_unstructured_table.delete())
             conn.execute(self.participants_unstructured_table.insert(), unstructured_data)
 
-        self.sql_db = SQLDatabase(self.structured_engine)
-        self.sql_chain = SQLDatabaseChain(llm=self.llm, database=self.sql_db)
+        self.sql_db_structured = SQLDatabase(self.structured_engine)
+        self.sql_db_unstructured = SQLDatabase(self.unstructured_engine)
+        self.execute_structured_query_tool = QuerySQLDatabaseTool(db=self.sql_db_structured)
+        self.execute_unstructured_query_tool = QuerySQLDatabaseTool(db=self.sql_db_unstructured)
+        self.sql_chain = SQLDatabaseChain(llm=self.llm, database=self.sql_db_structured)
         self.query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
 
         self.embedding_model = OpenAIEmbeddings()
@@ -175,9 +198,9 @@ class ChatbotPipeline:
         """Generate SQL query to fetch information."""
         prompt = self.query_prompt_template.invoke(
             {
-                "dialect": self.sql_db.dialect,
+                "dialect": self.sql_db_structured.dialect,
                 "top_k": 10000,
-                "table_info": self.sql_db.get_table_info(),
+                "table_info": self.sql_db_structured.get_table_info(),
                 "input": state["question"],
             }
         )
@@ -190,43 +213,7 @@ class ChatbotPipeline:
 
     def execute_query(self, state: State):
         """Execute SQL query."""
-        execute_query_tool = QuerySQLDatabaseTool(db=self.sql_db)
-        return {"result": execute_query_tool.invoke(state["query"])}
-
-    def create_sql_query(self, user_query, structured_cols):
-        prompt = f"""
-        Based on the user query: "{user_query}", generate a valid SQL query that retrieves data from the database based on the following schema:
-        
-        Schema:
-        {json.dumps({
-            "participants": {
-                "columns": structured_cols
-            }
-        }, indent=2)}
-
-        Rules:
-        - The SQL query should only retrieve data from the columns specified in the schema.
-        - Return only a valid SQL query executable on the database, there should be no extra string information in your response that can't run be run on SQLite.
-        - Return an empty string if no structured components are found in the query.
-        - Do not add any characters before or after the SQL query.
-        - Do not start your response with the string sql, just give me the raw SQL code
-
-        SQL Query:
-        """
-        response = self.llm.invoke(prompt)
-        sql_query = response.content.strip().strip("`").removeprefix("sql")
-        print(f"Generated SQL Query: \n{sql_query}")
-        # pdb.set_trace()
-        return sql_query 
-
-    def execute_sql_query(self, sql_query):
-        try:
-            with self.structured_engine.begin() as conn:
-                results = conn.execute(text(sql_query)).fetchall()
-            return [dict(r._mapping) for r in results]
-        except Exception as e:
-            print(f"Error executing SQL Query: {e}")
-            return []
+        return {"result": self.execute_structured_query_tool.invoke(state["query"])}
 
     def create_semantic_entities(self, user_query, unstructured_cols):
         prompt = f"""
@@ -268,42 +255,56 @@ class ChatbotPipeline:
         semantic_results = []
         if self.CONFIG["use_vector_search"]:
             print("Processing by vector search")
+            all_faiss_results = []
             for entity in entities:
-                semantic_results.extend(self.faiss_store.similarity_search(entity, k=self.CONFIG["vector_search_k"]))
+                faiss_results = self.faiss_store.similarity_search(entity, k=self.CONFIG["vector_search_k"])
+                for result in faiss_results:
+                    all_faiss_results.append((result.metadata["id"], result.metadata["text"]))
+
+            if all_faiss_results:
+                pretty_result = format_query_result(all_faiss_results, headers=["SP ID", "Text"])
+                semantic_results.append(pretty_result)
         if self.CONFIG["use_llm_for_column_selection"]:
-            with self.unstructured_engine.connect() as conn:
-                for column in semantic_entities_dict.keys():
+            for column, items in semantic_entities_dict.items():
+                if items:
                     query = f"SELECT sp_id, {column} FROM participants_unstructured"
-                    semantic_results.extend(conn.execute(query).fetchall())
+                    response = self.execute_unstructured_query_tool.invoke(query)
+                    parsed_response = ast.literal_eval(response)
+                    pretty_response = format_query_result(parsed_response, headers=["sp_id", column])
+                    semantic_results.append(pretty_response)
         print("Semantic Query processed.")
         return semantic_results
 
     def process_results_with_llm(self, sql_query, sql_results, semantic_results, identified_cols, user_query):
         print("Processing combined structured and semantic results in one.")
-        # Process semantic results safely
-        formatted_semantic_results = [
-            result.page_content if isinstance(result, Document) else str(result)
-            for result in semantic_results
-        ]
-        print("SQL Result: \n")
-        print(sql_results)
-        print("Semantic results")
-        print(formatted_semantic_results)
+        # Make SQL Results into a pretty string and add headers from the SQL query
+        parsed_sql_result = ast.literal_eval(sql_results["result"])    
+        headers = extract_selected_columns(sql_query["query"])
+        if headers and len(parsed_sql_result) > 0 and len(parsed_sql_result[0]) != len(headers):
+            print("Warning: number of columns does not match extracted headers. Headers ignored.")
+            headers = None
+        pretty_sql_results = format_query_result(parsed_sql_result, headers=headers)
+        # Make Semantic Results into a pretty string
+        semantic_results_string = ""
+        for result in semantic_results:
+            content = result.page_content if isinstance(result, Document) else result
+            semantic_results_string += content + "\n"
         prompt = f"""
-        Based on the user's query: "{user_query}", answer the query by analyzing and aggregating the following data:
+Based on the user's query: "{user_query}", answer the query by analyzing and aggregating the following data:
 
-        The following categories/ columns were identified in the user query: {identified_cols}
+The following categories/ columns were identified in the user query: {identified_cols}
 
-        SQL processed results for structured columns related to the identified categories:
-        {json.dumps(sql_results, default=str)}
+SQL processed results for structured columns related to the identified categories:
+{pretty_sql_results}
 
-        Created by this SQL Query:
-        {sql_query}
+Created by this SQL Query:
+{sql_query['query']}
 
-        Semantically retrieved entities for unstructured columns related to the identified categories:
-        {json.dumps(formatted_semantic_results, default=str)}
+Semantically retrieved entities for unstructured columns related to the identified categories:
+{semantic_results_string}
         """
-        
+        print("Combining Prompt: \n")
+        print(prompt)
         response = self.llm.invoke(prompt)
         return response.content
 
@@ -313,6 +314,8 @@ class ChatbotPipeline:
         identified_cols = self.identify_columns(query, columns=structured_cols + unstructured_cols)
         sql_results = []
         identified_structured_cols = [col for col in identified_cols if col in structured_cols]
+        sql_query = ""
+        sql_response = None
         if identified_structured_cols:
             sql_query = self.write_query({"question": query})
             sql_response = self.execute_query({"query": sql_query["query"]})
@@ -324,7 +327,7 @@ class ChatbotPipeline:
             semantic_entities_dict = self.create_semantic_entities(query, unstructured_cols)
             semantic_results = self.execute_semantic_queries(semantic_entities_dict)
         
-        final_response = self.process_results_with_llm(sql_query, sql_response , semantic_results, identified_cols, query)
+        final_response = self.process_results_with_llm(sql_query, sql_response, semantic_results, identified_cols, query)
         return final_response
 
 
