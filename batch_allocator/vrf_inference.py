@@ -14,7 +14,7 @@ import logging
 import pandas as pd
 import os
 
-from utils import create_timestamped_results, load_cached_indexes, get_depts_from_job_df
+from utils import create_timestamped_results, get_depts_from_job_df
 from training_data import clean_participant_data
 from pinecone_utils import get_pinecone_index
 
