@@ -213,6 +213,7 @@ def main() -> None:
     print("Peparing data for inference...")
     participant_info_df = pd.read_csv(args.input_participant_info_csv)
     input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
+    participant_info_df = participant_info_df[input_columns]
     participant_info_df = clean_participant_data(participant_info_df, target_columns=input_columns, columns_to_concatenate=["Work Experience/Designation", "Education/Qualifications", "Education/Specialization"])
     participant_info_df.to_csv(args.input_participant_info_cleaned_csv, index=False)
     input_df = make_input_df(participant_info_df, args.num_samples, args.random_sample, input_columns)

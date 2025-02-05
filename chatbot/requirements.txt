@@ -3,6 +3,6 @@ langchain-experimental
 langchain-community
 langchain-openai
 prettytable
-
+psycopg2-binary
 faiss-cpu
 pydantic==2.9.2

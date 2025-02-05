@@ -1,6 +1,7 @@
 import pandas as pd
 import os
-from Concatenation_Library import Concatenation_Handler
+import pdb
+from .Concatenation_Library import Concatenation_Handler
 from datetime import datetime
 
 def clean_participant_data(participant_info_df, target_columns, columns_to_concatenate):
@@ -59,6 +60,15 @@ def create_participant_db_df(participant_info_raw_df, target_columns):
     """
     columns_to_concatenate = ['Languages', 'Work Experience/Industry', 'Work Experience/Tasks', 'Work Experience/From Date', 'Work Experience/To Date']
     participant_info_df = clean_participant_data(participant_info_raw_df, target_columns=target_columns, columns_to_concatenate=columns_to_concatenate)
+    participant_info_df['SP ID'] = participant_info_df['SP ID'].astype(int)
+
+    from_date = 'Work Experience/From Date'
+    to_date = 'Work Experience/To Date'
+    len_mask = participant_info_df[from_date].apply(len) != participant_info_df[to_date].apply(len)
+    na_mask = participant_info_df.apply(lambda row: "NA" in row[from_date] or "NA" in row[to_date], axis=1)
+    mask = len_mask | na_mask
+    participant_info_df.loc[mask, from_date] = participant_info_df.loc[mask, from_date].apply(lambda x: ["NA"])
+    participant_info_df.loc[mask, to_date] = participant_info_df.loc[mask, to_date].apply(lambda x: ["NA"])
     participant_info_df = participant_info_df[target_columns]
     participant_info_df["summary"] = participant_info_df.apply(create_participant_summary, axis=1)
     return participant_info_df

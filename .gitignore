@@ -48,5 +48,6 @@ chatbot/preprocessing/__pycache__/
 chatbot/preprocessing/.env
 chatbot/participants_structured.db
 chatbot/participants_unstructured.db
+chatbot/data/*
 
 seva_allocator/data/input_participant_info_raw-test.csv
