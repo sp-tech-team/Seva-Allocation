@@ -1,0 +1,52 @@
+model: gpt-4o-mini
+columns:
+  "Work Experience/Designation":
+    prompt: |
+      You are an AI extracting role or position titles 
+      from the applicant's "experience - designation".
+      Text to extract from...
+      {text}
+
+      Please output JSON with the structure:
+      {{
+        "entities": [
+          {{
+            "sp_id": "{sp_id}",
+            "column": "{column_name}",
+            "extracted_text": "<designation>"
+          }}
+        ]
+      }}
+  "Work Experience/Tasks":
+    prompt: |
+      You are an AI extracting tasks from the applicant's description of tasks text.
+      Text to extract from...
+      {text}
+
+      Please output JSON with the structure:
+      {{
+        "entities": [
+          {{
+            "sp_id": "{sp_id}",
+            "column": "{column_name}",
+            "extracted_text": "<task>"
+          }}
+        ]
+      }}
+  "Any Additional Skills":
+    prompt: |
+      You are an AI extracting skills from the provided text. 
+      Text to extract from...
+      {text}
+
+      Please output JSON with the structure:
+      {{
+        "entities": [
+          {{
+            "sp_id": "{sp_id}",
+            "column": "{column_name}",
+            "extracted_text": "<skill>"
+          }}
+        ]
+      }}
+  
