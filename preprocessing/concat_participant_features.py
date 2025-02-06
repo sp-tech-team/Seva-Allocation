@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-class Concatenation_Handler:
+class ConcatTool:
     """
     A handler class for various DataFrame concatenation and transformation operations.
     """
@@ -33,7 +33,7 @@ class Concatenation_Handler:
                 df[column] = df[column].astype(str)
         return df
 
-    def Concatenation_Main_Using_Local_Downloaded_File(df, fill_cols, concat_cols, key_col):
+    def concat_target_cols(df, fill_cols, concat_cols, key_col):
         """
         Processes a locally downloaded Excel file by:
         - Front-filling specified columns
@@ -57,13 +57,13 @@ class Concatenation_Handler:
         df.loc[~df[key_col].isna()] = df.loc[~df[key_col].isna()].replace('', fill_str)
         
         # Apply front-fill function
-        df = Concatenation_Handler.front_fill_columns(df, fill_cols)
+        df = ConcatTool.front_fill_columns(df, fill_cols)
 
         # Ensure appropriate columns are converted to strings before concatenation
-        df = Concatenation_Handler.convert_columns_to_string(df, concat_cols)
+        df = ConcatTool.convert_columns_to_string(df, concat_cols)
 
         # Apply concatenation function
-        df = Concatenation_Handler.concatenate_method_for_Local_Downloaded_File(df, key_col, concat_cols)
+        df = ConcatTool.concatenate_method_for_Local_Downloaded_File(df, key_col, concat_cols)
 
         # Retain only relevant columns
         columns_to_keep = fill_cols + concat_cols

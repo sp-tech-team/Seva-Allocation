@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import pdb
-from .Concatenation_Library import Concatenation_Handler
+from .concat_participant_features import ConcatTool
 from datetime import datetime
 
 def clean_participant_data(participant_info_df, target_columns, columns_to_concatenate):
@@ -15,7 +15,7 @@ def clean_participant_data(participant_info_df, target_columns, columns_to_conca
         pd.DataFrame: Cleaned DataFrame.
     """
     columns_to_fill = list(filter(lambda x: x not in columns_to_concatenate, target_columns))
-    participant_cleaned_df = Concatenation_Handler.Concatenation_Main_Using_Local_Downloaded_File(participant_info_df, columns_to_fill, columns_to_concatenate, "SP ID")
+    participant_cleaned_df = ConcatTool.concat_target_cols(participant_info_df, columns_to_fill, columns_to_concatenate, "SP ID")
     return participant_cleaned_df[target_columns]
 
 def parse_date(date_str):

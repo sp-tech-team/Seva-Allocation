@@ -134,11 +134,6 @@ def create_participant_data():
     participant_info_raw_df = pd.read_csv('../data/input_participant_info_raw.csv')
     participant_df = create_participant_db_df(participant_info_raw_df, target_columns)
 
-    # count_mismatch = participant_df.apply(lambda row: {col: len(row[col]) if isinstance(row[col], list) else 1 for col in participant_df.columns}, axis=1)
-    # mismatch_df = pd.DataFrame(count_mismatch.tolist())
-    # paired_columns = ['Work Experience/From Date', 'Work Experience/To Date']
-    # mismatch_df['Paired Mismatch'] = mismatch_df[paired_columns[0]] != mismatch_df[paired_columns[1]]
-
     structured_cols = ["SP ID", "Gender", "Age", "Work Experience/From Date", "Work Experience/To Date", "Languages"]
     unstructured_cols = ["SP ID", "Work Experience/Company", "Work Experience/Designation",
                         "Work Experience/Tasks", "Work Experience/Industry",
@@ -154,8 +149,8 @@ def create_participant_data():
     df_unstructured = participant_df[unstructured_cols]
     df_unstructured = df_unstructured.map(lambda x: ", ".join(x) if isinstance(x, list) else x)
 
-    engine_structured = create_engine("sqlite:///participants_structured.db")
-    engine_unstructured = create_engine("sqlite:///participants_unstructured.db")
+    engine_structured = create_engine("sqlite:///data/participants_structured.db")
+    engine_unstructured = create_engine("sqlite:///data/participants_unstructured.db")
 
     df_structured.to_sql("participants_structured", engine_structured, if_exists="replace", index=False)
     df_unstructured.to_sql("participants_unstructured", engine_unstructured, if_exists="replace", index=False)
