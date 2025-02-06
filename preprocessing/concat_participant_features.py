@@ -33,7 +33,7 @@ class ConcatTool:
                 df[column] = df[column].astype(str)
         return df
 
-    def concat_target_cols(df, fill_cols, concat_cols, key_col):
+    def concat_target_cols(df, fill_cols, concat_cols, key_col, fill_str = 'NA'):
         """
         Processes a locally downloaded Excel file by:
         - Front-filling specified columns
@@ -47,7 +47,6 @@ class ConcatTool:
             raise ValueError(f"Key column '{key_col}' must be included in the fill columns.")
         df = df.copy()
         df = df[fill_cols + concat_cols]
-        fill_str = 'NA'
         # Fill empty cells for rows with non-empty IDs
         df = df.apply(
             lambda row: row.fillna(fill_str) if not pd.isna(row[key_col]) and row.isnull().any() else row,
