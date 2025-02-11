@@ -50,4 +50,5 @@ chatbot/preprocessing/.env
 chatbot/participants_structured.db
 chatbot/participants_unstructured.db
 chatbot/data/*
+chatbot/chatbot_conversation_log.txt
 

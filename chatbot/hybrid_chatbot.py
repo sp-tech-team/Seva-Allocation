@@ -2,21 +2,14 @@ import argparse
 import json
 from typing_extensions import Annotated
 from typing_extensions import TypedDict
-
 import ast
-import pdb
 import signal
 
 from langchain import hub
 from langchain_core.documents.base import Document
-from langchain_community.vectorstores import FAISS
-from langchain_community.docstore.in_memory import InMemoryDocstore
-
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
-import faiss
-
-from chatbot_data import create_mock_participant_data, create_participant_data, format_query_result
+from preprocessing.participant_database import create_mock_participant_database, create_participant_database, format_query_result
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -69,9 +62,14 @@ class ChatbotPipeline:
         
         self.participant_database = None
         if self.config["use_mock_data"]:
-            self.participant_database = create_mock_participant_data()
+            self.participant_database = create_mock_participant_database(
+                                            structured_db_file = 'sqlite:///chatbot/data/participants_structured_mock.db',
+                                            unstructured_db_file = 'sqlite:///chatbot/data/participants_unstructured_mock.db'
+                                            )
         else:
-            self.participant_database = create_participant_data()
+            self.participant_database = create_participant_database(
+                                            structured_db_file = "sqlite:///chatbot/data/participants_structured.db",
+                                            unstructured_db_file = "sqlite:///chatbot/data/participants_unstructured.db")
 
         self.structured_cols = self.participant_database.get_structured_column_names()
         self.unstructured_cols = self.participant_database.get_unstructured_column_names()
@@ -79,24 +77,7 @@ class ChatbotPipeline:
         self.query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
 
         self.embedding_model = OpenAIEmbeddings()
-        self.faiss_index = faiss.IndexFlatL2(len(self.embedding_model.embed_query("sample text")))
-        self.faiss_store = FAISS(
-            embedding_function=self.embedding_model,
-            index=self.faiss_index,
-            docstore=InMemoryDocstore(),
-            index_to_docstore_id={},
-        )
-
-        unstructured_data_dicts = self.participant_database.get_unstructured_data_dicts()
-        batch_unstructured_texts = []
-        batch_unstructured_metadata = []
-        for record in unstructured_data_dicts:
-            combined_text = " ".join([f"{key}: {str(value)}\n" 
-                                for key, value in record.items() if key != "SP ID"])
-            metadata = {"id": record["SP ID"], "text": combined_text, "record": record}
-            batch_unstructured_texts.append(combined_text)
-            batch_unstructured_metadata.append(metadata)
-        self.faiss_store.add_texts(batch_unstructured_texts, batch_unstructured_metadata)
+        self.faiss_store = self.participant_database.make_faiss_index(self.embedding_model)
 
     def identify_columns(self, query, columns):
         prompt = f"""
@@ -274,7 +255,7 @@ if __name__ == "__main__":
             print("Exiting chatbot. Goodbye!")
             break
         response, prompt = pipeline.chatbot(user_input)
-        log_file = "chatbot_conversation_log.txt"
+        log_file = "chatbot/chatbot_conversation_log.txt"
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(f"You: \n{user_input}\n\n")
             f.write(f"Prompt: \n{prompt}\n\n")

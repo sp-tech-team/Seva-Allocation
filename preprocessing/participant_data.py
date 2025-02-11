@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import pdb
-from concat_participant_features import ConcatTool
+from preprocessing.concat_participant_features import ConcatTool
 from datetime import datetime
 
 def parse_date(date_str):
@@ -45,7 +45,6 @@ class ParticipantData():
                             'Skills', 'Any Additional Skills', 'Computer Skills', 
                             'Languages', 'Gender', 'Age']
         self.participant_info_raw_df = participant_info_raw_df[self.all_columns]
-        self.participant_info_df = None
         self.columns_to_concatenate = ['Work Experience/Company', 'Work Experience/Designation',
                                        'Work Experience/Tasks', 'Work Experience/Industry',
                                        'Work Experience/From Date', 'Work Experience/To Date',
