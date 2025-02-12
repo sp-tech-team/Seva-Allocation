@@ -9,6 +9,7 @@ Usage:
     python main.py --input_file=input.txt --output_file=output.txt --verbose
 """
 
+import pdb
 import argparse
 import logging
 import pandas as pd
@@ -215,8 +216,8 @@ def main() -> None:
     participant_data = ParticipantData(participant_info_raw_df)
     participant_info_df = participant_data.create_participant_info_df()
     input_columns = ["SP ID", "Work Experience/Designation", "Education/Qualifications", "Education/Specialization"]
-    participant_info_df = participant_info_df[input_columns]
-    input_df = make_input_df(participant_info_df, args.num_samples, args.random_sample, input_columns)
+    participant_info_input_df = participant_info_df[input_columns]
+    input_df = make_input_df(participant_info_input_df, args.num_samples, args.random_sample, input_columns)
     print("Running inference on input data...")
     _, participant_jobs_vec_db = run_embedding_inference(input_df, vector_retriever, input_columns)
     vec_preds_df = jobs_dict_to_df(participant_jobs_vec_db)
