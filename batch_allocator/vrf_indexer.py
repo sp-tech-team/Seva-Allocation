@@ -14,8 +14,8 @@ import logging
 import os
 import pandas as pd
 
-from training_data import create_vrf_db_df
-from pinecone_utils import get_pinecone_index, clear_index
+from preprocessing.vrf_data import VrfData
+from batch_allocator.pinecone_utils import get_pinecone_index, clear_index
 
 
 from pinecone import Pinecone
@@ -114,8 +114,9 @@ def main() -> None:
     print("Creating Vector Store Index...")
     vrf_raw_df = pd.read_csv(args.vrf_data_raw_csv)
     generic_jobs_df = pd.read_csv(args.generic_jobs_csv)
-    vrf_db_df = create_vrf_db_df(vrf_raw_df, generic_jobs_df)
-    nodes = create_index_nodes(vrf_db_df)
+    vrf_data = VrfData(vrf_raw_df, generic_jobs_df)
+    vrf_info_df = vrf_data.create_vrf_info_df()
+    nodes = create_index_nodes(vrf_info_df)
     for node in nodes:
         node.embedding = embedding_model.get_text_embedding(node.get_text())
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
