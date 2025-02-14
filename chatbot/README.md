@@ -1,5 +1,37 @@
+# Hybrid Chatbot
 
+This project implements a hybrid conversational pipeline that combines structured and unstructured data for more dynamic query answering.
 
-# Table
+## Overview
 
-| spid | age | |------|-----| | 1 | 37 | | 3 | 37 | | 6 | 39 | | 8 | 35 | | 9 | 34 | | 10 | 39 | | 11 | 35 | | 15 | 39 | | 16 | 40 | | 17 | 39 | | 21 | 36 | | 25 | 34 | | 26 | 34 | | 28 | 33 | | 32 | 35 | | 33 | 35 | | 34 | 35 | | 36 | 36 | | 37 | 35 | | 39 | 33 | | 43 | 35 | | 44 | 31 | | 45 | 34 | | 46 | 38 | | 47 | 33 | | 51 | 40 | | 52 | 37 | | 57 | 30 | | 58 | 34 | | 60 | 37 | | 63 | 40 | | 66 | 33 | | 69 | 35 | | 70 | 40 | | 71 | 33 | | 72 | 30 | | 73 | 39 | | 75 | 37 | | 77 | 33 | | 78 | 34 | | 80 | 40 | | 81 | 37 | | 93 | 34 | | 94 | 30 | | 99 | 31 | | 100 | 38 |
+1. **Structured Data:** Stored in a SQLite database named `participants_structured.db` containing columns like age, gender, years_of_experience.  
+2. **Unstructured Data:** Stored in `participants_unstructured.db` holding free-text fields like skills, education_specialization, and past_jobs.  
+3. **Embedding & Vector Store:** The pipeline uses OpenAI embeddings to convert unstructured data into vectors, which are indexed in a FAISS store for efficient similarity-based lookups.  
+4. **LLM-Based Column Identification:** For each user query, the system attempts to identify which columns (structured and/or unstructured) are relevant.  
+5. **SQL Generation & Execution:** If structured data is relevant, an LLM-based SQL generator creates and executes a query on the structured database.  
+6. **Semantic Entities Extraction & Vector Search:** For unstructured data, the LLM extracts entities, which the FAISS index uses to retrieve relevant records.  
+7. **Combined Response:** The structured and unstructured results are merged, then passed to an LLM to produce a final, coherent answer.
+
+## How to Run
+
+1. **Install Requirements:**  
+   Make sure you have all dependencies installed (e.g., via `pip install -r requirements.txt`).
+
+2. **Set Up .env:**  
+   Provide your OpenAI API key and other environment variables in a `.env` file if needed.
+
+3. **Launch Chatbot:**  
+   From the project root, run:  
+   ```
+   python hybrid_chatbot.py
+   ```
+   - Optionally, use `--config_file_json <path/to/config.json>` to override default settings.
+
+4. **Interact:**  
+   You can now type queries into the console. Type `"exit"` to quit.
+
+## Notes
+
+- **Data Files:** Check `participants_structured.db` and `participants_unstructured.db` for the actual participant records.  
+- **Logging:** Conversations are saved to `chatbot_conversation_log.txt` automatically.  
+- **Mock Data:** Toggle `"use_mock_data": true` in the config to switch to a testing environment.
