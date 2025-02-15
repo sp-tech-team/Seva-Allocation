@@ -15,15 +15,18 @@ This project implements a hybrid conversational pipeline that combines structure
 ## How to Run
 
 1. **Install Requirements:**  
-   Make sure you have all dependencies installed (e.g., via `pip install -r requirements.txt`).
+   Make sure you have all dependencies installed (e.g., via `pip3 install -r requirements.txt`).
 
 2. **Set Up .env:**  
    Provide your OpenAI API key and other environment variables in a `.env` file if needed.
 
+3. **Check Participant Raw Data**
+   Make sure from root the file `data/input_participant_info_raw.csv` is available for the preprocessing pipeline to load and build the database.
+
 3. **Launch Chatbot:**  
    From the project root, run:  
    ```
-   python hybrid_chatbot.py
+   python3 -m chatbot.hybrid_chatbot
    ```
    - Optionally, use `--config_file_json <path/to/config.json>` to override default settings.
 
