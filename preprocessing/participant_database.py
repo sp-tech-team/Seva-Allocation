@@ -1,5 +1,5 @@
 from langchain_community.utilities.sql_database import SQLDatabase
-# from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
+from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 import faiss

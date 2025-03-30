@@ -117,7 +117,7 @@ class ParticipantData():
 
 
 if __name__ == "__main__":
-    participant_info_raw_df = pd.read_csv('../data/input_participant_info_raw.csv')
+    participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
     participant_data = ParticipantData(participant_info_raw_df)
     participant_info_df = participant_data.create_participant_info_df()
-    participant_info_df.to_csv("../data/input_participant_info_cleaned.csv")
+    participant_info_df.to_csv("data/input_participant_info_cleaned.csv")
