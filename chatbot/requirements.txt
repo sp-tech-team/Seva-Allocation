@@ -1,3 +1,7 @@
+pandas
+numpy
+python-dotenv
+
 langchain
 langchain-experimental
 langchain-community

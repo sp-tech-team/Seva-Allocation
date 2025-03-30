@@ -4,6 +4,7 @@
 */storage/*
 SEVA_ALLOCATION_OUTPUT/*
 venv/
+*.env*
 
 toy_data/extracted_skills_data.xlsx
 toy_data/predictions_data.xlsx
@@ -52,3 +53,8 @@ chatbot/participants_unstructured.db
 chatbot/data/*
 chatbot/chatbot_conversation_log.txt
 
+csv_tool/output_with_llm_results.csv
+data/request_notes.csv
+
+app_bot/chroma_index/
+app_bot/data/

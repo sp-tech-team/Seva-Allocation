@@ -1,10 +1,10 @@
 from langchain_community.utilities.sql_database import SQLDatabase
-from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
+# from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 import faiss
 
-from sqlalchemy import create_engine, inspect, Table, Column, Integer, String, MetaData
+from sqlalchemy import create_engine, inspect, Table, Column, Integer, String, MetaData, text
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
@@ -184,6 +184,41 @@ def create_participant_database(structured_db_file = "sqlite:///chatbot/data/par
                                execute_structured_query_tool, execute_unstructured_query_tool,
                                PydanticUnstructuredCategories)
 
+def create_participant_database_single(db_file="sqlite:///chatbot/data/participants.db"):
+    # Load data
+    participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
+    participant_data = ParticipantData(participant_info_raw_df)
+    participant_info_df = participant_data.create_participant_info_df()
+
+    structured_cols = ["SP ID", "Gender", "Age", "Work Experience/From Date", "Work Experience/To Date", "Languages"]
+    unstructured_cols = ["SP ID", "Work Experience/Company", "Work Experience/Designation",
+                        "Work Experience/Tasks", "Work Experience/Industry",
+                        "Education/Qualifications", "Education/Specialization",
+                        "Any Additional Skills", "Computer Skills", "Skills", "Languages"]
+
+    # Split data into two separate DataFrames
+    df_structured = participant_info_df[structured_cols]
+    paired_columns = ['Work Experience/From Date', 'Work Experience/To Date']
+    independent_columns = ['Languages']
+    df_structured = explode_columns(df_structured, paired_columns, independent_columns)
+
+    df_unstructured = participant_info_df[unstructured_cols]
+    df_unstructured = df_unstructured.map(lambda x: ", ".join(x) if isinstance(x, list) else x)
+
+    # Use a single database file and engine
+    engine = create_engine(db_file)
+
+    # Write both tables into the same database
+    df_structured.to_sql("participants_structured", engine, if_exists="replace", index=False)
+    df_unstructured.to_sql("participants_unstructured", engine, if_exists="replace", index=False)
+
+    # Optional: set up query tools if needed
+    # sql_db = SQLDatabase(engine)
+    # execute_query_tool = QuerySQLDatabaseTool(db=sql_db)
+    #execute_unstructured_query_tool = QuerySQLDatabaseTool(db=sql_db)
+    return engine
+    
+
 class MockPydanticUnstructuredCategories(BaseModel):
     """
     A user profile model with optional fields.
@@ -273,14 +308,19 @@ def create_mock_participant_database(structured_db_file = 'sqlite:///chatbot/dat
                                    MockPydanticUnstructuredCategories)
 
 if __name__ == '__main__':
-    participant_data = create_participant_database()
+    # participant_data = create_participant_database()
     # participant_data = create_mock_participant_database()
-    query = \
-    """SELECT "SP ID", "Work Experience/To Date", "Work Experience/From Date"
-    FROM participants_structured
-    LIMIT 10000;"""
-    result = participant_data.execute_structured_query_tool.invoke(query)
-    if result:
-        print(format_query_result(ast.literal_eval(result)))
-    else:
-        print("No results found.")
+    # query = \
+    # """SELECT "SP ID", "Work Experience/To Date", "Work Experience/From Date"
+    # FROM participants_structured
+    # LIMIT 10000;"""
+    # result = participant_data.execute_structured_query_tool.invoke(query)
+    # if result:
+    #     print(format_query_result(ast.literal_eval(result)))
+    # else:
+    #     print("No results found.")
+    engine = create_participant_database_single()
+    # result = execute_query_tool.run(
+    # "SELECT * FROM participants_structured WHERE Age > 30 LIMIT 5"
+    # )
+    # print(result)
