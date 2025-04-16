@@ -1,16 +1,17 @@
 import pdb
 import argparse
 import json
-from typing_extensions import Annotated
-from typing_extensions import TypedDict
+from typing_extensions import Annotated, TypedDict
 import ast
 import signal
+import os
 
 from langchain import hub
 from langchain_core.documents.base import Document
+from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
-from database.participant_database import create_mock_participant_database, create_participant_database, format_query_result
+from database.participant_pg_database import DbConfig, load_participant_db, format_query_result
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -56,29 +57,57 @@ class State(TypedDict):
     result: str
     answer: str
 
+text_to_sql_tmpl = """\
+Given an input question, first create a syntactically correct {dialect} 
+query to run, then look at the results of the query and return the answer. 
+You can order the results by a relevant column to return the most 
+interesting examples in the database.
+
+Pay attention to use only the column names that you can see in the schema 
+description. Be careful to not query for columns that do not exist. 
+Pay attention to which column is in which table. Also, qualify column names 
+with the table name when needed. 
+
+IMPORTANT NOTE: you can use specialized pgvector syntax (`<=>`) to do nearest 
+neighbors/semantic search to a given vector from an embeddings column in the table. 
+The embeddings value for a given row typically represents the semantic meaning of that row. 
+The vector represents an embedding representation 
+of the question, given below. Do NOT fill in the vector values directly, but rather specify a 
+`[query_vector]` placeholder. For instance, some select statement examples below 
+(the name of the embeddings columns columns are like `column_name_embedding`):
+SELECT * FROM items ORDER BY Languages_embedding <=> '[query_vector]' LIMIT 5;
+SELECT * FROM items WHERE id != 1 ORDER BY Languages_embedding <=> (SELECT Languages_embedding FROM items WHERE id = 1) LIMIT 5;
+SELECT * FROM items WHERE Skills_embedding <=> '[query_vector]' < 5;
+Use this vector search always instead of the LIKE or ILIKE operator. Never use LIKE or ILIKE.
+
+You are required to use the following format, 
+each taking one line:
+
+Question: Question here
+SQLQuery: SQL Query to run
+SQLResult: Result of the SQLQuery
+Answer: Final answer here
+
+Only use tables listed below.
+{schema}
+
+
+Question: {input}
+SQLQuery: \
+"""
+
 class ChatbotPipeline:
-    def __init__(self, config):
+    def __init__(self, config, participant_db):
         self.config = config
-        self.llm = ChatOpenAI(model="gpt-4o-mini")
+        self.llm = ChatOpenAI(model="gpt-4o")
         
-        self.participant_database = None
-        if self.config["use_mock_data"]:
-            self.participant_database = create_mock_participant_database(
-                                            structured_db_file = 'sqlite:///chatbot/data/participants_structured_mock.db',
-                                            unstructured_db_file = 'sqlite:///chatbot/data/participants_unstructured_mock.db'
-                                            )
-        else:
-            self.participant_database = create_participant_database(
-                                            structured_db_file = "sqlite:///chatbot/data/participants_structured.db",
-                                            unstructured_db_file = "sqlite:///chatbot/data/participants_unstructured.db")
+        self.participant_db = participant_db
 
-        self.structured_cols = self.participant_database.get_structured_column_names()
-        self.unstructured_cols = self.participant_database.get_unstructured_column_names()
-        
+        self.structured_cols = self.participant_db.get_structured_table_column_names()
+        self.unstructured_cols = self.participant_db.get_unstructured_table_column_names()
         self.query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
-
+        self.vector_sql_prompt_template = ChatPromptTemplate.from_template(text_to_sql_tmpl)
         self.embedding_model = OpenAIEmbeddings()
-        self.faiss_store = self.participant_database.make_faiss_index(self.embedding_model)
 
     def identify_columns(self, query, columns):
         prompt = f"""
@@ -97,11 +126,10 @@ class ChatbotPipeline:
     
     def write_query(self, state: State):
         """Generate SQL query to fetch information."""
-        prompt = self.query_prompt_template.invoke(
+        prompt = self.vector_sql_prompt_template.invoke(
             {
-                "dialect": self.participant_database.sql_db_structured.dialect,
-                "top_k": 10000,
-                "table_info": self.participant_database.sql_db_structured.get_table_info(),
+                "dialect": self.participant_db.lc_db.dialect,
+                "schema": self.participant_db.lc_db.get_table_info(),
                 "input": state["question"],
             }
         )
@@ -112,7 +140,8 @@ class ChatbotPipeline:
 
     def execute_query(self, state: State):
         """Execute SQL query."""
-        return {"result": self.participant_database.execute_structured_query_tool.invoke(state["query"])}
+        pdb.set_trace()
+        return {"result": self.participant_db.lc_db_query_tool.invoke(state["query"])}
 
     def create_semantic_entities(self, user_query):
         prompt = f"""
@@ -138,7 +167,7 @@ class ChatbotPipeline:
         - Return only the JSON object containing categories as keys and arrays of extracted phrases as values.
         - No extra text or formatting outside the JSON.
         """
-        structured_llm = self.llm.with_structured_output(self.participant_database.pydantic_unstructured_categories)
+        structured_llm = self.llm.with_structured_output(self.participant_db.pydantic_unstructured_categories)
         unstructured_cat_response = structured_llm.invoke(prompt)
         print(f"Semantic Entities: \n {unstructured_cat_response}")
         semantic_entities_dict = unstructured_cat_response.dict()
@@ -163,7 +192,7 @@ class ChatbotPipeline:
                     if sp_id not in seen_ids:
                         seen_ids.add(sp_id)
                         all_faiss_results.append((sp_id, result.metadata["text"]))
-            
+            # TODO: DEDUPLICATE RETRIEVALS
             if all_faiss_results:
                 pretty_result = format_query_result(all_faiss_results, headers=["SP ID", "Text"])
                 semantic_results.append(pretty_result)
@@ -171,7 +200,7 @@ class ChatbotPipeline:
             for column, items in semantic_entities_dict.items():
                 if items:
                     query = f"SELECT sp_id, {column} FROM participants_unstructured"
-                    response = self.participant_database.execute_unstructured_query_tool.invoke(query)
+                    response = self.participant_db.execute_unstructured_query_tool.invoke(query)
                     parsed_response = ast.literal_eval(response)
                     pretty_response = format_query_result(parsed_response, headers=["sp_id", column])
                     semantic_results.append(pretty_response)
@@ -182,7 +211,6 @@ class ChatbotPipeline:
         print("Processing combined structured and semantic results in one.")
         # Make SQL Results into a pretty string and add headers from the SQL query
         pretty_sql_results = "No structured data found."
-        pdb.set_trace()
         if sql_results["result"]:
             parsed_sql_result = ast.literal_eval(sql_results["result"])    
             headers = extract_selected_columns(sql_query["query"])
@@ -216,18 +244,12 @@ Semantically retrieved entities for unstructured columns related to the identifi
 
     def chatbot(self, query):
         identified_cols = self.identify_columns(query, columns=self.structured_cols + self.unstructured_cols)
-        identified_structured_cols = [col for col in identified_cols if col in self.structured_cols]
-        sql_query = ""
-        sql_response = None
-        if identified_structured_cols:
-            sql_query = self.write_query({"question": query})
-            sql_response = self.execute_query({"query": sql_query["query"]})
-        semantic_results = []
-        identified_unstructured_cols = [col for col in identified_cols if col in self.unstructured_cols]
-        if identified_unstructured_cols:
-            semantic_entities_dict = self.create_semantic_entities(query)
-            semantic_results = self.execute_semantic_queries(semantic_entities_dict)
-        
+        # identified_structured_cols = [col for col in identified_cols if col in self.structured_cols]
+        # identified_unstructured_cols = [col for col in identified_cols if col in self.unstructured_cols]
+        sql_query = self.write_query({"question": query})
+        sql_response = self.execute_query({"query": sql_query["query"]})
+        pdb.set_trace()
+        semantic_results = []        
         final_response, prompt = self.process_results_with_llm(sql_query, sql_response, semantic_results, identified_cols, query)
         return final_response, prompt
 
@@ -247,9 +269,21 @@ if __name__ == "__main__":
     else:
         config = DEFAULT_CONFIG()
     
-    print("Chatbot is running. Type your query below (or type 'exit' to quit):")
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    if OPENAI_API_KEY is None:
+        raise ValueError("OPENAI_API_KEY environment variable not set. Please set it in your .env file.")
+    db_config = DbConfig(
+        os.getenv("DB_USER"),
+        os.getenv("DB_HOST"),
+        os.getenv("DB_PORT"),
+        os.getenv("DB_NAME"),
+        os.getenv("DB_PASSWORD"),
+        os.getenv("OPENAI_API_KEY")
+    )
 
-    pipeline = ChatbotPipeline(config)
+    participant_db = load_participant_db(db_config)
+    pipeline = ChatbotPipeline(config, participant_db)
+    print("Chatbot is running. Type your query below (or type 'exit' to quit):")
     while True:
         print("\n")
         user_input = input("You: ")

@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import pdb
-from preprocessing.concat_participant_features import ConcatTool
+from database.concat_participant_features import ConcatTool
 from datetime import datetime
 
 def parse_date(date_str):
@@ -100,6 +100,11 @@ class ParticipantData():
             results.append(durations)
         return pd.Series(results)
 
+    def create_total_years_experience_col(self, participant_info_df):
+        experience_arrays = self.create_years_of_experience_col(participant_info_df)
+        total_experience = experience_arrays.apply(lambda arr: sum(filter(None, arr)) if isinstance(arr, list) else 0) #Handle None values, and non list values.
+        return total_experience
+
     def create_participant_info_df(self):
         """
         Create a DataFrame from the participant info csv.
@@ -112,12 +117,15 @@ class ParticipantData():
         """
         participant_info_df = self.clean_participant_data()
         participant_info_df["Years of Experience"] = self.create_years_of_experience_col(participant_info_df)
-        participant_info_df["summary"] = participant_info_df.apply(create_participant_summary, axis=1)
+        participant_info_df["Total Years of Experience"] = self.create_total_years_experience_col(participant_info_df)
+        participant_info_df["Summary"] = participant_info_df.apply(create_participant_summary, axis=1)
         return participant_info_df
 
 
 if __name__ == "__main__":
-    participant_info_raw_df = pd.read_csv('../data/input_participant_info_raw.csv')
+    print("reading raw file")
+    participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
     participant_data = ParticipantData(participant_info_raw_df)
     participant_info_df = participant_data.create_participant_info_df()
-    participant_info_df.to_csv("../data/input_participant_info_cleaned.csv")
+    print("writing cleaned file")
+    participant_info_df.to_csv("data/input_participant_info_cleaned.csv")

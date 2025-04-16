@@ -52,6 +52,8 @@ chatbot/participants_structured.db
 chatbot/participants_unstructured.db
 chatbot/data/*
 chatbot/chatbot_conversation_log.txt
+chatbot/test_results/*
+
 
 csv_tool/output_with_llm_results.csv
 data/request_notes.csv

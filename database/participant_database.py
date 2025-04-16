@@ -1,5 +1,5 @@
 from langchain_community.utilities.sql_database import SQLDatabase
-# from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
+from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 import faiss
@@ -13,7 +13,9 @@ import ast
 from prettytable import PrettyTable
 import pdb
 
-from preprocessing.participant_data import ParticipantData
+from database.participant_data import ParticipantData
+
+
 
 def format_query_result(result, headers=None):
     table = PrettyTable()
@@ -30,6 +32,61 @@ def get_column_names_sql_query(execute_query_tool, table_name):
     # Extract column names (second element in each tuple)
     column_names = [col[1] for col in parsed_result]
     return column_names
+
+def explode_columns(df, paired_cols, independent_cols):
+    df = df.explode(paired_cols, ignore_index=True)
+    for col in independent_cols:
+        df[col] = df[col].explode().reset_index(drop=True)
+    df = df.fillna('NA')
+    return df
+
+class PydanticUnstructuredCategories(BaseModel):
+    """
+    A user profile model with optional fields.
+    If any field is omitted, it defaults to an empty list.
+    However, passing 'null' (None) explicitly is still allowed.
+    """
+
+    work_experience_company: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of companies the user has worked for."
+    )
+    work_experience_designation: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of job designations held by the user."
+    )
+    work_experience_tasks: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of tasks the user performed in past jobs."
+    )
+    work_experience_industry: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of industries the user has worked in."
+    )
+    education_qualifications: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of the user's educational qualifications."
+    )
+    education_specialization: Optional[List[str]] = Field(
+        default_factory=list,
+        description="The user's educational specializations."
+    )
+    any_additional_skills: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of additional skills the user possesses."
+    )
+    computer_skills: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of computer-related skills the user has."
+    )
+    skills: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of general skills the user has."
+    )
+    languages: Optional[List[str]] = Field(
+        default_factory=list,
+        description="A list of languages spoken by the user."
+    )
 
 class ParticipantDatabase:
     def __init__(self, engine_structured, engine_unstructured,
@@ -92,62 +149,6 @@ class ParticipantDatabase:
         faiss_store.add_texts(batch_unstructured_texts, batch_unstructured_metadata)
         return faiss_store
 
-
-class PydanticUnstructuredCategories(BaseModel):
-    """
-    A user profile model with optional fields.
-    If any field is omitted, it defaults to an empty list.
-    However, passing 'null' (None) explicitly is still allowed.
-    """
-
-    work_experience_company: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of companies the user has worked for."
-    )
-    work_experience_designation: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of job designations held by the user."
-    )
-    work_experience_tasks: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of tasks the user performed in past jobs."
-    )
-    work_experience_industry: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of industries the user has worked in."
-    )
-    education_qualifications: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of the user's educational qualifications."
-    )
-    education_specialization: Optional[List[str]] = Field(
-        default_factory=list,
-        description="The user's educational specializations."
-    )
-    any_additional_skills: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of additional skills the user possesses."
-    )
-    computer_skills: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of computer-related skills the user has."
-    )
-    skills: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of general skills the user has."
-    )
-    languages: Optional[List[str]] = Field(
-        default_factory=list,
-        description="A list of languages spoken by the user."
-    )
-
-def explode_columns(df, paired_cols, independent_cols):
-    df = df.explode(paired_cols, ignore_index=True)
-    for col in independent_cols:
-        df[col] = df[col].explode().reset_index(drop=True)
-    df = df.fillna('NA')
-    return df
-
 def create_participant_database(structured_db_file = "sqlite:///chatbot/data/participants_structured.db",
                                 unstructured_db_file = "sqlite:///chatbot/data/participants_unstructured.db"):
     # Load data
@@ -177,8 +178,8 @@ def create_participant_database(structured_db_file = "sqlite:///chatbot/data/par
     df_unstructured.to_sql("participants_unstructured", engine_unstructured, if_exists="replace", index=False)
     sql_db_structured = SQLDatabase(engine_structured)
     sql_db_unstructured = SQLDatabase(engine_unstructured)
-    execute_structured_query_tool = QuerySQLDatabaseTool(db=sql_db_structured)
-    execute_unstructured_query_tool = QuerySQLDatabaseTool(db=sql_db_unstructured)
+    execute_structured_query_tool = QuerySQLDataBaseTool(db=sql_db_structured)
+    execute_unstructured_query_tool = QuerySQLDataBaseTool(db=sql_db_unstructured)
     return ParticipantDatabase(engine_structured, engine_unstructured,
                                sql_db_structured, sql_db_unstructured,
                                execute_structured_query_tool, execute_unstructured_query_tool,
@@ -213,9 +214,9 @@ def create_participant_database_single(db_file="sqlite:///chatbot/data/participa
     df_unstructured.to_sql("participants_unstructured", engine, if_exists="replace", index=False)
 
     # Optional: set up query tools if needed
-    # sql_db = SQLDatabase(engine)
-    # execute_query_tool = QuerySQLDatabaseTool(db=sql_db)
-    #execute_unstructured_query_tool = QuerySQLDatabaseTool(db=sql_db)
+    sql_db = SQLDatabase(engine)
+    execute_query_tool = QuerySQLDataBaseTool(db=sql_db)
+    execute_unstructured_query_tool = QuerySQLDataBaseTool(db=sql_db)
     return engine
     
 
@@ -299,27 +300,57 @@ def create_mock_participant_database(structured_db_file = 'sqlite:///chatbot/dat
 
     sql_db_structured = SQLDatabase(engine_structured)
     sql_db_unstructured = SQLDatabase(engine_unstructured)
-    execute_structured_query_tool = QuerySQLDatabaseTool(db=sql_db_structured)
-    execute_unstructured_query_tool = QuerySQLDatabaseTool(db=sql_db_unstructured)
+    execute_structured_query_tool = QuerySQLDataBaseTool(db=sql_db_structured)
+    execute_unstructured_query_tool = QuerySQLDataBaseTool(db=sql_db_unstructured)
 
     return ParticipantDatabase(engine_structured, engine_unstructured,
                                    sql_db_structured, sql_db_unstructured,
                                    execute_structured_query_tool, execute_unstructured_query_tool,
                                    MockPydanticUnstructuredCategories)
 
+def explode_columns_test(df, paired_cols, independent_cols):
+    pdb.set_trace()
+    df = df.explode(paired_cols, ignore_index=True)
+    # might actually just want to do this...
+    # df = df.explode(indexed_cols, ignore_index=True)
+    for col in independent_cols:
+        df[col] = df[col].explode().reset_index(drop=True)
+    df = df.fillna('NA')
+    return df
+
 if __name__ == '__main__':
-    # participant_data = create_participant_database()
-    # participant_data = create_mock_participant_database()
+    participant_data = create_participant_database()
+    #participant_data = create_mock_participant_database()
+
+    participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
+    participant_data = ParticipantData(participant_info_raw_df)
+    participant_info_df = participant_data.create_participant_info_df()
+
+    structured_cols = ["SP ID", "Gender", "Age", "Work Experience/From Date", "Work Experience/To Date", "Languages"]
+    unstructured_cols = ["SP ID", "Work Experience/Company", "Work Experience/Designation",
+                        "Work Experience/Tasks", "Work Experience/Industry",
+                        "Education/Qualifications", "Education/Specialization",
+                        "Any Additional Skills", "Computer Skills", "Skills", "Languages"]
+
+    # Split data into two separate DataFrames
+    df_structured = participant_info_df[structured_cols][participant_info_df["Work Experience/From Date"].apply(len) > 1].reset_index(drop=True).iloc[:5]
+    print(df_structured)
+    paired_columns = ['Work Experience/From Date', 'Work Experience/To Date']
+    independent_columns = ['Languages']
+    df_structured = explode_columns_test(df_structured, paired_columns, independent_columns)
+    print(df_structured)
+    pdb.set_trace()
+
     # query = \
-    # """SELECT "SP ID", "Work Experience/To Date", "Work Experience/From Date"
+    # """SELECT *
     # FROM participants_structured
-    # LIMIT 10000;"""
+    # LIMIT 20;"""
     # result = participant_data.execute_structured_query_tool.invoke(query)
     # if result:
     #     print(format_query_result(ast.literal_eval(result)))
     # else:
     #     print("No results found.")
-    engine = create_participant_database_single()
+    # engine = create_participant_database_single()
     # result = execute_query_tool.run(
     # "SELECT * FROM participants_structured WHERE Age > 30 LIMIT 5"
     # )
