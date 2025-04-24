@@ -1,0 +1,462 @@
+{
+    "Basic Question Answer Pairs - Mock 1": {
+        "database_name": "participants_mock1",
+        "questions": [
+            {
+                "question_id": "1",
+                "question": "Give me all participants over the age of 30",
+                "answer": [
+                    "SP001",
+                    "SP003",
+                    "SP005",
+                    "SP006",
+                    "SP007",
+                    "SP008",
+                    "SP009",
+                    "SP010",
+                    "SP011",
+                    "SP012",
+                    "SP013",
+                    "SP014",
+                    "SP016",
+                    "SP017",
+                    "SP019",
+                    "SP020",
+                    "SP021",
+                    "SP022",
+                    "SP023"
+                ],
+                "notes": "One column structured query"
+            },
+            {
+                "question_id": "2",
+                "question": "Give me all participants who can work on front end development",
+                "answer": [
+                    "SP004"
+                ],
+                "notes": "One column unstructured query"
+            },
+            {
+                "question_id": "3",
+                "question": "Give me all participants over the age of 30 who can work in tech",
+                "answer": [
+                    "SP001",
+                    "SP003",
+                    "SP005",
+                    "SP006"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "4",
+                "question": "Give me all of the men who work in the construction industry",
+                "answer": [
+                    "SP021",
+                    "SP023"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            }
+        ]
+    },
+    "Basic Question Answer Pairs - Mock 2": {
+        "database_name": "participants_mock2",
+        "questions": [
+            {
+                "question_id": "1",
+                "question": "Give me all of the participants with experience and skills in data and machine learning.",
+                "answer": [
+                    "SP001",
+                    "SP002",
+                    "SP003",
+                    "SP004",
+                    "SP005"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "2",
+                "question": "Give me all of the participants with experience and skills in software.",
+                "answer": [
+                    "SP006",
+                    "SP007",
+                    "SP008",
+                    "SP009",
+                    "SP010",
+                    "SP011",
+                    "SP012",
+                    "SP013",
+                    "SP014",
+                    "SP015"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "3",
+                "question": "Give me all of the participants with experience and skills in law.",
+                "answer": [
+                    "SP016",
+                    "SP017",
+                    "SP018",
+                    "SP019",
+                    "SP020",
+                    "SP021",
+                    "SP022",
+                    "SP023",
+                    "SP024",
+                    "SP025"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "4",
+                "question": "Give me all of the participants with experience and skills in medicine and health.",
+                "answer": [
+                    "SP026",
+                    "SP027",
+                    "SP028",
+                    "SP029",
+                    "SP030",
+                    "SP031",
+                    "SP032",
+                    "SP033",
+                    "SP034",
+                    "SP035"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "5",
+                "question": "Give me all of the participants with experience and skills in business and finance.",
+                "answer": [
+                    "SP036",
+                    "SP037",
+                    "SP038",
+                    "SP039",
+                    "SP040",
+                    "SP041",
+                    "SP042",
+                    "SP043",
+                    "SP044",
+                    "SP045"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "6",
+                "question": "Give me all of the participants with experience and skills in trade professionals.",
+                "answer": [
+                    "SP046",
+                    "SP047",
+                    "SP048",
+                    "SP049",
+                    "SP050",
+                    "SP051",
+                    "SP052",
+                    "SP053",
+                    "SP054",
+                    "SP055"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "7",
+                "question": "Give me all of the participants with experience and skills in construction.",
+                "answer": [
+                    "SP056",
+                    "SP057",
+                    "SP058",
+                    "SP059",
+                    "SP060"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "8",
+                "question": "Give me all of the participants with experience and skills in human resources.",
+                "answer": [
+                    "SP061",
+                    "SP062",
+                    "SP063",
+                    "SP064",
+                    "SP065"
+                ],
+                "notes": "One unstructured query"
+            },
+            {
+                "question_id": "9",
+                "question": "Give me all of the participants with experience and skills in human resources or data and machine learning.",
+                "answer": [
+                    "SP061",
+                    "SP062",
+                    "SP063",
+                    "SP064",
+                    "SP065",
+                    "SP001",
+                    "SP002",
+                    "SP003",
+                    "SP004",
+                    "SP005"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "10",
+                "question": "Give me all of the participants with experience and skills in data and machine learning or software.",
+                "answer": [
+                    "SP001",
+                    "SP002",
+                    "SP003",
+                    "SP004",
+                    "SP005",
+                    "SP006",
+                    "SP007",
+                    "SP008",
+                    "SP009",
+                    "SP010",
+                    "SP011",
+                    "SP012",
+                    "SP013",
+                    "SP014",
+                    "SP015"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "11",
+                "question": "Give me all of the participants with experience and skills in software or law.",
+                "answer": [
+                    "SP006",
+                    "SP007",
+                    "SP008",
+                    "SP009",
+                    "SP010",
+                    "SP011",
+                    "SP012",
+                    "SP013",
+                    "SP014",
+                    "SP015",
+                    "SP016",
+                    "SP017",
+                    "SP018",
+                    "SP019",
+                    "SP020",
+                    "SP021",
+                    "SP022",
+                    "SP023",
+                    "SP024",
+                    "SP025"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "12",
+                "question": "Give me all of the participants with experience and skills in law or medicine and health.",
+                "answer": [
+                    "SP016",
+                    "SP017",
+                    "SP018",
+                    "SP019",
+                    "SP020",
+                    "SP021",
+                    "SP022",
+                    "SP023",
+                    "SP024",
+                    "SP025",
+                    "SP026",
+                    "SP027",
+                    "SP028",
+                    "SP029",
+                    "SP030",
+                    "SP031",
+                    "SP032",
+                    "SP033",
+                    "SP034",
+                    "SP035"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "13",
+                "question": "Give me all of the participants with experience and skills in medicine and health or business and finance.",
+                "answer": [
+                    "SP026",
+                    "SP027",
+                    "SP028",
+                    "SP029",
+                    "SP030",
+                    "SP031",
+                    "SP032",
+                    "SP033",
+                    "SP034",
+                    "SP035",
+                    "SP036",
+                    "SP037",
+                    "SP038",
+                    "SP039",
+                    "SP040",
+                    "SP041",
+                    "SP042",
+                    "SP043",
+                    "SP044",
+                    "SP045"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "14",
+                "question": "Give me all of the participants with experience and skills in business and finance or trade professionals.",
+                "answer": [
+                    "SP036",
+                    "SP037",
+                    "SP038",
+                    "SP039",
+                    "SP040",
+                    "SP041",
+                    "SP042",
+                    "SP043",
+                    "SP044",
+                    "SP045",
+                    "SP046",
+                    "SP047",
+                    "SP048",
+                    "SP049",
+                    "SP050",
+                    "SP051",
+                    "SP052",
+                    "SP053",
+                    "SP054",
+                    "SP055"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "15",
+                "question": "Give me all of the participants with experience and skills in trade professionals or construction.",
+                "answer": [
+                    "SP046",
+                    "SP047",
+                    "SP048",
+                    "SP049",
+                    "SP050",
+                    "SP051",
+                    "SP052",
+                    "SP053",
+                    "SP054",
+                    "SP055",
+                    "SP056",
+                    "SP057",
+                    "SP058",
+                    "SP059",
+                    "SP060"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "16",
+                "question": "Give me all of the participants with experience and skills in construction or human resources.",
+                "answer": [
+                    "SP056",
+                    "SP057",
+                    "SP058",
+                    "SP059",
+                    "SP060",
+                    "SP061",
+                    "SP062",
+                    "SP063",
+                    "SP064",
+                    "SP065"
+                ],
+                "notes": "Two unstructured experience queries"
+            },
+            {
+                "question_id": "17",
+                "question": "Give me all of the participants who are men with experience and skills in data and machine learning.",
+                "answer": [
+                    "SP001",
+                    "SP003",
+                    "SP005"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "18",
+                "question": "Give me all of the participants who are men with experience and skills in software.",
+                "answer": [
+                    "SP007",
+                    "SP009",
+                    "SP011",
+                    "SP013",
+                    "SP015"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "19",
+                "question": "Give me all of the participants who are men with experience and skills in law.",
+                "answer": [
+                    "SP017",
+                    "SP019",
+                    "SP021",
+                    "SP023",
+                    "SP025"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "20",
+                "question": "Give me all of the participants who are men with experience and skills in medicine and health.",
+                "answer": [
+                    "SP027",
+                    "SP029",
+                    "SP031",
+                    "SP033",
+                    "SP035"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "21",
+                "question": "Give me all of the participants who are men with experience and skills in business and finance.",
+                "answer": [
+                    "SP037",
+                    "SP039",
+                    "SP041",
+                    "SP043",
+                    "SP045"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "22",
+                "question": "Give me all of the participants who are men with experience and skills in trade professionals.",
+                "answer": [
+                    "SP047",
+                    "SP049",
+                    "SP051",
+                    "SP053",
+                    "SP055"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "23",
+                "question": "Give me all of the participants who are men with experience and skills in construction.",
+                "answer": [
+                    "SP057",
+                    "SP059"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            },
+            {
+                "question_id": "24",
+                "question": "Give me all of the participants who are men with experience and skills in human resources.",
+                "answer": [
+                    "SP061",
+                    "SP063",
+                    "SP065"
+                ],
+                "notes": "On column structured query and one column unstructured query"
+            }
+        ]
+    }
+}

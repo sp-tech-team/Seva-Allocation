@@ -1,6 +1,7 @@
 import pdb
 import os
 import json
+import argparse
 import pandas as pd
 from chatbot.pg_text_to_sql import Text2PGSQL
 from database.participant_pg_database import load_participant_db, DbConfig, pretty_print_sqlalchemy_results
@@ -8,6 +9,18 @@ from database.participant_pg_database import load_participant_db, DbConfig, pret
 from dotenv import load_dotenv
 load_dotenv()
 
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '--test_file_json',
+        type=str,
+        help='JSON file containing test queries',
+        default="chatbot/test_data/tests2_converted.json"
+    )
+
+    return parser.parse_args()
 
 query_output_formatter_str = """
 Note for the follow query that will be asked below:
@@ -22,13 +35,18 @@ def evaluate_results(expected_results, actual_df, result_column="SP ID", include
     """
     expected_set = set(expected_results)
     actual_set = set(actual_df[result_column].tolist())
+
+    hits = list(expected_set.intersection(actual_set)) # True Positives
+    missing = list(expected_set - actual_set) # False Negatives
+    extra = list(actual_set - expected_set) # False Positives
+
     
     # True Positives for this test case: elements that are correctly retrieved.
-    tp = len(expected_set.intersection(actual_set))
+    tp = len(hits)
     # False Negatives: expected but missing.
-    fn = len(expected_set) - tp
+    fn = len(missing)
     # False Positives: items returned that shouldn't be.
-    fp = len(actual_set) - tp
+    fp = len(extra)
 
     precision = tp / (tp + fp) if (tp + fp) > 0 else 1.0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 1.0
@@ -36,9 +54,9 @@ def evaluate_results(expected_results, actual_df, result_column="SP ID", include
     samples = dict()
     if include_samples:
         samples = {
-                "hits_str": ",".join(list(expected_set.intersection(actual_set))), # True Positives
-                "missing_str": ",".join(list(expected_set - actual_set)), # False Negatives
-                "extra_str": ",".join(list(actual_set - expected_set)) # False Positives
+                "hits (TPs)": ",".join(hits),
+                "missing (FNs)": ",".join(missing),
+                "extra (FPs)": ",".join(extra)
             }
     return {
         "tp": tp,
@@ -56,6 +74,7 @@ def answer_question(text_to_sql, question):
     sql_output = text_to_sql.write_query(text_query)
     annotated_query = sql_output["query"]
     final_query = sql_output["query"]
+    error_str = "None"
     if "vector_searches" in sql_output:
         # Inject embeddings into the SQL query by replacing the placeholders.
         annotated_query = text_to_sql.inject_raw_search_strings(sql_output["query"], sql_output["vector_searches"])
@@ -67,12 +86,11 @@ def answer_question(text_to_sql, question):
     if sql_results["success"]:
         results_df = pd.DataFrame(sql_results['results'])
     else:
-        print("SQL Query Execution Failed:")
-        # Should log errors separately
-        #print(sql_results["error"])
+        print("SQL Query Execution Failed for question: ", question["question"])
         crashed = True
+        error_str = sql_results["error"]
 
-    return results_df, crashed, annotated_query
+    return results_df, crashed, annotated_query, error_str
 
 def run_eval_test(text_to_sql, test_queries_cfg, eval_results):
     # For macro averaging: collect each test case's metrics.
@@ -85,15 +103,19 @@ def run_eval_test(text_to_sql, test_queries_cfg, eval_results):
     # Evaluate each question in the current test
     basic_mock_tests = test_queries_cfg[test_name]["questions"]
     for idx, question in enumerate(basic_mock_tests):
-        results_df, crashed, annotated_query = answer_question(text_to_sql, question)
+        results_df, crashed, annotated_query, error_str = answer_question(text_to_sql, question)
         expected_results = question["answer"]
+        if "SP ID" not in results_df.columns:
+            print(f"Warning: 'SP ID' column not found in results for question {question['question_id']}.")
+            results_df["SP ID"] = []
         eval_dict = evaluate_results(expected_results, results_df)
         eval_results[test_name]["local_evals"].append({
             "question_id": question["question_id"],
             "question": question["question"],
             "crashed": crashed,
             "eval": eval_dict,
-            "debug_query": annotated_query
+            "debug_query": annotated_query,
+            "error_str": error_str
         })
         # Macro: Append metrics for later averaging.
         macro_precisions.append(eval_dict["precision"])
@@ -126,44 +148,43 @@ def run_eval_test(text_to_sql, test_queries_cfg, eval_results):
     }
 
 def make_eval_results_tables(eval_results):
-    # ========= 1. Local Evaluation Table =========
     local_records = []
+    global_records = []
     for test_name, suite_data in eval_results.items():
-        for test in suite_data.get("local_evals", []):
+        # ========= 1. Local Evaluation Table =========
+        for question in suite_data.get("local_evals", []):
             row = {
                 "test_name": test_name,
-                "question_id": test["question_id"],
-                "question": test["question"],
-                "crashed": test["crashed"],
-                "debug_query": test["debug_query"],
-                "tp": test["eval"]["tp"],
-                "fn": test["eval"]["fn"],
-                "fp": test["eval"]["fp"],
-                "precision": test["eval"]["precision"],
-                "recall": test["eval"]["recall"],
-                "f1": test["eval"]["f1"],
-                "hits_str": test["eval"]["samples"]["hits_str"],
-                "missing_str": test["eval"]["samples"]["missing_str"],
-                "extra_str": test["eval"]["samples"]["extra_str"]
+                "question_id": question["question_id"],
+                "question": question["question"],
+                "crashed": question["crashed"],
+                "debug_query": question["debug_query"],
+                "tp": question["eval"]["tp"],
+                "fn": question["eval"]["fn"],
+                "fp": question["eval"]["fp"],
+                "precision": question["eval"]["precision"],
+                "recall": question["eval"]["recall"],
+                "f1": question["eval"]["f1"],
+                "hits (TPs)": question["eval"]["samples"]["hits (TPs)"],
+                "missing (FNs)": question["eval"]["samples"]["missing (FNs)"],
+                "extra (FPs)": question["eval"]["samples"]["extra (FPs)"],
+                "error_str": question["error_str"]
             }
             local_records.append(row)
+        
+        # ========= 2. Global Evaluations Table =========
+        for avg_type in ["micro_avg", "macro_avg"]:
+            avg_data = suite_data.get(avg_type, {})
+            row = {
+                "test_name": test_name,
+                "average_type": avg_type.replace("_avg", ""),  # -> micro / macro
+                "precision": avg_data.get("precision"),
+                "recall": avg_data.get("recall"),
+                "f1": avg_data.get("f1")
+            }
+            global_records.append(row)
 
     local_evals_df = pd.DataFrame(local_records)
-
-    # ========= 2. Global Evaluations Table =========
-
-    global_records = []
-    for avg_type in ["micro_avg", "macro_avg"]:
-        avg_data = suite_data.get(avg_type, {})
-        row = {
-            "test_name": test_name,
-            "average_type": avg_type.replace("_avg", ""),  # -> micro / macro
-            "precision": avg_data.get("precision"),
-            "recall": avg_data.get("recall"),
-            "f1": avg_data.get("f1")
-        }
-        global_records.append(row)
-
     global_evals_df = pd.DataFrame(global_records)
 
     return local_evals_df, global_evals_df
@@ -173,7 +194,9 @@ if __name__ == "__main__":
     if OPENAI_API_KEY is None:
         raise ValueError("OPENAI_API_KEY environment variable not set. Please set it in your .env file.")
     
-    with open("chatbot/test_data/tests.json", "r") as file:
+    args = parse_args()
+    
+    with open(args.test_file_json, "r") as file:
         test_queries_cfg = json.load(file)
     
     eval_results = dict()
@@ -203,6 +226,6 @@ if __name__ == "__main__":
     with open("chatbot/test_results/eval_results.json", "w") as f:
         json.dump(eval_results, f, indent=4)
     local_evals_df, global_evals_df = make_eval_results_tables(eval_results)
-    local_evals_df.to_csv("chatbot/test_results/local_evals_results.csv", index=False)
-    global_evals_df.to_csv("chatbot/test_results/global_evals_results.csv", index=False)
+    local_evals_df.to_csv("chatbot/test_results/local_evals_results2.csv", index=False)
+    global_evals_df.to_csv("chatbot/test_results/global_evals_results2.csv", index=False)
     print("\n=== Evaluation Results Saved ===")

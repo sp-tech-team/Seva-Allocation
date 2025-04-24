@@ -52,6 +52,7 @@ def pretty_print_sqlalchemy_results(results, max_rows=10):
         result: SQLAlchemy result object (e.g., from conn.execute(...)).
         max_rows: Maximum number of rows to print (default = 10).
     """
+    pdb.set_trace()
     rows = results.fetchall()
     if not rows:
         print("No results found.")
@@ -140,7 +141,6 @@ class ParticipantDatabasePG:
             f'"{col}" <=> :query_vector < {threshold}' for col in embedding_columns
         ]) if threshold else "TRUE"
 
-        #pdb.set_trace()
         selected_cols = ', '.join([f'"{col}"' for col in (text_columns or [])])
         sql = f"""
         SELECT 
@@ -161,7 +161,7 @@ def create_participants_db(db_config: DbConfig):
 
     use_mock_data = True
     if use_mock_data:
-        participant_info_df = pd.read_csv('data/input_participant_info_cleaned_mock.csv')
+        participant_info_df = pd.read_csv('chatbot/test_data/input_participant_info_cleaned_mock2.csv')
     else:
         participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
         participant_data = ParticipantData(participant_info_raw_df)

@@ -1,0 +1,5 @@
+Test Name,Database Name,Question ID,Question,Answer,Notes
+Basic Question Answer Pairs - Mock 1,participants_mock1,1,Give me all participants over the age of 30,"[""SP001"", ""SP003"", ""SP005"", ""SP006"", ""SP007"", ""SP008"", ""SP009"", ""SP010"", ""SP011"", ""SP012"", ""SP013"", ""SP014"", ""SP016"", ""SP017"", ""SP019"", ""SP020"", ""SP021"", ""SP022"", ""SP023""]",One column structured query
+Basic Question Answer Pairs - Mock 1,participants_mock1,2,Give me all participants who can work on front end development,"[""SP004""]",One column unstructured query
+Basic Question Answer Pairs - Mock 1,participants_mock1,3,Give me all participants over the age of 30 who can work in tech,"[""SP001"", ""SP003"", ""SP005"", ""SP006""]",On column structured query and one column unstructured query
+Basic Question Answer Pairs - Mock 1,participants_mock1,4,Give me all of the men who work in the construction industry,"[""SP021"", ""SP023""]",On column structured query and one column unstructured query
