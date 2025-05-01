@@ -119,6 +119,13 @@ class ParticipantData():
         participant_info_df["Years of Experience"] = self.create_years_of_experience_col(participant_info_df)
         participant_info_df["Total Years of Experience"] = self.create_total_years_experience_col(participant_info_df)
         participant_info_df["Summary"] = participant_info_df.apply(create_participant_summary, axis=1)
+        pref_col_order = ['SP ID', 'Gender', 'Age', 'Total Years of Experience',
+                          'Work Experience/Industry', 'Work Experience/Designation', 'Work Experience/Tasks',
+                          'Skills', 'Any Additional Skills', 'Computer Skills',
+                          'Education/Qualifications', 'Education/Specialization', 'Work Experience/Company',
+                          'Years of Experience', 'Work Experience/From Date', 'Work Experience/To Date',
+                          'Languages', 'Summary']
+        participant_info_df = participant_info_df[pref_col_order]
         return participant_info_df
 
 
@@ -128,4 +135,4 @@ if __name__ == "__main__":
     participant_data = ParticipantData(participant_info_raw_df)
     participant_info_df = participant_data.create_participant_info_df()
     print("writing cleaned file")
-    participant_info_df.to_csv("data/input_participant_info_cleaned.csv")
+    participant_info_df.to_csv("data/input_participant_info_cleaned.csv", index=False)

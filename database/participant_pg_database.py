@@ -20,20 +20,26 @@ def parse_args():
     parser = argparse.ArgumentParser()
     
     parser.add_argument(
-        '--database_name',
-        type=str,
-        help='Name of the database to connect to',
-        default="participants_test")
-    parser.add_argument(
         '--create_db',
         action='store_true',
         help='Whether to refresh data in the database (default: False)')
-
+    parser.add_argument(
+        '--input_file_csv',
+        type=str,
+        help='Input CSV file for creating the database',
+        default='chatbot/test_data/input_participant_info_cleaned_mock2.csv'
+    )
+    parser.add_argument(
+        '--table_base_name',
+        type=str,
+        help='Name of the table to query',
+        default=''
+    )
     
     return parser.parse_args()
 
-STRUCTURED_TABLE_NAME = "structured_data"
-UNSTRUCTURED_TABLE_NAME = "unstructured_data"
+STRUCTURED_TABLE_NAME_POSTFIX = "structured_data"
+UNSTRUCTURED_TABLE_NAME_POSTFIX = "unstructured_data"
 
 class DbConfig:
     def __init__(self, db_user, db_host, db_port, db_name, db_password, openai_api_key):
@@ -52,7 +58,6 @@ def pretty_print_sqlalchemy_results(results, max_rows=10):
         result: SQLAlchemy result object (e.g., from conn.execute(...)).
         max_rows: Maximum number of rows to print (default = 10).
     """
-    pdb.set_trace()
     rows = results.fetchall()
     if not rows:
         print("No results found.")
@@ -70,26 +75,32 @@ def format_query_result(result, headers=None):
     return table.get_string()
 
 class ParticipantDatabasePG:
-    def __init__(self, engine):
+    def __init__(self, engine, table_base_name):
         self.engine = engine
+        self.table_base_name = table_base_name
         self.inspector = inspect(engine)
         self.lc_db = SQLDatabase(engine)
         self.lc_db_query_tool = QuerySQLDataBaseTool(db=self.lc_db)
 
+    def reset_table_base_name(self, table_base_name):
+        self.table_base_name = table_base_name
+
+    def get_table_names_limited(self):
+        return [self.get_structured_table_name(), self.get_unstructured_table_name()]
     def get_structured_table_name(self):
-        return STRUCTURED_TABLE_NAME
+        return self.table_base_name + '_' + STRUCTURED_TABLE_NAME_POSTFIX
 
     def get_unstructured_table_name(self):
-        return UNSTRUCTURED_TABLE_NAME
+        return self.table_base_name + '_' + UNSTRUCTURED_TABLE_NAME_POSTFIX
 
     def get_structured_table_columns_info(self):
-        return self.inspector.get_columns(STRUCTURED_TABLE_NAME)
+        return self.inspector.get_columns(self.get_structured_table_name())
     
     def get_structured_table_column_names(self):
         return [col["name"] for col in self.get_structured_table_columns_info()]
 
     def get_unstructured_table_columns_info(self):
-        return self.inspector.get_columns(UNSTRUCTURED_TABLE_NAME)
+        return self.inspector.get_columns(self.get_unstructured_table_name())
     
     def get_unstructured_table_column_names(self):
         return [col["name"] for col in self.get_unstructured_table_columns_info()]
@@ -122,6 +133,7 @@ class ParticipantDatabasePG:
         return embedding_model.embed_query(query)  # Return list[float]
 
     def run_query(self, query_string):
+        #return {"result": self.participant_db.lc_db_query_tool.invoke(sql_query)}
         try:
             with self.engine.connect() as conn:
                 results = conn.execute(text(query_string))
@@ -136,7 +148,7 @@ class ParticipantDatabasePG:
                 "query": query_string
             }
 
-    def similarity_search(self, query_vector, table, embedding_columns, text_columns=None, threshold=None, limit=100):
+    def similarity_search(self, query_vector, embedding_columns, text_columns=None, threshold=None, limit=100):
         where_clause = " OR ".join([
             f'"{col}" <=> :query_vector < {threshold}' for col in embedding_columns
         ]) if threshold else "TRUE"
@@ -146,7 +158,7 @@ class ParticipantDatabasePG:
         SELECT 
             "SP ID",
             {selected_cols}
-        FROM {table}
+        FROM {self.get_unstructured_table_name()}
         WHERE {where_clause}
         LIMIT {limit};
         """
@@ -155,13 +167,13 @@ class ParticipantDatabasePG:
             results = conn.execute(text(sql), {"query_vector": pgvector_str})
             return results
     
-def create_participants_db(db_config: DbConfig):
+def create_participants_db(db_config: DbConfig, input_file_csv: str = '', table_base_name: str = ''):
     # === Set up OpenAI Embeddings ===
     embedding_model = OpenAIEmbeddings()  # uses OPENAI_API_KEY env var
 
     use_mock_data = True
     if use_mock_data:
-        participant_info_df = pd.read_csv('chatbot/test_data/input_participant_info_cleaned_mock2.csv')
+        participant_info_df = pd.read_csv(input_file_csv)
     else:
         participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
         participant_data = ParticipantData(participant_info_raw_df)
@@ -178,12 +190,13 @@ def create_participants_db(db_config: DbConfig):
     # structured_df["Languages"] = structured_df["Languages"].apply(lambda x: x if isinstance(x, list) else [])
 
     # === Create DB connection ===
-    engine = create_engine(f"postgresql+psycopg2://{db_config.db_user}@{db_config.db_host}:{db_config.db_port}/{db_config.db_name}")
+    connection_str = f"postgresql+psycopg2://{db_config.db_user}:{db_config.db_password}@{db_config.db_host}:{db_config.db_port}/{db_config.db_name}"
+    engine = create_engine(connection_str)
     metadata = MetaData()
 
     # === Upload structured_df to PostgreSQL ===
     structured_df.to_sql(
-        STRUCTURED_TABLE_NAME,
+        table_base_name + '_' + STRUCTURED_TABLE_NAME_POSTFIX,
         engine,
         if_exists="replace",
         index=False,
@@ -207,8 +220,9 @@ def create_participants_db(db_config: DbConfig):
     for col in unstructured_cols:
         columns.append(Column(col, String))  # store raw text
         columns.append(Column(f"{col}_embedding", Vector(1536)))  # store embedding
-
-    unstructured_table = Table(UNSTRUCTURED_TABLE_NAME, metadata, *columns)
+    
+    unstructured_table_name = table_base_name + '_' + UNSTRUCTURED_TABLE_NAME_POSTFIX
+    unstructured_table = Table(unstructured_table_name, metadata, *columns)
     metadata.drop_all(engine, [unstructured_table], checkfirst=True)
     metadata.create_all(engine)
 
@@ -225,27 +239,27 @@ def create_participants_db(db_config: DbConfig):
         conn.execute(unstructured_table.insert(), insert_data)
     
     print("finished")
-    return ParticipantDatabasePG(engine)
+    return ParticipantDatabasePG(engine, table_base_name)
 
-def load_participant_db(db_config: DbConfig):
+def load_participant_db(db_config: DbConfig, table_base_name: str = ''):
     # === Load database ===
-    engine = create_engine(f"postgresql+psycopg2://{db_config.db_user}@{db_config.db_host}:{db_config.db_port}/{db_config.db_name}")
-    participant_db = ParticipantDatabasePG(engine)
+    connection_str = f"postgresql+psycopg2://{db_config.db_user}:{db_config.db_password}@{db_config.db_host}:{db_config.db_port}/{db_config.db_name}"
+    engine = create_engine(connection_str)
+    participant_db = ParticipantDatabasePG(engine, table_base_name)
     return participant_db
 
 if __name__ == "__main__":
     load_dotenv()
     args = parse_args()
-    database_name = args.database_name
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     if OPENAI_API_KEY is None:
         raise ValueError("OPENAI_API_KEY environment variable not set. Please set it in your .env file.")
     db_config = DbConfig(
-        os.getenv("DB_USER"),
-        os.getenv("DB_HOST"),
-        os.getenv("DB_PORT"),
-        database_name,
-        os.getenv("DB_PASSWORD"),
+        os.getenv("SUPABASE_USER"),
+        os.getenv("SUPABASE_HOST"),
+        os.getenv("SUPABASE_PORT"),
+        os.getenv("SUPABASE_NAME"),
+        os.getenv("SUPABASE_PASSWORD"),
         os.getenv("OPENAI_API_KEY")
     )
 
@@ -253,9 +267,9 @@ if __name__ == "__main__":
     # Load database
     participant_db = None
     if args.create_db:
-        participant_db = create_participants_db(db_config)
+        participant_db = create_participants_db(db_config, args.input_file_csv, args.table_base_name)
     else:
-        participant_db = load_participant_db(db_config)
+        participant_db = load_participant_db(db_config, args.table_base_name)
 
      # === Test 1: Print all table columns ===
     print("\n--- All Tables and Columns ---")
@@ -276,7 +290,6 @@ if __name__ == "__main__":
 
     similarity_results = participant_db.similarity_search(
         query_vector=vector,
-        table=UNSTRUCTURED_TABLE_NAME,
         embedding_columns=["Skills_embedding", "Computer Skills_embedding"],
         text_columns=["Skills", "Computer Skills"],
         threshold=0.2,
@@ -287,14 +300,14 @@ if __name__ == "__main__":
 
      # === Test 4: Run ad hoc SQL query ===
     print("\n--- Custom Query Result ---")
-    custom_query = """
+    custom_query = f"""
     SELECT "SP ID", "Skills"
-    FROM unstructured_data
+    FROM {participant_db.get_unstructured_table_name()}
     LIMIT 5;
     """
     custom_result = participant_db.run_query(custom_query)
     if custom_result["success"]:
         print("Query executed successfully.")
-        pretty_print_sqlalchemy_results(custom_result)
+        pretty_print_sqlalchemy_results(custom_result['results'])
     else:
         print("Error executing query:", custom_result["error"])

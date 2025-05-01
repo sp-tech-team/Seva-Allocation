@@ -4,7 +4,8 @@ import json
 import argparse
 import pandas as pd
 from chatbot.pg_text_to_sql import Text2PGSQL
-from database.participant_pg_database import load_participant_db, DbConfig, pretty_print_sqlalchemy_results
+from database.participant_pg_database import load_participant_db, DbConfig
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -17,7 +18,12 @@ def parse_args():
         '--test_file_json',
         type=str,
         help='JSON file containing test queries',
-        default="chatbot/test_data/tests2_converted.json"
+        default="chatbot/test_data/tests_converted.json"
+    )
+    parser.add_argument(
+        "--run_tests_filter",
+        nargs="*",
+        help=f"List of test names to run. example: --run_tests_filter 'test1' 'test2'",
     )
 
     return parser.parse_args()
@@ -39,7 +45,6 @@ def evaluate_results(expected_results, actual_df, result_column="SP ID", include
     hits = list(expected_set.intersection(actual_set)) # True Positives
     missing = list(expected_set - actual_set) # False Negatives
     extra = list(actual_set - expected_set) # False Positives
-
     
     # True Positives for this test case: elements that are correctly retrieved.
     tp = len(hits)
@@ -92,7 +97,7 @@ def answer_question(text_to_sql, question):
 
     return results_df, crashed, annotated_query, error_str
 
-def run_eval_test(text_to_sql, test_queries_cfg, eval_results):
+def run_eval_test(text_to_sql, test_queries_cfg, eval_results, test_name):
     # For macro averaging: collect each test case's metrics.
     macro_precisions = []
     macro_recalls = []
@@ -101,8 +106,8 @@ def run_eval_test(text_to_sql, test_queries_cfg, eval_results):
     # For micro averaging: sum TP, FP, and FN over all test cases.
     total_tp = total_fp = total_fn = 0
     # Evaluate each question in the current test
-    basic_mock_tests = test_queries_cfg[test_name]["questions"]
-    for idx, question in enumerate(basic_mock_tests):
+    test = test_queries_cfg[test_name]["questions"]
+    for idx, question in enumerate(test):
         results_df, crashed, annotated_query, error_str = answer_question(text_to_sql, question)
         expected_results = question["answer"]
         if "SP ID" not in results_df.columns:
@@ -198,34 +203,41 @@ if __name__ == "__main__":
     
     with open(args.test_file_json, "r") as file:
         test_queries_cfg = json.load(file)
+    # Filter the test queries based on the provided filter
+    if args.run_tests_filter:
+        test_queries_cfg = {
+            name: cfg for name, cfg in test_queries_cfg.items()
+            if name in args.run_tests_filter
+        }
     
-    eval_results = dict()
+    db_config = DbConfig(
+        os.getenv("SUPABASE_USER"),
+        os.getenv("SUPABASE_HOST"),
+        os.getenv("SUPABASE_PORT"),
+        os.getenv("SUPABASE_NAME"),
+        os.getenv("SUPABASE_PASSWORD"),
+        os.getenv("OPENAI_API_KEY")
+    )
 
+    participant_db = load_participant_db(db_config, 'participants')    
+    eval_results = dict()
     for test_name in test_queries_cfg.keys():
         eval_results[test_name] = {
-            "database_name": test_queries_cfg[test_name]["database_name"],
+            "table_base_name": test_queries_cfg[test_name]["table_base_name"],
             "local_evals": [],
             "micro_avg": {},
             "macro_avg": {}
         }
-        
-        db_config = DbConfig(
-            os.getenv("DB_USER"),
-            os.getenv("DB_HOST"),
-            os.getenv("DB_PORT"),
-            test_queries_cfg[test_name]["database_name"],
-            os.getenv("DB_PASSWORD"),
-            os.getenv("OPENAI_API_KEY")
-        )
-        participant_db = load_participant_db(db_config)
+        table_base_name = test_queries_cfg[test_name]["table_base_name"]
+        participant_db.reset_table_base_name(table_base_name)
         text_to_sql = Text2PGSQL(participant_db)
-        run_eval_test(text_to_sql, test_queries_cfg, eval_results)
+        run_eval_test(text_to_sql, test_queries_cfg, eval_results, test_name)
 
     eval_results_json = json.dumps(eval_results, indent=4)
     print(eval_results_json)
     with open("chatbot/test_results/eval_results.json", "w") as f:
         json.dump(eval_results, f, indent=4)
     local_evals_df, global_evals_df = make_eval_results_tables(eval_results)
-    local_evals_df.to_csv("chatbot/test_results/local_evals_results2.csv", index=False)
-    global_evals_df.to_csv("chatbot/test_results/global_evals_results2.csv", index=False)
+    local_evals_df.to_csv("chatbot/test_results/local_evals_results.csv", index=False)
+    global_evals_df.to_csv("chatbot/test_results/global_evals_results.csv", index=False)
     print("\n=== Evaluation Results Saved ===")

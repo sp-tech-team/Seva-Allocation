@@ -45,7 +45,7 @@ def convert_df_to_json_format(df):
     # Group by "Test Name"
     for test_name, group in df.groupby("Test Name"):
         # Assume the same database for all rows in this test group
-        database_name = group["Database Name"].iloc[0]
+        table_base_name = group["Table Base Name"].iloc[0]
 
         questions = []
         for _, row in group.iterrows():
@@ -58,7 +58,7 @@ def convert_df_to_json_format(df):
             questions.append(question)
 
         result[test_name] = {
-            "database_name": database_name,
+            "table_base_name": table_base_name,
             "questions": questions
         }
     return result
@@ -67,11 +67,11 @@ def convert_df_to_json_format(df):
 def convert_json_to_df(test_json):
     records = []
     for test_name, test_data in test_json.items():
-        database_name = test_data["database_name"]
+        table_base_name = test_data["table_base_name"]
         for question in test_data["questions"]:
             record = {
                 "Test Name": test_name,
-                "Database Name": database_name,
+                "Table Base Name": table_base_name,
                 "Question ID": question["question_id"],
                 "Question": question["question"],
                 "Answer": str(question["answer"]),  # convert list to string

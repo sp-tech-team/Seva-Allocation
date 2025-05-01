@@ -1,14 +1,27 @@
 import pdb
 import os
+import argparse
 import re
 from typing_extensions import Annotated, TypedDict
 from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain import hub
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
-from database.participant_pg_database import DbConfig, load_participant_db, format_query_result, pretty_print_sqlalchemy_results
+from database.participant_pg_database import DbConfig, load_participant_db, pretty_print_sqlalchemy_results
 from dotenv import load_dotenv
 load_dotenv()
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument(
+        '--table_base_name',
+        type=str,
+        help='Name of the table to query',
+        default='participants'
+    )
+    
+    return parser.parse_args()
 
 
 class SQLGenOutput(TypedDict):
@@ -79,7 +92,7 @@ class Text2PGSQL:
         prompt = self.vector_sql_prompt_template.invoke(
             {
                 "dialect": self.participant_db.lc_db.dialect,
-                "schema": self.participant_db.lc_db.get_table_info(),
+                "schema": self.participant_db.lc_db.get_table_info(table_names=self.participant_db.get_table_names_limited()),
                 "input": text_query,
             }
         )
@@ -128,7 +141,6 @@ class Text2PGSQL:
 
     def execute_query(self, sql_query: str):
         """Execute SQL query."""
-        #return {"result": self.participant_db.lc_db_query_tool.invoke(sql_query)}
         return self.participant_db.run_query(sql_query)
     
     def answer_query(self, text_query: str):
@@ -146,15 +158,18 @@ if __name__ == "__main__":
     if OPENAI_API_KEY is None:
         raise ValueError("OPENAI_API_KEY environment variable not set. Please set it in your .env file.")
     
+    args = parse_args()
+    
     db_config = DbConfig(
-        os.getenv("DB_USER"),
-        os.getenv("DB_HOST"),
-        os.getenv("DB_PORT"),
-        os.getenv("DB_NAME"),
-        os.getenv("DB_PASSWORD"),
+        os.getenv("SUPABASE_USER"),
+        os.getenv("SUPABASE_HOST"),
+        os.getenv("SUPABASE_PORT"),
+        os.getenv("SUPABASE_NAME"),
+        os.getenv("SUPABASE_PASSWORD"),
         os.getenv("OPENAI_API_KEY")
     )
-    participant_db = load_participant_db(db_config)
+
+    participant_db = load_participant_db(db_config, args.table_base_name)
     text_to_sql = Text2PGSQL(participant_db)
     
     # An example text query that may generate multiple vector search slots.
@@ -176,7 +191,7 @@ if __name__ == "__main__":
     sql_result = text_to_sql.execute_query(final_query)
     if sql_result["success"]:
         print("SQL Query Result:")
-        pretty_print_sqlalchemy_results(sql_result, max_rows=1000)
+        pretty_print_sqlalchemy_results(sql_result['results'], max_rows=1000)
     else:
         print("SQL Query failed to execute.")
         print(sql_result["error"])
