@@ -7,6 +7,8 @@ prettytable
 gradio
 sqlalchemy
 psycopg2-binary
+pgvector
+tabulate
 
 langchain
 langchain-experimental

@@ -5,6 +5,7 @@ import argparse
 import pandas as pd
 from chatbot.pg_text_to_sql import Text2PGSQL
 from database.participant_pg_database import load_participant_db, DbConfig
+from chatbot.scripts.pg_text_to_sql_test_converter import convert_df_to_json_format
 
 
 from dotenv import load_dotenv
@@ -18,12 +19,22 @@ def parse_args():
         '--test_file_json',
         type=str,
         help='JSON file containing test queries',
-        default="chatbot/test_data/tests_converted.json"
+    )
+    parser.add_argument(
+        '--test_file_csv',
+        type=str,
+        help='csv file containing test queries',
     )
     parser.add_argument(
         "--run_tests_filter",
         nargs="*",
-        help=f"List of test names to run. example: --run_tests_filter 'test1' 'test2'",
+        help=f"List of test names to run. example: --run_tests_filter 'Basic Question Answer Pairs - Mock 1' 'Basic Question Answer Pairs - Mock 2'",
+    )
+    parser.add_argument(
+        "--results_file_json",
+        type=str,
+        default="chatbot/test_results/eval_results.json",
+        help="Path to save the evaluation results JSON file"
     )
 
     return parser.parse_args()
@@ -200,9 +211,18 @@ if __name__ == "__main__":
         raise ValueError("OPENAI_API_KEY environment variable not set. Please set it in your .env file.")
     
     args = parse_args()
+
+    if args.test_file_json is None and args.test_file_csv is None:
+        raise ValueError("Please provide either a JSON or CSV file containing test queries.")
+    if args.test_file_json  and args.test_file_csv:
+        raise ValueError("Please provide only one of the JSON or CSV files containing test queries.")
     
-    with open(args.test_file_json, "r") as file:
-        test_queries_cfg = json.load(file)
+    if args.test_file_json:
+        with open(args.test_file_json, "r") as file:
+            test_queries_cfg = json.load(file)
+    elif args.test_file_csv:
+        test_df = pd.read_csv(args.test_file_csv)
+        test_queries_cfg = convert_df_to_json_format(test_df)
     # Filter the test queries based on the provided filter
     if args.run_tests_filter:
         test_queries_cfg = {
@@ -222,20 +242,21 @@ if __name__ == "__main__":
     participant_db = load_participant_db(db_config, 'participants')    
     eval_results = dict()
     for test_name in test_queries_cfg.keys():
+        table_base_name = test_queries_cfg[test_name]["table_base_name"]
         eval_results[test_name] = {
-            "table_base_name": test_queries_cfg[test_name]["table_base_name"],
+            "table_base_name": table_base_name,
             "local_evals": [],
             "micro_avg": {},
             "macro_avg": {}
         }
-        table_base_name = test_queries_cfg[test_name]["table_base_name"]
         participant_db.reset_table_base_name(table_base_name)
         text_to_sql = Text2PGSQL(participant_db)
         run_eval_test(text_to_sql, test_queries_cfg, eval_results, test_name)
 
     eval_results_json = json.dumps(eval_results, indent=4)
     print(eval_results_json)
-    with open("chatbot/test_results/eval_results.json", "w") as f:
+    os.makedirs(os.path.dirname(args.results_file_json), exist_ok=True)
+    with open(args.results_file_json, "w") as f:
         json.dump(eval_results, f, indent=4)
     local_evals_df, global_evals_df = make_eval_results_tables(eval_results)
     local_evals_df.to_csv("chatbot/test_results/local_evals_results.csv", index=False)

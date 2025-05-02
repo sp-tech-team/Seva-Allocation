@@ -27,12 +27,12 @@ def parse_args():
         '--input_file_csv',
         type=str,
         help='Input CSV file for creating the database',
-        default='chatbot/test_data/input_participant_info_cleaned_mock2.csv'
+        default='data/input_participant_info_cleaned_mock2.csv'
     )
     parser.add_argument(
         '--table_base_name',
         type=str,
-        help='Name of the table to query',
+        help='The base name of the tables group in the database, ex "participants", "participants_mock2"',
         default=''
     )
     

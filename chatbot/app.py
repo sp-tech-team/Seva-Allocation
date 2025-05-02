@@ -1,49 +1,48 @@
 import gradio as gr
-from chatbot import initialize_pipeline, db_selector_query, prompt_tmpl
 import argparse
 import os
+from database.participant_pg_database import DbConfig, load_participant_db
+from chatbot.pg_text_to_sql import Text2PGSQL
+from chatbot.pg_chatbot import ChatbotPipeline
+
+# May need to remove this for huggingface spaces
+from dotenv import load_dotenv
+load_dotenv()
 
 
-def inference_parse_args() -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     """Parses command-line arguments.
 
     Returns:
         A namespace with parsed arguments.
     """
-    parser = argparse.ArgumentParser(
-        description="Process an input file and save the results to an output file."
-    )
-
+    parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--num_retrievals",
-        default=10,
-        type=int,
-        help="Number of retrievals from db.",
-    )
-
-    parser.add_argument(
-        "-participant_pinecone_index_name",
-        default='participant-test-local',
-        help="Path to vector store dbs.",
-    )
-
-    parser.add_argument(
-        "-vrf_pinecone_index_name",
-        default='vrf-test-local',
-        help="Path to vector store dbs.",
-    )
-
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        dest='verbose',  # Default False
-        help="Enable verbose logging. (default is disabled)"
+        '--table_base_name',
+        type=str,
+        help='Name of the table to query',
+        default='participants_mock2'
     )
 
     return parser.parse_args()
 
-args = inference_parse_args()
-retrievers, llm = initialize_pipeline(args.participant_pinecone_index_name, args.vrf_pinecone_index_name, args.num_retrievals)
+args = parse_args()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if OPENAI_API_KEY is None:
+    raise ValueError("OPENAI_API_KEY environment variable not set. Please set it in your .env file.")
+db_config = DbConfig(
+    os.getenv("SUPABASE_USER"),
+    os.getenv("SUPABASE_HOST"),
+    os.getenv("SUPABASE_PORT"),
+    os.getenv("SUPABASE_NAME"),
+    os.getenv("SUPABASE_PASSWORD"),
+    os.getenv("OPENAI_API_KEY")
+)
+
+participant_db = load_participant_db(db_config, args.table_base_name)
+text_to_sql = Text2PGSQL(participant_db)
+pipeline = ChatbotPipeline(text_to_sql)
 
 # === Define Chatbot Logic ===
 def chat_with_bot(user_input, chat_history):
@@ -52,18 +51,9 @@ def chat_with_bot(user_input, chat_history):
     and generating a response using the LLM.
     """
     try:
-        db_selector_response = llm.complete(db_selector_query + user_input)
-        if db_selector_response.text not in retrievers:
-            raise ValueError(f"Invalid database selector response: {db_selector_response.text}")
-        nodes = retrievers[db_selector_response.text].retrieve(user_input)
-        context_str = "\n".join(node.get_content() for node in nodes)
-        query = prompt_tmpl.format(context_str=context_str, query_str=user_input)
-        response = llm.complete(query)
-
-        # Update chat history
-        bot_response = response.text
+        pretty_sql_results = pipeline.chatbot(user_input)
         chat_history.append(("User", user_input))
-        chat_history.append(("Bot", bot_response))
+        chat_history.append(("Bot", pretty_sql_results))
 
         return "", chat_history  # Return updated chat history and clear input box
     except Exception as e:

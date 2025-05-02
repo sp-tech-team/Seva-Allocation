@@ -3,6 +3,25 @@ import os
 import pdb
 from database.concat_participant_features import ConcatTool
 from datetime import datetime
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument(
+        '--participant_info_raw_csv',
+        type=str,
+        help='Raw participant info csv file from Sadhaka',
+        default='data/input_participant_info_raw.csv'
+    )
+    parser.add_argument(
+        '--output_participant_info_cleaned_csv',
+        type=str,
+        help='Output cleaned participant info csv file',
+        default='data/input_participant_info_cleaned.csv'
+    )
+    
+    return parser.parse_args()
 
 def parse_date(date_str):
     try:
@@ -130,9 +149,9 @@ class ParticipantData():
 
 
 if __name__ == "__main__":
-    print("reading raw file")
-    participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
+    args = parse_args()
+    participant_info_raw_df = pd.read_csv(args.participant_info_raw_csv)
     participant_data = ParticipantData(participant_info_raw_df)
     participant_info_df = participant_data.create_participant_info_df()
     print("writing cleaned file")
-    participant_info_df.to_csv("data/input_participant_info_cleaned.csv", index=False)
+    participant_info_df.to_csv(args.output_participant_info_cleaned_csv, index=False)
