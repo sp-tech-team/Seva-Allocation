@@ -1,6 +1,7 @@
 import pdb
 import os
 import json
+import yaml
 import argparse
 import pandas as pd
 from chatbot.pg_text_to_sql import Text2PGSQL
@@ -35,6 +36,18 @@ def parse_args():
         type=str,
         default="chatbot/test_results/eval_results.json",
         help="Path to save the evaluation results JSON file"
+    )
+    parser.add_argument(
+        "--prompts_config_yaml",
+        type=str,
+        default="chatbot/configs/text_to_sql_prompts.yaml",
+        help="Path to the YAML file containing the prompt configuration"
+    )
+    parser.add_argument(
+        "--prompt_key",
+        type=str,
+        default="prompt_pg_vector_1",
+        help="Key for the prompt to use from the YAML file"
     )
 
     return parser.parse_args()
@@ -235,11 +248,13 @@ if __name__ == "__main__":
         os.getenv("SUPABASE_HOST"),
         os.getenv("SUPABASE_PORT"),
         os.getenv("SUPABASE_NAME"),
-        os.getenv("SUPABASE_PASSWORD"),
-        os.getenv("OPENAI_API_KEY")
+        os.getenv("SUPABASE_PASSWORD")
     )
 
-    participant_db = load_participant_db(db_config, 'participants')    
+    participant_db = load_participant_db(db_config, 'participants')
+    with open(args.prompts_config_yaml, "r") as f:
+        prompt_tmpls = yaml.safe_load(f)
+    text_to_sql_prompt_tmpl = prompt_tmpls[args.prompt_key]
     eval_results = dict()
     for test_name in test_queries_cfg.keys():
         table_base_name = test_queries_cfg[test_name]["table_base_name"]
@@ -250,7 +265,7 @@ if __name__ == "__main__":
             "macro_avg": {}
         }
         participant_db.reset_table_base_name(table_base_name)
-        text_to_sql = Text2PGSQL(participant_db)
+        text_to_sql = Text2PGSQL(participant_db, text_to_sql_prompt_tmpl)
         run_eval_test(text_to_sql, test_queries_cfg, eval_results, test_name)
 
     eval_results_json = json.dumps(eval_results, indent=4)

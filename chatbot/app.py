@@ -1,6 +1,7 @@
 import gradio as gr
 import argparse
 import os
+import yaml
 from database.participant_pg_database import DbConfig, load_participant_db
 from chatbot.pg_text_to_sql import Text2PGSQL
 from chatbot.pg_chatbot import ChatbotPipeline
@@ -23,6 +24,18 @@ def parse_args() -> argparse.Namespace:
         help='Name of the table to query',
         default='participants_mock2'
     )
+    parser.add_argument(
+        "--prompts_config_yaml",
+        type=str,
+        default="chatbot/configs/text_to_sql_prompts.yaml",
+        help="Path to the YAML file containing the prompt configuration"
+    )
+    parser.add_argument(
+        "--prompt_key",
+        type=str,
+        default="prompt_pg_vector_1",
+        help="Key for the prompt to use from the YAML file"
+    )
 
     return parser.parse_args()
 
@@ -36,12 +49,14 @@ db_config = DbConfig(
     os.getenv("SUPABASE_HOST"),
     os.getenv("SUPABASE_PORT"),
     os.getenv("SUPABASE_NAME"),
-    os.getenv("SUPABASE_PASSWORD"),
-    os.getenv("OPENAI_API_KEY")
+    os.getenv("SUPABASE_PASSWORD")
 )
 
 participant_db = load_participant_db(db_config, args.table_base_name)
-text_to_sql = Text2PGSQL(participant_db)
+with open(args.prompts_config_yaml, "r") as f:
+    prompt_tmpls = yaml.safe_load(f)
+text_to_sql_prompt_tmpl = prompt_tmpls[args.prompt_key]
+text_to_sql = Text2PGSQL(participant_db, text_to_sql_prompt_tmpl)
 pipeline = ChatbotPipeline(text_to_sql)
 
 # === Define Chatbot Logic ===
@@ -63,7 +78,7 @@ def chat_with_bot(user_input, chat_history):
 def create_interface():
     with gr.Blocks() as demo:
         with gr.Row():
-            gr.Markdown("# Chatbot with LlamaIndex RAG Pipeline (Optimized)")
+            gr.Markdown("# Seva Text 2 SQL Chatbot")
 
         # Login UI Components
         with gr.Row():

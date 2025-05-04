@@ -1,5 +1,5 @@
 import pandas as pd
-import os
+import json
 import pdb
 from database.concat_participant_features import ConcatTool
 from datetime import datetime
@@ -20,8 +20,30 @@ def parse_args():
         help='Output cleaned participant info csv file',
         default='data/input_participant_info_cleaned.csv'
     )
+    parser.add_argument(
+        '--column_info_config_json',
+        type=str,
+        help='JSON file for column info configuration',
+        default='database/column_info_config.json'
+    )
     
     return parser.parse_args()
+
+def filter_data_columns(data_columns: dict, *,
+                        data_mode: str = None,
+                        derivative_column: bool = None,
+                        needs_roll_up: bool = None,
+                        upload_db: bool = None) -> list[str]:
+    filtered_cols = []
+    for col_name, props in data_columns.items():
+        if (
+            (data_mode is None or props.get("data_mode") == data_mode) and
+            (derivative_column is None or props.get("derivative_column") == derivative_column) and
+            (needs_roll_up is None or props.get("needs_roll_up") == needs_roll_up) and
+            (upload_db is None or props.get("upload_db") == upload_db)
+        ):
+            filtered_cols.append(col_name)
+    return filtered_cols
 
 def parse_date(date_str):
     try:
@@ -55,20 +77,11 @@ The participant is a {row['Gender']} and {row['Age']} years old.\n"""
 
 
 class ParticipantData():
-    def __init__(self, participant_info_raw_df):
-        self.all_columns = ['SP ID',
-                            'Work Experience/Company', 'Work Experience/Designation',
-                            'Work Experience/Tasks', 'Work Experience/Industry',
-                            'Work Experience/From Date', 'Work Experience/To Date',
-                            'Education/Qualifications', 'Education/Specialization',
-                            'Skills', 'Any Additional Skills', 'Computer Skills', 
-                            'Languages', 'Gender', 'Age']
+    def __init__(self, participant_info_raw_df, column_info_config):
+        self.column_info_config = column_info_config
+        self.all_columns = [self.column_info_config["data_key_column"]] + filter_data_columns(self.column_info_config["data_columns"], derivative_column=False)
         self.participant_info_raw_df = participant_info_raw_df[self.all_columns]
-        self.columns_to_concatenate = ['Work Experience/Company', 'Work Experience/Designation',
-                                       'Work Experience/Tasks', 'Work Experience/Industry',
-                                       'Work Experience/From Date', 'Work Experience/To Date',
-                                       'Education/Qualifications', 'Education/Specialization',
-                                       'Skills','Languages']
+        self.columns_to_concatenate = filter_data_columns(self.column_info_config["data_columns"], derivative_column=False, needs_roll_up=True)
         self.concat_fill_str = 'NA'
     
     def clean_participant_data(self):
@@ -88,10 +101,10 @@ class ParticipantData():
         participant_info_df = ConcatTool.concat_target_cols(participant_info_df,
                                                                columns_to_fill,
                                                                self.columns_to_concatenate,
-                                                               "SP ID",
+                                                              self.column_info_config["data_key_column"],
                                                                fill_str=self.concat_fill_str)
         # Convert SP ID to int
-        participant_info_df['SP ID'] = participant_info_df['SP ID'].astype(int)
+        participant_info_df[self.column_info_config["data_key_column"]] = participant_info_df[self.column_info_config["data_key_column"]].astype(int)
         # Clean up Experience Date columns that are inconsistent
         from_date = 'Work Experience/From Date'
         to_date = 'Work Experience/To Date'
@@ -138,20 +151,17 @@ class ParticipantData():
         participant_info_df["Years of Experience"] = self.create_years_of_experience_col(participant_info_df)
         participant_info_df["Total Years of Experience"] = self.create_total_years_experience_col(participant_info_df)
         participant_info_df["Summary"] = participant_info_df.apply(create_participant_summary, axis=1)
-        pref_col_order = ['SP ID', 'Gender', 'Age', 'Total Years of Experience',
-                          'Work Experience/Industry', 'Work Experience/Designation', 'Work Experience/Tasks',
-                          'Skills', 'Any Additional Skills', 'Computer Skills',
-                          'Education/Qualifications', 'Education/Specialization', 'Work Experience/Company',
-                          'Years of Experience', 'Work Experience/From Date', 'Work Experience/To Date',
-                          'Languages', 'Summary']
+        pref_col_order = [column_info_config["data_key_column"]] + list(column_info_config["data_columns"].keys())
         participant_info_df = participant_info_df[pref_col_order]
         return participant_info_df
 
 
 if __name__ == "__main__":
     args = parse_args()
+    with open(args.column_info_config_json, 'r') as f:
+        column_info_config = json.load(f)
     participant_info_raw_df = pd.read_csv(args.participant_info_raw_csv)
-    participant_data = ParticipantData(participant_info_raw_df)
+    participant_data = ParticipantData(participant_info_raw_df, column_info_config)
     participant_info_df = participant_data.create_participant_info_df()
     print("writing cleaned file")
     participant_info_df.to_csv(args.output_participant_info_cleaned_csv, index=False)

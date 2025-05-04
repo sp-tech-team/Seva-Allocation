@@ -1,5 +1,5 @@
 import pandas as pd
-from preprocessing.concat_participant_features import ConcatTool
+from database.concat_participant_features import ConcatTool
 
 def clean_vrf_data(vrf_df):
     """

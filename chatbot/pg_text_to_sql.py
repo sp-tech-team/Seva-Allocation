@@ -1,4 +1,5 @@
 import pdb
+import yaml
 import os
 import argparse
 import re
@@ -19,6 +20,18 @@ def parse_args():
         type=str,
         help='Name of the table to query',
         default='participants'
+    )
+    parser.add_argument(
+        "--prompts_config_yaml",
+        type=str,
+        default="chatbot/configs/text_to_sql_prompts.yaml",
+        help="Path to the YAML file containing the prompt configuration"
+    )
+    parser.add_argument(
+        "--prompt_key",
+        type=str,
+        default="prompt_pg_vector_1",
+        help="Key for the prompt to use from the YAML file"
     )
     
     return parser.parse_args()
@@ -77,14 +90,14 @@ def strip_vector_values(sql: str) -> str:
     return vector_pattern.sub("[...]", sql)
 
 class Text2PGSQL:
-    def __init__(self, participant_db):
+    def __init__(self, participant_db, text_to_sql_prompt_tmpl: str):
         self.participant_db = participant_db
         self.llm = ChatOpenAI(model="gpt-4o")
         
         self.structured_cols = self.participant_db.get_structured_table_column_names()
         self.unstructured_cols = self.participant_db.get_unstructured_table_column_names()
         self.query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
-        self.vector_sql_prompt_template = ChatPromptTemplate.from_template(text_to_sql_tmpl)
+        self.vector_sql_prompt_template = ChatPromptTemplate.from_template(text_to_sql_prompt_tmpl)
         self.embedding_model = OpenAIEmbeddings()
 
     def write_query(self, text_query: str) -> SQLGenOutput:
@@ -165,12 +178,15 @@ if __name__ == "__main__":
         os.getenv("SUPABASE_HOST"),
         os.getenv("SUPABASE_PORT"),
         os.getenv("SUPABASE_NAME"),
-        os.getenv("SUPABASE_PASSWORD"),
-        os.getenv("OPENAI_API_KEY")
+        os.getenv("SUPABASE_PASSWORD")
     )
 
     participant_db = load_participant_db(db_config, args.table_base_name)
-    text_to_sql = Text2PGSQL(participant_db)
+
+    with open(args.prompts_config_yaml, "r") as f:
+        prompt_tmpls = yaml.safe_load(f)
+    text_to_sql_prompt_tmpl = prompt_tmpls[args.prompt_key]
+    text_to_sql = Text2PGSQL(participant_db, text_to_sql_prompt_tmpl)
     
     # An example text query that may generate multiple vector search slots.
     text_query = "Give me the participants who are over 30 years old and have experience in data science"

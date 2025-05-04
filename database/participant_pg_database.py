@@ -2,6 +2,7 @@ import pdb
 import os
 import pandas as pd
 import argparse
+import json
 from prettytable import PrettyTable
 from sqlalchemy import create_engine, Table, Column, Integer, Float, String, MetaData, ARRAY, text, inspect
 from sqlalchemy.exc import SQLAlchemyError
@@ -12,7 +13,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.utilities.sql_database import SQLDatabase
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 
-from database.participant_data import ParticipantData
+from database.participant_data import filter_data_columns
 
 from dotenv import load_dotenv
 
@@ -27,13 +28,19 @@ def parse_args():
         '--input_file_csv',
         type=str,
         help='Input CSV file for creating the database',
-        default='data/input_participant_info_cleaned_mock2.csv'
+        default='data/input_participant_info_cleaned.csv'
     )
     parser.add_argument(
         '--table_base_name',
         type=str,
         help='The base name of the tables group in the database, ex "participants", "participants_mock2"',
-        default=''
+        default='participants'
+    )
+    parser.add_argument(
+        '--column_info_config_json',
+        type=str,
+        help='JSON file for column info configuration',
+        default='database/column_info_config.json'
     )
     
     return parser.parse_args()
@@ -42,13 +49,12 @@ STRUCTURED_TABLE_NAME_POSTFIX = "structured_data"
 UNSTRUCTURED_TABLE_NAME_POSTFIX = "unstructured_data"
 
 class DbConfig:
-    def __init__(self, db_user, db_host, db_port, db_name, db_password, openai_api_key):
+    def __init__(self, db_user, db_host, db_port, db_name, db_password):
         self.db_user = db_user
         self.db_host = db_host
         self.db_port = db_port
         self.db_name = db_name
         self.db_password = db_password
-        self.openai_api_key = openai_api_key
 
 def pretty_print_sqlalchemy_results(results, max_rows=10):
     """
@@ -166,50 +172,11 @@ class ParticipantDatabasePG:
         with self.engine.connect() as conn:
             results = conn.execute(text(sql), {"query_vector": pgvector_str})
             return results
-    
-def create_participants_db(db_config: DbConfig, input_file_csv: str = '', table_base_name: str = ''):
-    # === Set up OpenAI Embeddings ===
-    embedding_model = OpenAIEmbeddings()  # uses OPENAI_API_KEY env var
 
-    use_mock_data = True
-    if use_mock_data:
-        participant_info_df = pd.read_csv(input_file_csv)
-    else:
-        participant_info_raw_df = pd.read_csv('data/input_participant_info_raw.csv')
-        participant_data = ParticipantData(participant_info_raw_df)
-        participant_info_df = participant_data.create_participant_info_df()
-    structured_cols = ["Gender", "Age", "Total Years of Experience"]
-    unstructured_cols = ["Work Experience/Company", "Work Experience/Designation",
-                        "Work Experience/Tasks", "Work Experience/Industry",
-                        "Education/Qualifications", "Education/Specialization",
-                        "Any Additional Skills", "Computer Skills", "Skills", "Languages"]
-    structured_df = participant_info_df[["SP ID"] + structured_cols]
-    unstructured_df = participant_info_df[["SP ID"] + unstructured_cols]
-
-    # === Prepare structured_df array columns ===
-    # structured_df["Languages"] = structured_df["Languages"].apply(lambda x: x if isinstance(x, list) else [])
-
-    # === Create DB connection ===
-    connection_str = f"postgresql+psycopg2://{db_config.db_user}:{db_config.db_password}@{db_config.db_host}:{db_config.db_port}/{db_config.db_name}"
-    engine = create_engine(connection_str)
-    metadata = MetaData()
-
-    # === Upload structured_df to PostgreSQL ===
-    structured_df.to_sql(
-        table_base_name + '_' + STRUCTURED_TABLE_NAME_POSTFIX,
-        engine,
-        if_exists="replace",
-        index=False,
-        dtype={
-            "SP ID": String,
-            "Gender": String,
-            "Age": Integer,
-            "Total Years of Experience": Float,
-            "Languages": ARRAY(String),
-        }
-    )
-
+def make_unstructured_table(engine, unstructured_table_name, unstructured_df):
+    unstructured_cols = [col for col in unstructured_df.columns.tolist() if col != "SP ID"]
     # === Generate embeddings using LangChain + OpenAI ===
+    embedding_model = OpenAIEmbeddings()
     for col in unstructured_cols:
         texts = unstructured_df[col].fillna("").astype(str).tolist()
         embeddings = embedding_model.embed_documents(texts)
@@ -221,7 +188,7 @@ def create_participants_db(db_config: DbConfig, input_file_csv: str = '', table_
         columns.append(Column(col, String))  # store raw text
         columns.append(Column(f"{col}_embedding", Vector(1536)))  # store embedding
     
-    unstructured_table_name = table_base_name + '_' + UNSTRUCTURED_TABLE_NAME_POSTFIX
+    metadata = MetaData()
     unstructured_table = Table(unstructured_table_name, metadata, *columns)
     metadata.drop_all(engine, [unstructured_table], checkfirst=True)
     metadata.create_all(engine)
@@ -237,6 +204,38 @@ def create_participants_db(db_config: DbConfig, input_file_csv: str = '', table_
 
     with engine.begin() as conn:
         conn.execute(unstructured_table.insert(), insert_data)
+
+def create_participants_db(participant_info_df: pd.DataFrame, column_info_config: dict, db_config: DbConfig, table_base_name: str = ''):
+    column_info_config["data_columns"]
+    structured_cols = filter_data_columns(column_info_config["data_columns"], data_mode="structured", upload_db=True)
+    unstructured_cols = filter_data_columns(column_info_config["data_columns"], data_mode="unstructured", upload_db=True)
+    pdb.set_trace()
+    structured_df = participant_info_df[[column_info_config["data_key_column"]] + structured_cols]
+    unstructured_df = participant_info_df[[column_info_config["data_key_column"]] + unstructured_cols]
+
+    # === Create DB connection ===
+    connection_str = f"postgresql+psycopg2://{db_config.db_user}:{db_config.db_password}@{db_config.db_host}:{db_config.db_port}/{db_config.db_name}"
+    engine = create_engine(connection_str)
+
+    # === Upload structured_df to PostgreSQL ===
+    structured_table_name = table_base_name + '_' + STRUCTURED_TABLE_NAME_POSTFIX
+    structured_df.to_sql(
+        structured_table_name,
+        engine,
+        if_exists="replace",
+        index=False,
+        dtype={
+            "SP ID": String,
+            "Gender": String,
+            "Age": Integer,
+            "Total Years of Experience": Float,
+            "Languages": ARRAY(String),
+        }
+    )
+
+    # === Create UNstructured table with pgvector columns ===
+    unstructured_table_name = table_base_name + '_' + UNSTRUCTURED_TABLE_NAME_POSTFIX
+    make_unstructured_table(engine, unstructured_table_name, unstructured_df)
     
     print("finished")
     return ParticipantDatabasePG(engine, table_base_name)
@@ -250,24 +249,24 @@ def load_participant_db(db_config: DbConfig, table_base_name: str = ''):
 
 if __name__ == "__main__":
     load_dotenv()
-    args = parse_args()
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     if OPENAI_API_KEY is None:
         raise ValueError("OPENAI_API_KEY environment variable not set. Please set it in your .env file.")
+    args = parse_args()
+    # Load database
     db_config = DbConfig(
         os.getenv("SUPABASE_USER"),
         os.getenv("SUPABASE_HOST"),
         os.getenv("SUPABASE_PORT"),
         os.getenv("SUPABASE_NAME"),
-        os.getenv("SUPABASE_PASSWORD"),
-        os.getenv("OPENAI_API_KEY")
+        os.getenv("SUPABASE_PASSWORD")
     )
-
-    # === Test the database functionality ===
-    # Load database
     participant_db = None
     if args.create_db:
-        participant_db = create_participants_db(db_config, args.input_file_csv, args.table_base_name)
+        with open(args.column_info_config_json, 'r') as f:
+            column_info_config = json.load(f)
+        participant_info_df = pd.read_csv(args.input_file_csv)
+        participant_db = create_participants_db(participant_info_df, column_info_config, db_config, args.table_base_name)
     else:
         participant_db = load_participant_db(db_config, args.table_base_name)
 

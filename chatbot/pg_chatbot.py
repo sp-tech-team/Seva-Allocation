@@ -1,15 +1,10 @@
 import pdb
 import argparse
-import json
-from typing_extensions import Annotated, TypedDict
-import ast
+import yaml
 import signal
 import os
 import pandas as pd
 
-from langchain import hub
-from langchain_core.documents.base import Document
-from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
 from chatbot.pg_text_to_sql import Text2PGSQL
@@ -27,6 +22,18 @@ def parse_args():
         type=str,
         help='Name of the table to query',
         default='participants'
+    )
+    parser.add_argument(
+        "--prompts_config_yaml",
+        type=str,
+        default="chatbot/configs/text_to_sql_prompts.yaml",
+        help="Path to the YAML file containing the prompt configuration"
+    )
+    parser.add_argument(
+        "--prompt_key",
+        type=str,
+        default="prompt_pg_vector_1",
+        help="Key for the prompt to use from the YAML file"
     )
 
     return parser.parse_args()
@@ -93,12 +100,14 @@ if __name__ == "__main__":
         os.getenv("SUPABASE_HOST"),
         os.getenv("SUPABASE_PORT"),
         os.getenv("SUPABASE_NAME"),
-        os.getenv("SUPABASE_PASSWORD"),
-        os.getenv("OPENAI_API_KEY")
-    )
+        os.getenv("SUPABASE_PASSWORD")
+        )
 
     participant_db = load_participant_db(db_config, args.table_base_name)
-    text_to_sql = Text2PGSQL(participant_db)
+    with open(args.prompts_config_yaml, "r") as f:
+        prompt_tmpls = yaml.safe_load(f)
+    text_to_sql_prompt_tmpl = prompt_tmpls[args.prompt_key]
+    text_to_sql = Text2PGSQL(participant_db, text_to_sql_prompt_tmpl)
     pipeline = ChatbotPipeline(text_to_sql)
     print("Chatbot is running. Type your query below (or type 'exit' to quit):")
     while True:

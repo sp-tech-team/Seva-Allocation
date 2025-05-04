@@ -77,7 +77,7 @@ This pipeline implements a chatbot for talking with a database consisting of bot
 5. **Test Text To SQL Pipeline:**  
    * Make sure a test config file is available ex in `chatbot/test_data/tests.csv` as described in the Tests data overview section.
    ```
-   python3 -m chatbot.pg_text_to_sql_test --test_file_json chatbot/test_data/tests.csv --results_file_json chatbot/test_results/eval_results.json
+   python3 -m chatbot.pg_text_to_sql_test --test_file_json chatbot/test_data/tests_converted.json --results_file_json chatbot/test_results/eval_results.json
    ```  
    * Note you can also use `--run_tests_filter 'Basic Question Answer Pairs - Mock 1' 'Basic Question Answer Pairs - Mock 2' 'Basic Question Answer Pairs - Real 1'` to only run the listed tests you provide. Otherwise all tests will run.
    * You can also run the `pg_text_to_sql` pipeline more directly for a sanity check with `python3 -m chatbot.pg_text_to_sql --table_base_name participants_mock2`
@@ -99,3 +99,30 @@ The Gradio UI Chatbot is the same as the commandline chatbot but you will gave a
    * This will give you a hosting address you can put in your web browser: `http://127.0.0.1:7860` or `http://localhost:7860`
 
 
+**Notes**  
+* For Windows replace all `python3` with `python`
+
+## Past Experiments in Git History
+
+* Load all data into LLM context window:
+   * data was loaded in both csv format as raw data and as sentences describing each participant line by line.
+   * Both of these approaches work poorly for structured data but have been improving as models improve, but they will never be 100% reliable like SQL as the need to fully internallize the data and not hallucinate any copying mistakes. 
+   * This approach should be repeaded every once in a while.
+   * Its easy to try this wil chat gpt just uploading the data as a file. We should also have a version of this that uses the API and goes through our testing suite
+
+* RAG and Graph RAG Chatbot
+   * This approach involves making each of the participants data into sentences. Ex. Participant 21342 is 25 years old with 3 yoe in software dev. Each sentence is embededded and vector search is done for the user query. The question and vector response are supplied to the chat llm as context to answer the question.
+   * Graph RAG is the same but in addition to vector search a graph search is done on a graph database. The graph database we tested was automically made by LlamaIndex/ Langchain on the participant data laid out into sentences. This creates a low quality graph though since these algos are expecting real english narratives not the same structured data thats repeated over and over in the same sentence. Instead in the future we should consider building a graph database with cipher and neo4j manually with custom knowledge of the relationships in the data. Also not that graph search can either be SQL like (Cipher or GraphQL) or vector search based where each node has an embedding.
+* Text to SQL and Vector search invidually
+   * This pipeline is very similar to our current pipeline except the vector search and structured sql search are generated separately and unaware of each other.
+   * We used SQLite for the structured data and FAISS for the vector database.
+   * [Design Doc](https://docs.google.com/document/d/1vc2ZzrDX2W5rHbugij7mADgyCfUiXARFZc1paDxHyYQ/edit?tab=t.0#heading=h.4415s17cs6zn)
+   * This issue with this pipeline was the separation of information between structured and unstructured querying.
+* Unfinished preprocessing Experiments
+   * Clustering unstructured embeddings to make unstructured data more structured.
+   * Using LLM to classify/group unstructured data into a more structured format.
+* Future: 
+   * Agentic chatbot: instead of just Text to sql a conversational main agent should schedule sub agents to do tasks like column analysis, text to sql and final response formatting. Sub agents that are complex like Text to sql will even have their own sub agents and tools.
+   * Graph Database: hard code with Cypher a Relationship and Property graph of our data that makes fluid connections between structured and unstructured data. This can be used by the agentic bots too!
+   * Vanna: a service that can help with text to sql by learning from examples and any sort of document based context to make text to sql better and more specific to specific rules our unusual text to sql will have
+   * Hosting the chatbot somehwere somewhat stable. This is more important when the chatbot is relavent for more than just SP Seva assignment. It could be whole ashram level chatbot that needs to be able to scale.

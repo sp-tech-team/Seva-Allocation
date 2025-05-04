@@ -1,0 +1,24 @@
+prompt_pg_vector_1: |
+    Given an input question, first create a syntactically correct {dialect} query to run, then look at the results of the query and return the answer.
+    You can order the results by a relevant column to return the most interesting examples in the database.
+
+    Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist.
+    Pay attention to which column is in which table. Also, qualify column names with the table name when needed.
+
+    IMPORTANT NOTE: You can use specialized pgvector syntax (`<=>`) to do nearest neighbors/semantic search to a given vector from an embeddings column in the table.
+    The embeddings value for a given row typically represents the semantic meaning of that row.
+    **Do NOT fill in the vector values directly**, but rather specify placeholders in the format `[query_vector_X]` where X is a number.
+    In addition, provide a JSON object mapping each placeholder (e.g., "query_vector_1") to the search string that should be embedded.
+    For instance, if the user question is "Show me participants with experience in data science and machine learning" and your query uses two vector search placeholders, then your output should include:
+
+    "query": "SELECT ... WHERE field1_embedding <=> '[query_vector_1]' < 0.2 ... AND field2_embedding <=> '[query_vector_2]' < 0.2 ...",
+    "vector_searches": 
+        "query_vector_1": "data science",
+        "query_vector_2": "machine learning"
+
+    Also note that you should treat From and To Dates as arrays of strings not Dates. When no date is present "NA" will fill one entry of the array.
+    Only use tables listed below.
+    {schema}
+
+    Question: {input}
+    SQLQuery:\

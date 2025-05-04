@@ -1,0 +1,111 @@
+{
+    "data_key_column": "SP ID",
+    "data_columns": {
+        "Gender": {
+            "data_mode": "structured",
+            "derivative_column": false,
+            "needs_roll_up": false,
+            "upload_db": true
+
+        },
+        "Age": {
+            "data_mode": "structured",
+            "derivative_column": false,
+            "needs_roll_up": false,
+            "upload_db": true
+        },
+        "Total Years of Experience": {
+            "data_mode": "structured",
+            "derivative_column": true,
+            "needs_roll_up": false,
+            "upload_db": true
+        },
+        "Work Experience/Company": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+        },
+        "Work Experience/Designation": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+
+        },
+        "Work Experience/Tasks": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+        },
+        "Work Experience/Industry": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+        },
+        "Education/Qualifications": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+        },
+        "Education/Specialization": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+        },
+        "Any Additional Skills": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": false,
+            "upload_db": true
+        },
+        "Computer Skills": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": false,
+            "upload_db": true
+        },
+        "Skills": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+        },
+        "Languages": {
+            "data_mode": "unstructured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": true
+        },
+        "Work Experience/From Date": {
+            "data_mode": "structured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": false
+        },
+        "Work Experience/To Date": {
+            "data_mode": "structured",
+            "derivative_column": false,
+            "needs_roll_up": true,
+            "upload_db": false
+        },
+        "Years of Experience": {
+            "data_mode": "structured",
+            "derivative_column": true,
+            "needs_roll_up": false,
+            "upload_db": false
+        },
+        "Summary": {
+            "data_mode": "unstructured",
+            "derivative_column": true,
+            "needs_roll_up": false,
+            "upload_db": false
+        }
+
+    }
+
+}
