@@ -8,7 +8,7 @@ from chatbot.pg_chatbot import ChatbotPipeline
 
 # May need to remove this for huggingface spaces
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(".env")
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,6 +36,10 @@ def parse_args() -> argparse.Namespace:
         default="prompt_pg_vector_1",
         help="Key for the prompt to use from the YAML file"
     )
+    parser.add_argument(
+        '--make_public',
+        action='store_true',
+        help='Whether to make the Gradio app public')
 
     return parser.parse_args()
 
@@ -127,4 +131,7 @@ def create_interface():
 # === Launch the App ===
 if __name__ == "__main__":
     gradio_app = create_interface()
-    gradio_app.launch(share=True)
+    if args.make_public:
+        gradio_app.launch(share=True)
+    else:
+        gradio_app.launch()
