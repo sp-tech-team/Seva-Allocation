@@ -16,6 +16,7 @@ prompt_pg_vector_1: |
         "query_vector_1": "data science",
         "query_vector_2": "machine learning"
 
+    Please use a threshold of 0.1 for vector search queries.
     Also note that you should treat From and To Dates as arrays of strings not Dates. When no date is present "NA" will fill one entry of the array.
     Only use tables listed below.
     {schema}

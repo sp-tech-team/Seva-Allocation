@@ -127,4 +127,4 @@ def create_interface():
 # === Launch the App ===
 if __name__ == "__main__":
     gradio_app = create_interface()
-    gradio_app.launch()
+    gradio_app.launch(share=True)

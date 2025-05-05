@@ -209,7 +209,6 @@ def create_participants_db(participant_info_df: pd.DataFrame, column_info_config
     column_info_config["data_columns"]
     structured_cols = filter_data_columns(column_info_config["data_columns"], data_mode="structured", upload_db=True)
     unstructured_cols = filter_data_columns(column_info_config["data_columns"], data_mode="unstructured", upload_db=True)
-    pdb.set_trace()
     structured_df = participant_info_df[[column_info_config["data_key_column"]] + structured_cols]
     unstructured_df = participant_info_df[[column_info_config["data_key_column"]] + unstructured_cols]
 
