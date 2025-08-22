@@ -56,12 +56,7 @@ class GoogleSheetHandler:
         """
 
         # Replace pd.NA or np.nan with empty strings to ensure JSON serializability
-        for col in df.columns:
-            if pd.api.types.is_integer_dtype(df[col].dtype):
-                df[col] = df[col].astype("object")  # or .astype(str)
-
         df = df.fillna("").replace({pd.NA: ""})
-
 
         sheet = self.client.open_by_url(sheet_url)
         try:
@@ -104,4 +99,60 @@ class GoogleSheetHandler:
 
         worksheet.append_rows(df.values.tolist(), value_input_option="RAW")
 
+def Concatenate_Skills_By_RequestName(sheet_url, input_tab_name, output_tab_name, credentials_path):
+    """
+    Fetches data from a specified tab in a Google Sheet,
+    concatenates 'Skills/Keywords' grouped by 'Request Name',
+    and writes the transformed data back to another tab in the same sheet.
 
+    :param sheet_url: URL of the Google Sheet
+    :param input_tab_name: Name of the tab to fetch data from
+    :param output_tab_name: Name of the tab to write transformed data to
+    :param credentials_path: Path to the Google API service account credentials file
+    """
+    # Initialize the Google Sheet Handler
+    sheet_handler = GoogleSheetHandler(credentials_path)
+
+    print("Fetching data from the Google Sheet...")
+    try:
+        df_in = sheet_handler.get_sheet_as_dataframe(sheet_url, input_tab_name)
+        print(f"Data successfully read from tab '{input_tab_name}':")
+        print(df_in.iloc[:4, :4])
+    except Exception as e:
+        print(f"Failed to retrieve data: {e}")
+        return
+
+    # Work on a copy
+    df = df_in.copy()
+
+    # Convert column to string to ensure consistency
+    if "Skills/Keywords" in df.columns:
+        df["Skills/Keywords"] = df["Skills/Keywords"].astype(str)
+
+        # Group by 'Request Name' and concatenate 'Skills/Keywords'
+        df["Skills/Keywords"] = df.groupby("Request Name")["Skills/Keywords"] \
+                                  .transform(lambda x: ', '.join(sorted(set(i.strip() for i in x if i.lower() != 'nan' and i.strip()))))
+
+    else:
+        print("'Skills/Keywords' column not found in the input data.")
+        return
+
+    # Drop duplicates based on 'Request Name' to keep only one row per request
+    df_result = df.drop_duplicates(subset=["Request Name"]).reset_index(drop=True)
+
+    print("Concatenation complete. Writing to output tab...")
+
+    # Write the final DataFrame to the Google Sheet
+    try:
+        sheet_handler.write_dataframe_to_sheet(sheet_url, df_result, output_tab_name)
+        print(f"Output successfully written to '{output_tab_name}' tab.")
+    except Exception as e:
+        print(f"Failed to write data: {e}")
+
+if __name__ == "__main__":
+    SHEET_URL = "https://docs.google.com/spreadsheets/d/1i0ANT5-tamlo6YX9uuMTUwayzL31YEmpgC6qQ-0y7jI/edit?gid=1288139751#gid=1288139751"
+    INPUT_TAB = "Input"  # Change this if the input tab has a different name
+    OUTPUT_TAB = "Skills Combined Output"
+    CREDENTIALS_PATH = "path/to/your/credentials.json"  # Update this to your local credentials file
+
+    Concatenate_Skills_By_RequestName(SHEET_URL, INPUT_TAB, OUTPUT_TAB, CREDENTIALS_PATH)

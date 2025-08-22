@@ -2,16 +2,93 @@ import numpy as np
 import pandas as pd
 from Libraries.Gspread_Library import GoogleSheetHandler
 from Libraries.Concatenation_Library import Concatenation_Handler
+from datetime import datetime
+
+# --- Timing Start ---
+start_time = datetime.now()
 
 # Parameters
 credentials_path = "D:/Seva-Allocation/Concatenation/credentials.json"  # Path to service account credentials file
-sheet_url = "https://docs.google.com/spreadsheets/d/1DtJEE7e43ePkrGefvn7nl21je2xDGZWxOCKOS8nAxYE/edit?gid=903292404#gid=903292404"
-input_tab_name = "input"  # Input tab in the Google Sheet
-output_tab_name = "Formatted Input"  # Output tab to write the processed data
+sheet_url = "https://docs.google.com/spreadsheets/d/1ZcaFKwFiu79cyU3q0e7ds8EPfwaBaGICCsXHpX8iOl4/edit?gid=1371297251#gid=1371297251"
+input_tab_name = "Input"  # Input tab in the Google Sheet
+output_tab_name = "Formatted Output"  # Output tab to write the processed data
+front_fill_tab_name = "Front Filled" # Front Fill tab for language and interview columns process in appsheet
+
+# Sheet names for the second step (Mapping)
+id_mapping_tab_name = "ID Mappings"
+final_output_tab_name = "Final Output"
+
+# Location for Seva Allocation Input data
+local_output_path = r"D:\Seva-Allocation-Checkout\batch_allocator\data"
+
+# Seva Allocation checkout path to run seva allocation automatically
+batch_allocator_path = r"D:\Seva-Allocation-Checkout\batch_allocator"
+
+# Derived path for saving intermediate files
+# local_save_path = os.path.join(batch_allocator_path, "data")
+
+# --- NEW: Configuration for final step ---
+upload_final_results_to_drive = False # Set to True to enable optional GDrive upload
+
+# --- NEW: Define the target sheet name for the final results ---
+seva_allocation_sheet_name = "Seva Allocation"
 
 print("\n You can download credentials.json from https://console.cloud.google.com/")
 print("Google cloud console -> API & Services -> Credentials -> Add Service Account - Add Key and download as Json", end="\n \n")
 print("Note: Make sure to give editor access in the sheet for the client_email mentioned in credentials.json", end="\n \n")
 
-# Run the function
-Concatenation_Handler.Concatenation_Main_Using_GSpread(sheet_url, input_tab_name, output_tab_name, credentials_path)
+# --- Step 1: Run the original concatenation function ---
+print("--- Starting Step 1: Concatenation ---")
+Concatenation_Handler.Concatenation_Main_Using_GSpread(
+    sheet_url=sheet_url,
+    input_tab_name=input_tab_name,
+    output_tab_name=output_tab_name,
+    front_fill_tab_name=front_fill_tab_name,
+    credentials_path=credentials_path
+)
+print("--- Finished Step 1 ---\n")
+
+
+# --- Step 2: Run the new ID mapping function ---
+print("--- Starting Step 2: ID Mapping ---")
+Concatenation_Handler.Map_And_Finalize(
+    sheet_url=sheet_url,
+    formatted_tab_name=output_tab_name,  # The output of step 1 is the input for step 2
+    id_mapping_tab_name=id_mapping_tab_name,
+    final_output_tab_name=final_output_tab_name,
+    credentials_path=credentials_path,
+    local_output_path=local_output_path
+)
+print("--- Finished Step 2 ---")
+
+
+# --- Step 3: Run the inference model ---
+print("--- Starting Step 3: Run Inference Model ---")
+Concatenation_Handler.Run_Inference_Model(
+    batch_allocator_root=batch_allocator_path
+)
+print("--- Finished Step 3 ---")
+
+
+# --- Step 4: Process and Upload the final results ---
+print("--- Starting Step 4: Process and Upload Results ---")
+Concatenation_Handler.Process_And_Upload_Results(
+    batch_allocator_root=batch_allocator_path,
+    credentials_path=credentials_path,
+    sheet_url=sheet_url,
+    final_participant_info_tab=final_output_tab_name,
+    target_allocation_sheet_name=seva_allocation_sheet_name, # Pass the new parameter
+    upload_to_drive=upload_final_results_to_drive
+)
+print("--- Finished Step 4 ---")
+
+print("\n--- All tasks completed! ---")
+
+# --- Timing End ---
+end_time = datetime.now()
+duration = end_time - start_time
+total_seconds = duration.total_seconds()
+hours, remainder = divmod(total_seconds, 3600)
+minutes, seconds = divmod(remainder, 60)
+
+print(f"Total execution time: {int(hours):02}:{int(minutes):02}:{int(seconds):02} (HH:MM:SS)")
