@@ -557,3 +557,401 @@ class Concatenation_Handler:
 
         except Exception as e:
             print(f"An unexpected error occurred during the result processing and upload: {e}")
+
+    # ... [Methods for Seva Allocation] ...
+
+    @staticmethod
+    def Sync_Front_Filled_To_AppSheet(source_sheet_url, source_tab_name, target_sheet_url, target_tab_name, credentials_path):
+        """
+        Step 5: Appends 'Front Filled' data to AppSheet Backend, preventing duplicates.
+        It compares every column to ensure only truly new rows are added.
+        """
+        print(f"\n--- Running Step 5: Sync 'Front Filled' to AppSheet ---")
+        try:
+            handler = GoogleSheetHandler(credentials_path)
+
+            print(f"Reading Source: '{source_tab_name}'...")
+            df_source = handler.get_sheet_as_dataframe(source_sheet_url, source_tab_name)
+            
+            print(f"Reading Target: '{target_tab_name}'...")
+            df_target = handler.get_sheet_as_dataframe(target_sheet_url, target_tab_name)
+
+            # --- Stats Calculation ---
+            unique_spids_source = df_source['SP ID'].nunique() if 'SP ID' in df_source.columns else 0
+            count_before = len(df_target)
+
+            # --- Deduplication Logic ---
+            if df_source.empty:
+                print("Source is empty. Nothing to sync.")
+                return
+
+            if df_target.empty:
+                print("Target is empty. Appending all source rows.")
+                df_to_upload = df_source
+            else:
+                # 1. Align Columns: Ensure Source has same columns as Target (or intersection)
+                # We prioritize Target columns to ensure append works smoothly
+                common_cols = [c for c in df_target.columns if c in df_source.columns]
+                
+                # If source has extra columns not in target, we might need to drop them or warn
+                # For now, we stick to common columns to perform the check
+                df_source_check = df_source[common_cols].astype(str)
+                df_target_check = df_target[common_cols].astype(str)
+
+                # 2. Perform Anti-Join (Find rows in Source that are NOT in Target)
+                # We merge on all columns. 'indicator=True' creates a column called '_merge'
+                merged = df_source_check.merge(
+                    df_target_check, 
+                    on=common_cols, 
+                    how='left', 
+                    indicator=True
+                )
+
+                # 3. Filter for 'left_only' (Rows present in Source but not Target)
+                new_rows_indices = merged[merged['_merge'] == 'left_only'].index
+                df_to_upload = df_source.iloc[new_rows_indices]
+
+            # --- Upload ---
+            count_to_add = len(df_to_upload)
+            
+            if count_to_add > 0:
+                print(f"Identified {count_to_add} new rows to append.")
+                handler.append_to_sheet(target_sheet_url, df_to_upload, target_tab_name)
+            else:
+                print("No new data found. Source and Target are in sync.")
+
+            # --- Final Reporting ---
+            print("-" * 30)
+            print(f"Stats Report:")
+            print(f"1. Total unique SPID rows of Front Filled : {unique_spids_source}")
+            print(f"2. Total in Filled vlookup before change  : {count_before}")
+            print(f"3. Total in Filled vlookup after change   : {count_before + count_to_add}")
+            print("-" * 30)
+
+        except Exception as e:
+            print(f"Error in Step 5: {e}")
+            import traceback
+            traceback.print_exc()
+
+
+    @staticmethod
+    def Sync_Participants_To_AppSheet(source_sheet_url, source_tab_name, target_sheet_url, target_tab_name, credentials_path):
+        """
+        Step 5 (Part 2): Syncs 'Final Output' to 'participants' tab.
+        - Uses SP ID as the unique key.
+        - NEVER clears the target sheet.
+        - Appends only new SP IDs.
+        """
+        print(f"\n--- Running Sync: 'Final Output' -> 'participants' ---")
+        try:
+            handler = GoogleSheetHandler(credentials_path)
+
+            print(f"Reading Source: '{source_tab_name}'...")
+            df_source = handler.get_sheet_as_dataframe(source_sheet_url, source_tab_name)
+            
+            print(f"Reading Target: '{target_tab_name}'...")
+            df_target = handler.get_sheet_as_dataframe(target_sheet_url, target_tab_name)
+
+            # --- Stats Calculation ---
+            count_before = len(df_target)
+
+            # --- Deduplication Logic (Based on SP ID) ---
+            if df_source.empty:
+                print("Source is empty. Nothing to sync.")
+                return
+
+            # Ensure SP ID is string for comparison
+            source_ids = df_source['SP ID'].astype(str).str.strip()
+            
+            if df_target.empty:
+                existing_ids = set()
+                print("Target is empty. Preparing to append all source rows.")
+                df_to_upload = df_source
+            else:
+                existing_ids = set(df_target['SP ID'].astype(str).str.strip())
+                
+                # Filter Source: Keep rows where SP ID is NOT in existing_ids
+                df_to_upload = df_source[~source_ids.isin(existing_ids)].copy()
+
+                # --- Column Alignment (Crucial for Database Integrity) ---
+                # Ensure we upload data in the exact column order as the target
+                # 1. Add missing columns to source (if any exist in target but not source)
+                missing_cols_in_source = set(df_target.columns) - set(df_to_upload.columns)
+                for col in missing_cols_in_source:
+                    df_to_upload[col] = "" # Fill missing cols with empty string
+                
+                # 2. Reorder source columns to match target exactly
+                # We filter df_to_upload to only include columns that exist in target
+                # This ignores extra columns in source that might not belong in the db
+                common_cols = [c for c in df_target.columns if c in df_to_upload.columns]
+                df_to_upload = df_to_upload[common_cols]
+
+            # --- Upload ---
+            count_to_add = len(df_to_upload)
+            
+            if count_to_add > 0:
+                print(f"Identified {count_to_add} new participants to add.")
+                handler.append_to_sheet(target_sheet_url, df_to_upload, target_tab_name)
+            else:
+                print("No new participants found. Database is up to date.")
+
+            # --- Final Reporting ---
+            print("-" * 30)
+            print(f"Stats Report for '{target_tab_name}':")
+            print(f"1. Total Rows Before Sync  : {count_before}")
+            print(f"2. New Rows Added          : {count_to_add}")
+            print(f"3. Total Rows After Sync   : {count_before + count_to_add}")
+            print("-" * 30)
+
+        except Exception as e:
+            print(f"Error in Participants Sync: {e}")
+            import traceback
+            traceback.print_exc()
+
+
+    @staticmethod
+    def Sync_Allocations_To_AppSheet(source_sheet_url, source_tab_name, target_sheet_url, target_tab_name, credentials_path):
+        """
+        Step 5 (Part 3): Syncs 'Seva Allocation' to 'Current Predictions'.
+        - SIMPLE MODE: No column mapping or reordering.
+        - Deduplicates based on SP ID.
+        - Appends data exactly as it appears in the Source columns.
+        """
+        print(f"\n--- Running Sync: 'Seva Allocation' -> 'Current Predictions' (Direct Append) ---")
+        try:
+            handler = GoogleSheetHandler(credentials_path)
+
+            print(f"Reading Source: '{source_tab_name}'...")
+            df_source = handler.get_sheet_as_dataframe(source_sheet_url, source_tab_name)
+            
+            print(f"Reading Target: '{target_tab_name}'...")
+            df_target = handler.get_sheet_as_dataframe(target_sheet_url, target_tab_name)
+
+            # --- Stats Calculation ---
+            count_before = len(df_target)
+
+            # --- Deduplication Logic ---
+            if df_source.empty:
+                print("Source is empty. Nothing to sync.")
+                return True
+
+            # Ensure SP ID is string
+            source_ids = df_source['SP ID'].astype(str).str.strip()
+            
+            if df_target.empty:
+                df_to_upload = df_source.copy()
+            else:
+                existing_ids = set(df_target['SP ID'].astype(str).str.strip())
+                # Filter for new SP IDs only
+                df_to_upload = df_source[~source_ids.isin(existing_ids)].copy()
+
+            # --- Upload ---
+            count_to_add = len(df_to_upload)
+            
+            if count_to_add > 0:
+                print(f"Identified {count_to_add} new allocations to append.")
+                print("Appending raw values (assuming column order matches)...")
+                
+                # We do NOT rename or reorder columns. We just take the values.
+                handler.append_to_sheet(target_sheet_url, df_to_upload, target_tab_name)
+            else:
+                print("No new allocations found.")
+
+            # --- Final Reporting ---
+            print("-" * 30)
+            print(f"Stats Report for '{target_tab_name}':")
+            print(f"1. Total Rows Before Sync  : {count_before}")
+            print(f"2. New Rows Added          : {count_to_add}")
+            print(f"3. Total Rows After Sync   : {count_before + count_to_add}")
+            print("-" * 30)
+            return True
+
+        except Exception as e:
+            print(f"Error in Allocations Sync: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+
+    @staticmethod
+    def Run_Post_Processing_Scripts(sheet_url, predictions_tab_name, formatted_tab_name, credentials_path):
+        """
+        Step 6: Executes the logic previously held in Google Apps Scripts.
+        1. Tweak Predictions: Modifies 'Researcher' roles based on experience/education.
+        2. Format Predictions: Unpivots the data (Ranks 1, 2, 3) into a clean list.
+        """
+        print(f"\n--- Running Step 6: Post-Processing Scripts ---")
+        try:
+            handler = GoogleSheetHandler(credentials_path)
+
+            # ==========================================
+            # PART 1: Tweak Predictions
+            # ==========================================
+            print(f"1. Tweaking Predictions in '{predictions_tab_name}'...")
+            df = handler.get_sheet_as_dataframe(sheet_url, predictions_tab_name)
+
+            if df.empty:
+                print("Error: Predictions sheet is empty."); return
+
+            # --- Define Column Names (Based on your latest input) ---
+            col_job_title = "Pred Job Title: 1"
+            col_work_exp = "Work Experience/Designation"
+            col_edu_qual = "Education/Qualifications"
+            col_edu_spec = "Education/Specialization"
+            col_grad_year = "Education/Year of Passing/Graduation"
+
+            # Check if columns exist
+            required_cols = [col_job_title, col_work_exp, col_edu_qual, col_edu_spec, col_grad_year]
+            if not all(col in df.columns for col in required_cols):
+                print(f"Error: Missing columns for tweaking. Found: {df.columns.tolist()}")
+                return
+
+            # --- Apply Logic (Vectorized for speed) ---
+            # Convert Grad Year to numeric for comparison, handling errors
+            df['temp_year'] = pd.to_numeric(df[col_grad_year], errors='coerce').fillna(0)
+
+            # 1. Condition: Job Title is "Researcher"
+            is_researcher = df[col_job_title] == "Researcher"
+
+            # 2. Condition: Values are exactly "['NA']"
+            # Note: We strip whitespace to be safe
+            is_work_na = df[col_work_exp].astype(str).str.strip() == "['NA']"
+            is_edu_qual_na = df[col_edu_qual].astype(str).str.strip() == "['NA']"
+            is_edu_spec_na = df[col_edu_spec].astype(str).str.strip() == "['NA']"
+
+            # 3. Condition: Grad Year is 2023, 2024, or 2025
+            is_recent_grad = df['temp_year'].isin([2023, 2024, 2025])
+
+            # --- Update DataFrame ---
+            # Case A: All NA -> "Ashram Support"
+            mask_all_na = is_researcher & is_work_na & is_edu_qual_na & is_edu_spec_na
+            df.loc[mask_all_na, col_job_title] = "Ashram Support"
+
+            # Case B: Work is NA (but not others), and Recent Grad -> "Fresher"
+            mask_work_na_only = is_researcher & is_work_na & (~mask_all_na)
+            
+            df.loc[mask_work_na_only & is_recent_grad, col_job_title] = "Fresher"
+            df.loc[mask_work_na_only & (~is_recent_grad), col_job_title] = "Ashram Support"
+
+            # Clean up temp column
+            df.drop(columns=['temp_year'], inplace=True)
+
+            print("Tweaks applied. Updating 'Current Predictions' sheet...")
+            handler.write_dataframe_to_sheet(sheet_url, df, predictions_tab_name)
+
+
+            # ==========================================
+            # PART 2: Format Predictions (Unpivot)
+            # ==========================================
+            print(f"2. Formatting Predictions into '{formatted_tab_name}'...")
+            
+            # Prepare list to store formatted rows
+            formatted_rows = []
+
+            # Define the triplets of columns for Rank 1, 2, 3
+            rank_cols = [
+                ("Pred Job Title: 1", "Pred VRF ID: 1", "Department 1"),
+                ("Pred Job Title: 2", "Pred VRF ID: 2", "Department 2"),
+                ("Pred Job Title: 3", "Pred VRF ID: 3", "Department 3")
+            ]
+
+            for rank_idx, (job_col, vrf_col, dept_col) in enumerate(rank_cols):
+                rank_num = rank_idx + 1
+                
+                # Check if these columns exist
+                if job_col not in df.columns: continue
+
+                # Extract sub-dataframe
+                sub_df = pd.DataFrame()
+                sub_df['SP ID'] = df['SP ID']
+                sub_df['Job Title Prediction'] = df[job_col] if job_col in df.columns else "NA"
+                sub_df['VRF ID'] = df[vrf_col] if vrf_col in df.columns else "NA"
+                
+                # --- Improved Department Logic ---
+                # 1. Try extracting from Department column
+                raw_dept = df[dept_col] if dept_col in df.columns else None
+                
+                # 2. If Department column is empty/NA, try extracting from VRF ID (fallback)
+                if raw_dept is None or raw_dept.isna().all() or (raw_dept == "").all():
+                    raw_dept = df[vrf_col] if vrf_col in df.columns else None
+
+                # 3. Apply splitting logic (Split by ':' if present)
+                if raw_dept is not None:
+                     sub_df['Department'] = raw_dept.astype(str).apply(
+                        lambda x: x.split(':')[1].strip() if ':' in x else (x if x and x.lower() != 'nan' else "NA")
+                    )
+                else:
+                    sub_df['Department'] = "NA"
+
+                sub_df['Rank'] = rank_num
+
+                # Filter out rows where Job Title is NA/Empty
+                mask_valid = (sub_df['Job Title Prediction'] != "NA") & (sub_df['Job Title Prediction'] != "")
+                filtered_sub_df = sub_df[mask_valid].copy()
+                
+                formatted_rows.append(filtered_sub_df)
+
+            # Combine all ranks
+            if formatted_rows:
+                final_formatted_df = pd.concat(formatted_rows, ignore_index=True)
+                
+                # Sort by SP ID and Rank
+                final_formatted_df.sort_values(by=['SP ID', 'Rank'], inplace=True)
+                
+                # Fill actual NAs with "NA" string
+                final_formatted_df.fillna("NA", inplace=True)
+
+                print(f"Writing {len(final_formatted_df)} formatted rows to '{formatted_tab_name}'...")
+                handler.write_dataframe_to_sheet(sheet_url, final_formatted_df, formatted_tab_name)
+            else:
+                print("No valid predictions found to format.")
+
+            print("Step 6 Complete.")
+
+        except Exception as e:
+            print(f"Error in Step 6: {e}")
+            import traceback
+            traceback.print_exc()
+
+
+    @staticmethod
+    def Summarize_Execution(execution_log):
+        """
+        Step 7: Prints a beautiful summary of the entire run.
+        :param execution_log: A list of dictionaries: [{'step': 'Name', 'status': True/False, 'error': 'msg'}]
+        """
+        print("\n\n")
+        print("="*60)
+        print(f"{'FINAL EXECUTION SUMMARY':^60}")
+        print("="*60)
+        print(f"{'Step Name':<40} | {'Status':<15}")
+        print("-" * 60)
+
+        all_success = True
+
+        for item in execution_log:
+            name = item['name']
+            success = item['status']
+            error_msg = item.get('error', '')
+
+            if success:
+                # Green Checkmark
+                status_symbol = "✅ Success" 
+            else:
+                # Red Cross
+                status_symbol = "❌ Failed"
+                all_success = False
+
+            print(f"{name:<40} | {status_symbol}")
+            
+            # If failed, print the error details below
+            if not success and error_msg:
+                print(f"   └── Error Details: {error_msg}")
+
+        print("-" * 60)
+        
+        if all_success:
+            print(f"{'🚀 ALL SYSTEMS GO! PIPELINE COMPLETED SUCCESSFULLY.':^60}")
+        else:
+            print(f"{'⚠️ COMPLETED WITH ERRORS. CHECK LOGS ABOVE.':^60}")
+        print("="*60 + "\n")

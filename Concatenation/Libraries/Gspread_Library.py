@@ -83,25 +83,33 @@ class GoogleSheetHandler:
     def append_to_sheet(self, sheet_url: str, df: pd.DataFrame, worksheet_name: str = None):
         """
         Append rows from a DataFrame to a specific Google Sheet tab without overwriting.
-        If the tab does not exist, create it and add the content.
-        :param sheet_url: The URL of the Google Sheet.
-        :param df: The DataFrame to append.
-        :param worksheet_name: The name of the worksheet/tab (optional, defaults to the first tab).
+        Handles NA/NaN values by converting them to empty strings to prevent JSON errors.
         """
+        # --- FIX START: Sanitize Data for JSON Serialization ---
+        # 1. Convert Integer types to object to allow for empty strings
+        for col in df.columns:
+            if pd.api.types.is_integer_dtype(df[col].dtype):
+                df[col] = df[col].astype("object")
+
+        # 2. Replace all forms of NA (np.nan, pd.NA, None) with empty strings
+        df = df.fillna("").replace({pd.NA: ""})
+        # --- FIX END ---
+
         sheet = self.client.open_by_url(sheet_url)
         try:
             # Try to get the existing worksheet by name
             if worksheet_name:
                 worksheet = sheet.worksheet(worksheet_name)
             else:
-                worksheet = sheet.get_worksheet(0)  # Default to the first worksheet
+                worksheet = sheet.get_worksheet(0)
         except:
             # If worksheet does not exist, create a new one
             if worksheet_name:
                 worksheet = sheet.add_worksheet(title=worksheet_name, rows=str(len(df) + 1), cols=str(len(df.columns)))
             else:
-                worksheet = sheet.get_worksheet(0)  # Fall back to first worksheet
+                worksheet = sheet.get_worksheet(0)
 
+        # Append the data
         worksheet.append_rows(df.values.tolist(), value_input_option="RAW")
 
 

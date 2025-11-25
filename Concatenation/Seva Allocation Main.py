@@ -18,6 +18,15 @@ front_fill_tab_name = "Front Filled" # Front Fill tab for language and interview
 id_mapping_tab_name = "ID Mappings"
 final_output_tab_name = "Final Output"
 
+# AppSheet Backend Config
+
+# Test Appsheet Sheet
+# appsheet_backend_url = "https://docs.google.com/spreadsheets/d/16VaRQQ6Vu20DlMjC3Uxaj81_RxLQeEEN859FxweLpO8/edit?gid=2124451009#gid=2124451009"
+
+# PRODUCTION URL - Actual Appsheet sheet [Note: Beware before updating the main appsheet sheet - use test sheet until then]
+appsheet_backend_url = "https://docs.google.com/spreadsheets/d/1UlD-jKkO9HEh_wAwFlcywlrBDYThpL6_s-_GtLOWmAg/edit?gid=1578071586#gid=1578071586"#
+
+
 # Location for Seva Allocation Input data
 local_output_path = r"D:\Seva-Allocation-Checkout\batch_allocator\data"
 
@@ -81,6 +90,58 @@ Concatenation_Handler.Process_And_Upload_Results(
     upload_to_drive=upload_final_results_to_drive
 )
 print("--- Finished Step 4 ---")
+
+# --- NEW: Step 5: Sync All Data to AppSheet Backend ---
+print("--- Starting Step 5: Sync Data to AppSheet ---")
+
+# ---------------------------------------------------------
+# Part 1: Sync Front Filled -> Filled Vlookup Data
+# ---------------------------------------------------------
+Concatenation_Handler.Sync_Front_Filled_To_AppSheet(
+    source_sheet_url=sheet_url,
+    source_tab_name=front_fill_tab_name,
+    target_sheet_url=appsheet_backend_url,
+    target_tab_name="Filled Vlookup Data",
+    credentials_path=credentials_path
+)
+
+# ---------------------------------------------------------
+# Part 2: Sync Final Output -> participants
+# ---------------------------------------------------------
+Concatenation_Handler.Sync_Participants_To_AppSheet(
+    source_sheet_url=sheet_url,
+    source_tab_name=final_output_tab_name, 
+    target_sheet_url=appsheet_backend_url,
+    target_tab_name="participants",
+    credentials_path=credentials_path
+)
+
+# ---------------------------------------------------------
+# Part 3: Sync Seva Allocation -> Current Predictions
+# ---------------------------------------------------------
+
+
+# Step 5c: Sync Allocations (Direct Append)
+# Note: Ensure the columns in 'Seva Allocation' are in the same visual order 
+# as 'Current Predictions' for this to work perfectly.
+Concatenation_Handler.Sync_Allocations_To_AppSheet(
+    source_sheet_url=sheet_url,
+    source_tab_name=seva_allocation_sheet_name,
+    target_sheet_url=appsheet_backend_url,
+    target_tab_name="Current Predictions", 
+    credentials_path=credentials_path)
+
+# --- NEW: Step 6: Run AppScript Logic (Tweak & Format) ---
+print("--- Starting Step 6: Post-Processing (Tweak & Format) ---")
+
+Concatenation_Handler.Run_Post_Processing_Scripts(
+    sheet_url=appsheet_backend_url,
+    predictions_tab_name="Current Predictions", # The sheet to be tweaked
+    formatted_tab_name="Formatted Predictions", # The output sheet to be created/overwritten
+    credentials_path=credentials_path
+)
+
+print("--- Finished Step 6 ---")
 
 print("\n--- All tasks completed! ---")
 
