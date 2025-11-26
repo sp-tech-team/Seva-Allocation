@@ -80,6 +80,7 @@ class GoogleSheetHandler:
         worksheet.clear()  # Clear existing data
         worksheet.update([df.columns.values.tolist()] + df.values.tolist())  # Update with new data
 
+    # New Function
     def append_to_sheet(self, sheet_url: str, df: pd.DataFrame, worksheet_name: str = None):
         """
         Append rows from a DataFrame to a specific Google Sheet tab without overwriting.

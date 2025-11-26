@@ -464,6 +464,7 @@ class Concatenation_Handler:
         except Exception as e:
             print(f"An error occurred while running the inference model: {e}")
 
+    # New functions
     @staticmethod
     def Process_And_Upload_Results(
         batch_allocator_root: str,
