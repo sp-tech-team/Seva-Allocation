@@ -357,7 +357,7 @@ class Concatenation_Handler:
             "How do you feel about sharing your space with many other volunteers? for example - dormitory stay area, shared bathroom facilities, and during volunteering activities ?",
             "How does your family feel about you staying at the Isha Yoga Center for the full duration of the program?",
             "What other questions do you have about the program?", "Now that you have more clarity on the program",
-            "Computer Skills", "Any Additional Skills"
+            "Computer Skills", "Any Additional Skills", "Skills"
         ]
 
         # Filter the dataframe to keep only the required columns in the correct order
